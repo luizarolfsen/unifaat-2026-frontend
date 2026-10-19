@@ -1,0 +1,298 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+/* Diagrama interativo da rede Docker (aulas/rede-docker).
+   Tema claro (padrão) e escuro, via cookie "tema" gravado por tema.js. */
+:root{
+  color-scheme: light;
+  --bg: #f5f7f3;
+  --surface: #ffffff;
+  --ink: #0b0f0c;
+  --muted: #3a423c;
+  --rule: #d7ddd2;
+  --accent: #7a4800;
+  --accent-2: #08624c;
+  --shadow: rgba(30,40,32,.14);
+
+  --host-bg: #eceee9;
+  --host-border: #b9c0b6;
+  --net-border: #27313a;
+  --node-bg: #dce8fb;
+  --node-border: #2f5fd0;
+  --node-ink: #1d3f8f;
+  --port-bg: #16a34a;
+  --port-ink: #ffffff;
+  --vol-bg: #fb923c;
+  --vol-border: #9a3412;
+  --bind-bg: #facc15;
+  --bind-border: #a16207;
+  --vol-label: #7c2d12;
+  --vol-badge-bg: #ffedd5;
+  --line: #3b4552;
+  --line-vol: #d97706;
+  --flow: #e11d48;
+  --blocked: #dc2626;
+  --dim: .16;
+
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg: #0e1713;
+  --surface: #16231d;
+  --ink: #eef3ee;
+  --muted: #b7c4bb;
+  --rule: #29392f;
+  --accent: #ffb454;
+  --accent-2: #5fd0a8;
+  --shadow: rgba(0,0,0,.55);
+
+  --host-bg: #121c18;
+  --host-border: #34443b;
+  --net-border: #a9b8c9;
+  --node-bg: #172a4d;
+  --node-border: #6d97f0;
+  --node-ink: #cfe0ff;
+  --port-bg: #22c55e;
+  --port-ink: #05230f;
+  --vol-bg: #f97316;
+  --vol-border: #fdba74;
+  --bind-bg: #eab308;
+  --bind-border: #fde68a;
+  --vol-label: #fdba74;
+  --vol-badge-bg: #3b1a08;
+  --line: #9fb0c3;
+  --line-vol: #fbbf24;
+  --flow: #fb7185;
+  --blocked: #f87171;
+}
+
+*{ box-sizing: border-box; }
+
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+
+.page{ max-width: 1800px; margin: 0 auto; padding: 24px 16px 48px; }
+
+.topbar{ display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.back{
+  font-family: var(--font-mono); font-weight: 700; font-size: .9rem;
+  color: var(--ink); text-decoration: none;
+  border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; background: var(--surface);
+}
+.back:hover{ border-color: var(--accent-2); color: var(--accent-2); }
+
+.eyebrow{ font-family: var(--font-mono); font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-2); margin: 8px 0 4px; }
+h1{ font-family: var(--font-mono); font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0 0 6px; }
+h1 .accent{ color: var(--accent); }
+.lede{ color: var(--muted); max-width: 70ch; margin: 0 0 18px; }
+
+/* ── controles ─────────────────────────────────────────── */
+.controls{ display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; margin-bottom: 14px; }
+.group{ display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.group-title{ font-family: var(--font-mono); font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-right: 4px; }
+.btn{
+  font-family: var(--font-mono); font-size: .82rem; font-weight: 600;
+  padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--rule); background: var(--surface); color: var(--ink);
+}
+.btn:hover{ border-color: var(--accent-2); color: var(--accent-2); }
+.btn[aria-pressed="true"]{ background: var(--accent-2); border-color: var(--accent-2); color: var(--surface); }
+:root[data-theme="dark"] .btn[aria-pressed="true"]{ color: #06140f; }
+
+/* ── palco do diagrama ─────────────────────────────────── */
+.scroller{ overflow-x: auto; border-radius: 16px; box-shadow: 0 6px 24px var(--shadow); }
+.stage{
+  position: relative;
+  min-width: 980px;
+  aspect-ratio: 1800 / 1160;
+  background: var(--host-bg);
+  border: 2px solid var(--host-border);
+  border-radius: 16px;
+}
+.stage > *{
+  position: absolute;
+  left: calc(var(--x) / 1800 * 100%);
+  top: calc(var(--y) / 1160 * 100%);
+  width: calc(var(--w) / 1800 * 100%);
+  height: calc(var(--h) / 1160 * 100%);
+}
+.stage > svg.wires{ left: 0; top: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; overflow: visible; }
+
+.host-title{ font-weight: 700; font-size: clamp(.8rem, 1.3vw, 1.15rem); color: var(--muted); }
+.net{
+  border: 3px dashed var(--net-border);
+  border-radius: 18px;
+  z-index: 1;
+}
+.net-title{
+  position: absolute; right: 14px; bottom: 8px;
+  font-weight: 700; font-size: clamp(.7rem, 1.2vw, 1.05rem); color: var(--ink);
+}
+
+/* itens clicáveis: containers, portas, volumes, pastas, clientes */
+.item{
+  z-index: 4;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; cursor: pointer;
+  font-size: clamp(.7rem, 1.18vw, 1.12rem);
+  transition: opacity .2s, transform .2s, box-shadow .2s;
+  user-select: none;
+}
+.item:focus-visible{ outline: 3px solid var(--accent); outline-offset: 3px; }
+.item:hover{ transform: translateY(-2px); }
+
+.container{
+  background: var(--node-bg); border: 2px solid var(--node-border); border-radius: 12px;
+  color: var(--node-ink); font-weight: 700;
+}
+.container small{ font-weight: 500; font-size: .72em; color: var(--blocked); }
+/* hostname interno (alias na app-network) e porta que o container escuta */
+.container .addr{
+  display: block; margin-top: 2px;
+  font-family: var(--font-mono); font-weight: 600; font-size: .74em; line-height: 1.25; letter-spacing: -.02em;
+  color: var(--ink); opacity: .82; white-space: nowrap;
+}
+/* container efêmero (nodecommand: docker compose run --rm ...): borda tracejada */
+/* pasta do host montada no container: badge "origem:destino" (igual à linha do compose),
+   na borda do container voltada para a pasta, como a porta 8080 → 80 na borda do nginx */
+.container .mount-badge{
+  position: absolute; z-index: 1; transform: translate(-50%, -50%);
+  padding: 2px 7px;
+  border: 1.5px solid var(--node-border); border-radius: 6px; background: var(--surface);
+  font-family: var(--font-mono); font-weight: 600; font-size: .66em; line-height: 1.3; letter-spacing: -.02em;
+  color: var(--ink); white-space: nowrap;
+  transition: border-color .2s, box-shadow .2s;
+}
+.container .mount-badge.top{ top: 0; }
+/* volume interno (gerenciado pelo Docker): fundo laranja, como o ícone do volume */
+.container .mount-badge.vol{ background: var(--vol-badge-bg); border-color: var(--vol-border); color: var(--vol-label); }
+.container .mount-badge.bottom{ top: 100%; }
+.container .mount-badge.lit{ border-color: var(--flow); box-shadow: 0 0 0 2px var(--flow); }
+.lg-bind{ display: inline-block; width: 22px; height: 12px; border: 1.5px solid var(--node-border); border-radius: 4px; margin-right: 6px; vertical-align: middle; }
+.container.ephemeral{ border-style: dashed; border-width: 3px; background: transparent; }
+.container.ephemeral small{ color: var(--muted); }
+.lg-ephemeral{ border-style: dashed !important; background: transparent !important; }
+.client{
+  background: var(--surface); border: 2px solid var(--ink); border-radius: 12px; font-weight: 700;
+}
+.port{
+  background: var(--port-bg); color: var(--port-ink); border-radius: 8px;
+  font-family: var(--font-mono); font-weight: 700; font-size: clamp(.55rem, .9vw, .9rem);
+  white-space: nowrap;
+}
+
+/* volume (cilindro) e bind mount (pasta) desenhados em CSS */
+.volume, .bind{ justify-content: flex-start; }
+.volume .icon{
+  width: 100%; height: 100%; position: relative;
+  background: var(--vol-bg); border: 2px solid var(--vol-border);
+  border-radius: 50% / 22%;
+}
+.volume .icon::before{
+  content: ""; position: absolute; left: -2px; right: -2px; top: -2px; height: 44%;
+  border: 2px solid var(--vol-border); border-radius: 50%; background: var(--vol-bg); filter: brightness(1.12);
+}
+.bind .icon{
+  width: 100%; height: 100%; position: relative; margin-top: 14%;
+  background: var(--bind-bg); border: 2px solid var(--bind-border); border-radius: 2px 6px 4px 4px;
+}
+.bind .icon::before{
+  content: ""; position: absolute; left: -2px; top: -26%; width: 45%; height: 30%;
+  background: var(--bind-bg); border: 2px solid var(--bind-border); border-bottom: 0; border-radius: 4px 4px 0 0;
+}
+.mount-label{
+  position: absolute; white-space: nowrap; pointer-events: none;
+  font-size: clamp(.55rem, .85vw, .82rem); line-height: 1.25; color: var(--muted);
+  left: 50%; transform: translateX(-50%);
+}
+.mount-label b{ color: var(--vol-label); }
+.mount-label.above{ bottom: calc(100% + 6px); }
+.mount-label.below{ top: calc(100% + 6px); }
+.mount-label.left{ left: auto; right: calc(100% + 8px); transform: none; top: 0; text-align: right; }
+
+/* ── fios (SVG) ────────────────────────────────────────── */
+.wire{ fill: none; stroke: var(--line); stroke-width: 2; transition: opacity .2s, stroke .2s; }
+.wire.vol{ stroke: var(--line-vol); stroke-dasharray: 6 5; stroke-width: 1.8; }
+.wire-label{
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700; fill: var(--ink);
+  paint-order: stroke; stroke: var(--host-bg); stroke-width: 4px; transition: opacity .2s;
+}
+.wire.hot, .wire.flow{ stroke: var(--flow); stroke-width: 3.2; opacity: 1; }
+.wire.flow{ stroke-dasharray: 10 7; animation: march .6s linear infinite; }
+/* montagens em destaque: o tracejado anda do container para o volume/pasta que ele usa */
+.wire.vol.hot{ stroke-dasharray: 8 6; animation: march .8s linear infinite; }
+@keyframes march{ to{ stroke-dashoffset: -17; } }
+.pulse{ fill: var(--flow); }
+
+/* camadas desligadas */
+
+/* foco: o resto apaga */
+.stage.focus .item:not(.lit){ opacity: var(--dim); }
+.stage.focus .wire:not(.hot):not(.flow), .stage.focus .wire-label:not(.lit){ opacity: .07; }
+.stage .wire-label.vol:not(.lit){ opacity: 0; }
+.stage .wire.only-scenario:not(.hot):not(.flow), .stage .wire-label.only-scenario:not(.lit){ opacity: 0; }
+/* filtros de camada: depois do esmaecimento do foco/cenário, e com !important para vencer o esmaecimento (mais específico) */
+.stage.hide-net .wire.net, .stage.hide-net .wire-label.net{ opacity: 0 !important; }
+/* volumes internos e pastas do PC: cada filtro esconde a seta, o ícone e o badge do container */
+.stage.hide-vol .wire.m-volume, .stage.hide-vol .volume, .stage.hide-vol .mount-badge.vol{ opacity: 0 !important; pointer-events: none; }
+.stage.hide-bind .wire.m-bind, .stage.hide-bind .bind, .stage.hide-bind .mount-badge:not(.vol){ opacity: 0 !important; pointer-events: none; }
+.stage.hide-port .wire.port, .stage.hide-port .port{ opacity: 0 !important; pointer-events: none; }
+.stage.hide-net .pulse.net, .stage.hide-port .pulse.port, .stage.hide-vol .pulse.m-volume, .stage.hide-bind .pulse.m-bind{ opacity: 0 !important; }
+.item.lit{ box-shadow: 0 0 0 4px var(--flow); }
+.volume.lit, .bind.lit, .port.lit{ box-shadow: none; transform: scale(1.12); }
+/* volume/pasta acesos: mesmo contorno dos containers, no ícone */
+.volume.lit .icon, .volume.lit .icon::before, .bind.lit .icon, .bind.lit .icon::before{ border-color: var(--flow); border-width: 3px; }
+.port.lit{ box-shadow: 0 0 0 3px var(--flow); }
+
+/* ── painel de detalhes e legenda do cenário ───────────── */
+.panels{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+@media (max-width: 900px){ .panels{ grid-template-columns: 1fr; } }
+.panel{
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 18px;
+  box-shadow: 0 2px 10px var(--shadow);
+}
+.panel h2{ font-family: var(--font-mono); font-size: 1.05rem; margin: 0 0 8px; color: var(--accent); }
+.panel p{ margin: 6px 0; }
+.panel dl{ display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 8px 0 0; }
+.panel dt{ font-family: var(--font-mono); font-size: .8rem; color: var(--muted); }
+.panel dd{ margin: 0; font-size: .92rem; }
+.panel code, .lede code{ font-family: var(--font-mono); font-size: .88em; background: var(--host-bg); padding: 1px 5px; border-radius: 5px; }
+.panel .hint{ color: var(--muted); }
+
+.steps-nav{ display: flex; gap: 6px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.step-count{ font-family: var(--font-mono); font-size: .82rem; color: var(--muted); }
+.steps{ margin: 8px 0 0; padding-left: 20px; }
+.steps li{ margin: 4px 0; color: var(--muted); }
+.steps li.current{ color: var(--ink); font-weight: 600; }
+
+.legend{
+  margin-top: 14px; font-size: .85rem; color: var(--muted);
+  display: flex; flex-wrap: wrap; gap: 6px 18px;
+}
+.legend span{ display: inline-flex; align-items: center; gap: 6px; }
+.legend i{ display: inline-block; width: 18px; height: 12px; border-radius: 3px; }
+.lg-node{ background: var(--node-bg); border: 2px solid var(--node-border); }
+.lg-port{ background: var(--port-bg); }
+.lg-vol{ background: var(--vol-bg); border-radius: 50% !important; }
+.lg-bind{ background: var(--bind-bg); }
+.lg-net{ border-top: 2px solid var(--line); height: 0 !important; }
+.lg-mount{ border-top: 2px dashed var(--line-vol); height: 0 !important; }
+
+/* botão de tema (tema.js) */
+.tema-toggle{
+  position: fixed; top: 16px; right: 16px; z-index: 20;
+  width: 42px; height: 42px; border-radius: 12px; cursor: pointer;
+  border: 1px solid var(--rule); background: var(--surface); color: var(--ink); font-size: 1.1rem;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .wire.flow{ animation: none; }
+  .item, .wire{ transition: none; }
+}

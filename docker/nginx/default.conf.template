@@ -1,6 +1,6 @@
 server {
     
-    listen 80; # Porta em que o NGINX vai escutar
+    listen ${NGINX_PORT}; # Porta em que o NGINX vai escutar, vem do .env
 
     root /var/www/; # Diretório raiz dos arquivos estáticos, inseridos do coker compose
     index index.html; # Arquivo padrão a ser carregado, nos arquivos estáticos

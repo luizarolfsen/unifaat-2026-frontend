@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gabarito da Prova do 1º bimestre</title>
+<link rel="stylesheet" href="../../../assets/briefing.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <a class="back" href="../../../index.html">← Voltar</a>
+    <details class="toc" open><summary>Nesta página</summary><ol><li class="l1"><a href="#topo">Gabarito da Prova do 1º bimestre</a></li><li class="l2"><a href="#s1-sobre-a-prova">1 - Sobre a prova</a></li><li class="l2"><a href="#s2-questões-objetivas">2 - Questões objetivas</a></li><li class="l3"><a href="#q1">Questão 1</a></li><li class="l3"><a href="#q2">Questão 2</a></li><li class="l3"><a href="#q3">Questão 3</a></li><li class="l3"><a href="#q4">Questão 4</a></li><li class="l3"><a href="#q5">Questão 5</a></li><li class="l3"><a href="#q6">Questão 6</a></li><li class="l2"><a href="#s3-questões-dissertativas">3 - Questões dissertativas</a></li><li class="l3"><a href="#s3-1-questão-7-benefícios-do-pré-compilador-20">3.1 - Questão 7: benefícios do pré-compilador (2,0)</a></li><li class="l4"><a href="#s3-1-1-resposta-esperada">3.1.1 - Resposta esperada</a></li><li class="l3"><a href="#s3-2-questão-8-generics-em-typescript-20">3.2 - Questão 8: generics em TypeScript (2,0)</a></li><li class="l4"><a href="#s3-2-1-resposta-esperada">3.2.1 - Resposta esperada</a></li></ol></details>
+  </aside>
+  <main class="doc">
+    <header class="cover" id="topo">
+      <p class="eyebrow">UNIFAAT · Gabarito da prova · Prova do 1º bimestre · 2026.2</p>
+      <h1>Gabarito da Prova do 1º bimestre</h1>
+      <dl class="ficha"><div><dt>Professor</dt><dd>Luan Tavares Lourenço</dd></div><div><dt>Disciplina</dt><dd>Frontend</dd></div><div><dt>Aplicação</dt><dd>05/10/2026</dd></div><div><dt>Conteúdo</dt><dd>Aulas 01 a 06</dd></div></dl>
+    </header>
+<h2 id="s1-sobre-a-prova"><span class="hn">1</span>Sobre a prova</h2>
+<p>A prova do 1º bimestre cobriu as Aulas 01 a 06 e valeu <strong>10,0 pontos</strong>: 6 questões objetivas (1,0 cada, total 6,0) e 2 questões dissertativas (2,0 cada, total 4,0).</p>
+<p>Nas objetivas, as respostas valem apenas na folha de respostas, e não é aceita rasura nela. Gabarito rápido:</p>
+<div class="tbl"><table><thead><tr><th>Questão</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr></thead><tbody><tr><td>Resposta</td><td>C</td><td>B</td><td>E</td><td>D</td><td>A</td><td>C</td></tr></tbody></table></div>
+<h2 id="s2-questões-objetivas"><span class="hn">2</span>Questões objetivas</h2>
+<article class="questao" id="q1"><h3><span class="qn">Questão 1</span></h3><p>Um servidor Nginx está configurado como abaixo. Sobre o funcionamento da diretiva <code>try_files</code>, assinale a alternativa correta.</p><pre class="code"><code>server {
+    listen 80;
+    root /var/www;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}</code></pre><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">O Nginx testa os três argumentos ao mesmo tempo e escolhe o que for mais adequado.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">O Nginx trata <code>=404</code> como o nome de um arquivo e o testa por último, depois de <code>$uri</code> e <code>$uri/</code>.</span></li><li class="alt ok"><span class="ltr">C</span><span class="txt">O Nginx testa os argumentos em ordem, da esquerda para a direita, e usa o primeiro que resolver para um arquivo ou diretório existente; se nenhum resolver, o <code>=404</code> interrompe a busca e responde com o código 404.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">D</span><span class="txt">O Nginx avalia <code>=404</code> primeiro, por ser o mais restritivo, e só depois tenta <code>$uri</code> e <code>$uri/</code>.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">Mesmo que <code>$uri</code> exista como arquivo, o Nginx continua testando <code>$uri/</code> e <code>=404</code> antes de responder.</span></li></ol><p class="coment"><span class="lbl">Por quê</span>O <code>try_files</code> é sequencial, da esquerda para a direita, e para no primeiro argumento que resolve: <code>$uri</code> como arquivo, <code>$uri/</code> como diretório (servindo o <code>index</code>). O <code>=404</code> não é um arquivo: é um retorno de status, usado quando nada antes dele resolveu. A está errada (não é simultâneo), B confunde <code>=404</code> com arquivo, D inverte a ordem e E ignora que a busca para no primeiro sucesso.</p></article>
+<article class="questao" id="q2"><h3><span class="qn">Questão 2</span></h3><p>Considere o HTML e a linha de JavaScript abaixo.</p><pre class="code"><code>&lt;main&gt;
+  &lt;article&gt;
+    &lt;h2&gt;Título&lt;/h2&gt;
+    &lt;p id="txt"&gt;Oi&lt;/p&gt;
+  &lt;/article&gt;
+&lt;/main&gt;</code></pre><pre class="code"><code>const p = document.getElementById('txt');</code></pre><p>Qual alternativa está correta?</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt"><code>p.parentElement</code> é o <code>&lt;main&gt;</code>, pois ele é o ancestral mais externo de <code>p</code>.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt"><code>p.closest('article')</code> retorna o <code>&lt;article&gt;</code> e <code>p.closest('p')</code> retorna o próprio <code>p</code>, pois <code>closest()</code> começa procurando no próprio elemento e sobe pelos ancestrais.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt"><code>p.closest('h2')</code> retorna o <code>&lt;h2&gt;</code>, pois ele é o irmão anterior de <code>p</code> e <code>closest()</code> procura também entre os irmãos.</span></li><li class="alt"><span class="ltr">D</span><span class="txt"><code>document.querySelector('article').children.length</code> é 3, pois <code>children</code> conta também a quebra de linha entre as tags.</span></li><li class="alt"><span class="ltr">E</span><span class="txt"><code>p.closest('main')</code> retorna <code>null</code>, pois <code>closest()</code> só encontra o pai direto.</span></li></ol><p class="coment"><span class="lbl">Por quê</span>O <code>closest()</code> testa o próprio elemento e depois sobe pelos ancestrais até a raiz. A: o pai direto de <code>p</code> é o <code>&lt;article&gt;</code>. C: <code>closest()</code> só sobe, nunca olha irmãos, então <code>p.closest('h2')</code> é <code>null</code>. D: <code>children</code> só conta tags, então dá 2. E: <code>closest()</code> sobe quantos níveis precisar e acha o <code>&lt;main&gt;</code>.</p></article>
+<article class="questao" id="q3"><h3><span class="qn">Questão 3</span></h3><p>Considere o menu de navegação de uma página:</p><pre class="code"><code>&lt;nav class="menu"&gt;
+  &lt;ul&gt;
+    &lt;li class="item open"&gt;
+      &lt;span class="icon"&gt;&lt;/span&gt;
+      &lt;a href="#"&gt;Início&lt;/a&gt;
+      &lt;a href="#"&gt;Perfil&lt;/a&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;</code></pre><p>Queremos selecionar apenas o link <code>&lt;a&gt;</code> que: (1) está dentro de um <code>li.item</code> que tenha a classe <code>.open</code>; e (2) aparece <strong>imediatamente depois</strong> (irmão adjacente) de um <code>span.icon</code> que seja filho direto desse <code>li</code>. Qual seletor atende a todas as condições?</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt"><code>.menu li.item span.icon + a</code></span></li><li class="alt"><span class="ltr">B</span><span class="txt"><code>.menu li.item.open span.icon ~ a</code></span></li><li class="alt"><span class="ltr">C</span><span class="txt"><code>.menu &gt; li.item.open span.icon + a</code></span></li><li class="alt"><span class="ltr">D</span><span class="txt"><code>.menu li.item.open &gt; span.icon a</code></span></li><li class="alt ok"><span class="ltr">E</span><span class="txt"><code>.menu li.item.open &gt; span.icon + a</code></span><span class="gab">gabarito</span></li></ol><p class="coment"><span class="lbl">Por quê</span><code>li.item.open</code> exige as duas classes no mesmo <code>li</code>; <code>&gt; span.icon</code> exige filho direto; <code>+ a</code> pega só o irmão imediatamente seguinte (Início). A: falta <code>.open</code>. B: <code>~</code> pega todos os irmãos seguintes (Início <strong>e</strong> Perfil). C: <code>.menu &gt; li</code> falha, porque há um <code>&lt;ul&gt;</code> entre o <code>nav</code> e o <code>li</code>. D: o espaço antes do <code>a</code> procura um <code>a</code> <strong>dentro</strong> do <code>span</code>, mas o <code>a</code> é irmão dele.</p></article>
+<article class="questao" id="q4"><h3><span class="qn">Questão 4</span></h3><p>Uma lista <code>&lt;ul id="lista"&gt;</code> tem vários <code>&lt;li&gt;</code>, cada um com um botão <code>&lt;button class="remover"&gt;</code>. Existe um único listener de clique, registrado no <code>&lt;ul&gt;</code>. O usuário clica em um botão "remover".</p><pre class="code"><code>lista.addEventListener('click', (event) =&gt; {
+  if (event.target.tagName === 'BUTTON') {
+    event.target.parentElement.remove();
+  }
+});</code></pre><p>Qual alternativa explica corretamente o que acontece?</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt"><code>event.target</code> é o <code>&lt;ul&gt;</code> e <code>event.currentTarget</code> é o <code>&lt;button&gt;</code>, pois o evento sobe do botão até a lista.</span></li><li class="alt"><span class="ltr">B</span><span class="txt"><code>event.target</code> e <code>event.currentTarget</code> são o <code>&lt;button&gt;</code>, porque o clique aconteceu nele.</span></li><li class="alt"><span class="ltr">C</span><span class="txt"><code>event.target</code> é o <code>&lt;li&gt;</code> e <code>event.currentTarget</code> é o <code>&lt;ul&gt;</code>, pois o <code>&lt;li&gt;</code> é o pai mais próximo do botão.</span></li><li class="alt ok"><span class="ltr">D</span><span class="txt"><code>event.target</code> é o <code>&lt;button&gt;</code> (origem do clique) e <code>event.currentTarget</code> é o <code>&lt;ul&gt;</code> (dono do listener); o evento borbulha do botão até a lista, o que permite a delegação de eventos e cobre até itens criados depois.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">E</span><span class="txt"><code>event.target</code> é o <code>&lt;ul&gt;</code>; o listener só dispararia se o clique fosse direto na lista, pois eventos não se propagam para o pai por padrão.</span></li></ol><p class="coment"><span class="lbl">Por quê</span><code>target</code> é onde o evento nasceu (o botão clicado); <code>currentTarget</code> é o elemento dono do listener que está rodando (o <code>&lt;ul&gt;</code>). O clique borbulha do botão até o <code>&lt;ul&gt;</code>, por isso um único listener na lista atende todos os botões, inclusive os criados depois: é a delegação de eventos. A inverte os dois, B e C erram a origem/dono, e E nega o bubbling, que é o comportamento padrão.</p></article>
+<article class="questao" id="q5"><h3><span class="qn">Questão 5</span></h3><p>Um card <code>&lt;div class="card"&gt;</code> possui um listener de clique que abre um modal. Dentro dele há um link <code>&lt;a href="/detalhes"&gt;</code> com um handler próprio. Ao clicar no link, queremos executar <strong>apenas</strong> o handler do link: sem navegar para <code>/detalhes</code> e sem abrir o modal do card.</p><p>Qual alternativa resolve o problema corretamente?</p><ol class="alts"><li class="alt ok"><span class="ltr">A</span><span class="txt">Chamar <code>event.preventDefault()</code> (impede a navegação) e <code>event.stopPropagation()</code> (impede o borbulhamento até o card) no handler do link.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">B</span><span class="txt">Chamar somente <code>event.stopPropagation()</code>, pois ele impede tanto o borbulhamento quanto a navegação.</span></li><li class="alt"><span class="ltr">C</span><span class="txt">Chamar somente <code>event.preventDefault()</code>, pois ele cancela o comportamento padrão e também a propagação.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Registrar o listener do link com <code>{ capture: true }</code>, o que impede a navegação do link.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">Chamar <code>event.stopPropagation()</code> para cancelar a navegação e <code>event.preventDefault()</code> para cancelar a propagação.</span></li></ol><p class="coment"><span class="lbl">Por quê</span>São dois problemas independentes, com dois métodos independentes: <code>preventDefault()</code> cancela a ação padrão do navegador (seguir o <code>href</code>) e <code>stopPropagation()</code> impede o evento de subir até o card. B e C acham que um método faz o trabalho do outro; E troca os papéis; D só muda a fase em que o listener roda (captura), não cancela a navegação.</p></article>
+<article class="questao" id="q6"><h3><span class="qn">Questão 6</span></h3><p>Sobre a relação entre <code>window</code> e <code>document</code>, assinale a alternativa correta.</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt"><code>document</code> é o objeto global do navegador e <code>window</code> é uma propriedade dele.</span></li><li class="alt"><span class="ltr">B</span><span class="txt"><code>window.document</code> e <code>document</code> são objetos diferentes: o segundo é uma cópia do primeiro.</span></li><li class="alt ok"><span class="ltr">C</span><span class="txt"><code>document</code> é uma propriedade de <code>window</code>, que é o objeto global do navegador e onde vivem <code>localStorage</code>, <code>fetch</code> e eventos como <code>resize</code> e <code>scroll</code>; escrever <code>document</code> sem o prefixo funciona porque propriedades do objeto global são acessíveis diretamente.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">D</span><span class="txt"><code>localStorage</code> e <code>fetch</code> pertencem a <code>document</code>, por isso só funcionam quando chamados como <code>document.localStorage</code> e <code>document.fetch</code>.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">O prefixo <code>window.</code> é obrigatório para acessar <code>document</code> fora de funções; dentro de funções ele pode ser omitido.</span></li></ol><p class="coment"><span class="lbl">Por quê</span><code>window</code> é o objeto global (a aba do navegador); <code>document</code> é uma propriedade dele, a página carregada. <code>window.document === document</code> é <code>true</code>: é o mesmo objeto, acessível sem prefixo em qualquer lugar do código, porque tudo que está no objeto global pode ser usado diretamente. A inverte a hierarquia, B fala em cópia, D põe <code>localStorage</code>/<code>fetch</code> no lugar errado e E inventa uma regra de escopo.</p></article>
+<h2 id="s3-questões-dissertativas"><span class="hn">3</span>Questões dissertativas</h2>
+<h3 id="s3-1-questão-7-benefícios-do-pré-compilador-20"><span class="hn">3.1</span>Questão 7: benefícios do pré-compilador (2,0)</h3>
+<p>Cite pelo menos quatro benefícios práticos de usar um pré-compilador (como o Vite) no frontend e explique cada um.</p>
+<h4 id="s3-1-1-resposta-esperada"><span class="hn">3.1.1</span>Resposta esperada</h4>
+<p>Quatro destes, cada um com a explicação (<strong>0,5 por benefício + explicação</strong>):</p>
+<ul>
+<li><strong>Linguagens que o navegador não entende:</strong> usar TypeScript e React/JSX, que o pré-compilador converte para JavaScript comum;</li>
+<li><strong>Minificação:</strong> arquivos menores (sem espaços, comentários e com nomes curtos), reduzindo o tráfego na internet;</li>
+<li><strong>Organização e escalabilidade:</strong> o código fica dividido em vários módulos/arquivos, e o pré-compilador junta tudo no build;</li>
+<li><strong>Bundle:</strong> unificação dos módulos JS em poucos arquivos, economizando requisições HTTP;</li>
+<li><strong>Controle de cache:</strong> assets (JS, CSS, imagens, fontes) com hash no nome do arquivo, então o navegador nunca usa uma versão velha;</li>
+<li><strong>HMR (hot module reload):</strong> as mudanças aparecem no navegador sem recarregar a página, aumentando a produtividade no desenvolvimento.</li>
+</ul>
+<p><strong>Bônus</strong> (não foi dado em aula, mas é aceito): recursos avançados de CSS com pré-processadores (Sass, SCSS etc.).</p>
+
+<h3 id="s3-2-questão-8-generics-em-typescript-20"><span class="hn">3.2</span>Questão 8: generics em TypeScript (2,0)</h3>
+<p>Dado o trecho de código abaixo:</p>
+<pre class="code"><code>const usuarios = [
+  { id: 1, nome: 'Ana', ativo: true },
+  { id: 2, nome: 'Bruno', ativo: false }
+];
+
+function filtrar(lista, condicao) {
+  const resultado = [];
+  for (const item of lista) {
+    if (condicao(item)) {
+      resultado.push(item);
+    }
+  }
+  return resultado;
+}
+
+const ativos = filtrar(usuarios, (u) =&gt; u.ativo);</code></pre>
+<p>Faça a tipagem, em TypeScript, seguindo estas regras:</p>
+<ol>
+<li>Crie um <strong>type Usuario</strong> que contenha id, nome e ativo (0,5)</li>
+<li>Tipar a array <strong>usuarios</strong> baseado no type Usuario (0,5)</li>
+<li>Tipar os argumentos e o retorno da função <strong>filtrar</strong> para Usuario (0,5)</li>
+<li>Inserir um <strong>generic T</strong> na função <strong>filtrar</strong>, para que ela possa ser usada com qualquer tipo de objeto, não somente Usuario. (0,5)</li>
+</ol>
+<h4 id="s3-2-1-resposta-esperada"><span class="hn">3.2.1</span>Resposta esperada</h4>
+<pre class="code"><code>// 1) Type Usuario
+type Usuario = {
+  id: number;
+  nome: string;
+  ativo: boolean;
+};
+
+// 2) Array usuarios tipada
+const usuarios: Usuario[] = [
+  { id: 1, nome: 'Ana', ativo: true },
+  { id: 2, nome: 'Bruno', ativo: false },
+];
+
+// 3) Função filtrar tipada
+function filtrar(
+  lista: Usuario[],
+  condicao: (item: Usuario) =&gt; boolean
+): Usuario[]
+
+// 4) Função filtrar com generics
+function filtrar&lt;T&gt;(
+  lista: T[],
+  condicao: (item: T) =&gt; boolean
+): T[]</code></pre>
+<p>Nos itens 3 e 4 só a <strong>assinatura</strong> muda: o corpo da função continua o mesmo do enunciado.</p>
+
+  </main>
+</div>
+<script src="../../../assets/briefing.js"></script>
+</body>
+</html>

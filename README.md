@@ -8,8 +8,15 @@ Repositório centralizado para todas as aulas do bimestre de Frontend. Aqui voc�
 
 | Aula | Material |
 |------|----------|
+| **Aula 01** - Servidor de Arquivos Estáticos e DOM | [Acesso](./aulas/01/README.md) |
+| **Aula 02** - CSS, Seletores e JS Reativo | [Acesso](./aulas/02/README.md) |
+| **Aula 03** - Vite, Forms e Listeners | [Acesso](./aulas/03/README.md) |
 | **Aula 04** - Navegadores Web e API | [Acesso](./aulas/04/README.md) |
-| **Aula 05** - TypeScript, Generics e API Contextual | [Acesso](./aulas/05/README.md) |
+| **Aula 05** - Pré Compiladores e Typescript | [Acesso](./aulas/05/README.md) |
+| **Aula 06** - Revisão Geral | [Acesso](./aulas/06/README.md) |
+| **Aula 07** - Views e Elasticsearch | [Briefing](./aulas/07/briefing.md) · [Raio-X do código](./aulas/07/raio-x/index.html) |
+
+Documentação: [rede Docker do projeto](./aulas/rede-docker/index.html) (diagrama interativo dos containers, portas e volumes).
 
 ---
 
@@ -18,8 +25,13 @@ Repositório centralizado para todas as aulas do bimestre de Frontend. Aqui voc�
 ```
 .
 ├── src/                      # Projeto compartilhado - Bimestre 01 (usado em TODAS as aulas)
-│   ├── backend/              # API Node.js (Express-like)
-│   ├── frontend/             # Aplicação Vue 3 com Vite
+│   ├── app/                  # Controllers, Middlewares, Models, Commands (Node/Express)
+│   ├── bootstrap/ database/ routes/ utils/ docs/ storage/
+│   ├── resources/            # Fonte do frontend (HTML, TS, CSS, img) — compilado pelo Vite
+│   │   └── views/            # Views do servidor (EJS)
+│   ├── public/               # Saída do Vite (gerada, não versionada)
+│   ├── _web.js _command.js _worker.js   # Entry points do Node
+│   ├── vite.config.js tsconfig.json nodemon.json
 │   ├── docker/               # Configurações Docker
 │   ├── package.json
 │   └── readme.md             # Documentação detalhada do projeto
@@ -58,14 +70,23 @@ cp .env.example .env
 Edite o `.env` na **raiz** e preencha as variáveis vazias:
 
 ```env
-POSTGRES_HOST=postgres_host
+POSTGRES_HOST=localhost
 POSTGRES_DB=unifaat
 POSTGRES_PORT=6789
 POSTGRES_USER=aluno                    # ← PREENCHER
 POSTGRES_PASSWORD=123456               # ← PREENCHER
+
+NGNIX_WEB_PORT=8080
+NGINX_PORT=80
 NODE_WEB_PORT=3000
+
+RABBITMQ_USER=aluno                    # ← PREENCHER
+RABBITMQ_PASSWORD=123456               # ← PREENCHER
+
 JWT_SECRET=seu_segredo_super_seguro    # ← PREENCHER (mude em produção!)
 ```
+
+> O usuário e a senha do RabbitMQ só são criados na **primeira** subida do container. Para trocar depois, apague o volume `rabbitmq-volume`.
 
 ### 3. Instalar dependências
 
@@ -76,29 +97,56 @@ npm i
 ### 4. Subir a aplicação com Docker
 
 ```sh
-docker compose up --build
+docker compose up -d --build
 ```
 
-Aguarde até ver as mensagens:
-- `Servidor node web rodando na porta 3000` ✅
-- `VITE v8.3.0  ready in XXX ms` ✅
+Sobem 8 containers: `nginx`, `nodeweb`, `nodeworker`, `nodevitehmr`, `nodevitecompiler`, `postgres`, `rabbitmq` e `elasticsearch`. Confira com `docker compose ps` e acompanhe os logs com `docker compose logs -f nodeweb-container nodeworker-container`:
 
-### 5. Em outro terminal, executar Migrations e Seeds
+- `Servidor node web rodando na porta 3000` ✅
+- `Worker iniciado. Aguardando mensagens na fila: default` ✅
+
+O Elasticsearch leva uns 20 a 40 segundos para ficar pronto na primeira subida.
+
+### 5. Executar Migrations e Seed (pelo container de comandos)
 
 ```sh
-npm run migrate
-npm run seed
+docker compose run --rm nodecommand-container migrate
+docker compose run --rm nodecommand-container seed
 ```
 
 Você verá:
 ```
-✓ Executada: 001_create_users_table.js
-✓ Executada: 002_create_tasks_table.js
+Executada: 001_create_users_table.js
+Executada: 002_create_tasks_table.js
+Executada: 003_add_profile_fields_to_users.js
 ✓ Usuários criados
 ✓ Tarefas criadas
+✓ 40 usuários indexados no Elasticsearch
 ```
 
+> Rode pelo `nodecommand-container`, não com `npm run migrate`/`npm run seed` no seu PC: o seed também popula o Elasticsearch, que **não tem porta no host** (só a rede interna do Docker alcança `elasticsearch_host:9200`).
+
 Pronto! A aplicação está completamente configurada e rodando.
+
+### Já tinha o projeto? Atualizando para a Aula 07
+
+```sh
+git pull
+
+# 1) .env: acrescente NGINX_PORT=80, RABBITMQ_USER e RABBITMQ_PASSWORD (veja o passo 2)
+
+# 2) Dependências novas (ejs, amqplib): o node_modules dos containers fica num volume
+#    que só é criado uma vez. Recrie o volume:
+docker compose down
+docker volume rm "$(basename "$PWD")_nodemodules-volume"
+docker compose up -d --build
+
+# 3) Migration nova (campos de perfil em users) e seed (completa os perfis e popula o Elastic)
+docker compose run --rm nodecommand-container migrate
+docker compose run --rm nodecommand-container seed
+```
+
+> A pasta `src/` mudou de estrutura na Aula 07: não existem mais `src/backend/` e `src/frontend/`. Tudo fica na raiz de `src/` (`app/`, `routes/`, `resources/`, `public/`...). Se sobrar uma pasta `src/frontend/public` antiga, pode apagar.
 
 ---
 
@@ -138,10 +186,13 @@ Com o Docker rodando, você pode acessar:
 
 | Recurso | URL | Descrição |
 |---------|-----|-----------|
-| **Frontend** | `http://localhost:8080` | Aplicação Vue.js |
+| **Frontend** | `http://localhost:8080` | Páginas estáticas e views (login em `/login`) |
+| **API** | `http://localhost:8080/users` | API REST (o nginx encaminha para o Node) |
+| **API Docs** | `http://localhost:8080/docs` | Documentação Swagger, incluindo `POST /users/search` |
 | **Vite Dev (HMR)** | `http://localhost:5172` | Frontend em desenvolvimento com hot reload |
+| **RabbitMQ** | `http://localhost:15672` | Painel das filas (usuário e senha do `.env`) |
 | **Aulas e Materiais** | `http://localhost:8080/aulas/` | Todos os slides e materiais das aulas |
-| **API Docs** | `http://localhost:3000/docs` | Documentação Swagger da API |
+| **Rede Docker** | `http://localhost:8080/aulas/rede-docker/` | Diagrama interativo dos containers |
 
 ---
 
@@ -149,15 +200,17 @@ Com o Docker rodando, você pode acessar:
 
 O `src/` é o projeto base do **primeiro bimestre** que evolui ao longo das aulas. Ele contém:
 
-- **Backend**: API Node.js com Express, PostgreSQL
-- **Frontend**: Aplicação Vue 3 com Vite
-- **Docker**: Stack completo com NGINX, Node.js, PostgreSQL e Vite HMR
+- **Backend**: API Node.js com Express e PostgreSQL, views EJS, busca com Elasticsearch e jobs em fila (RabbitMQ + worker)
+- **Frontend**: HTML + TypeScript compilados pelo Vite (`src/resources` → `src/public`)
+- **Docker**: NGINX, Node.js (web, worker e comandos), PostgreSQL, RabbitMQ, Elasticsearch e Vite (HMR e compilador)
 
 **Acesso às aplicações:**
 - Frontend estático: `http://localhost:8080`
 - Vite Dev (HMR): `http://localhost:5172`
-- API Node.js: `http://localhost:3000` (interno)
+- API Node.js: `nodeweb_host:3000` (só na rede interna; de fora, pelo nginx em `http://localhost:8080`)
 - PostgreSQL: `localhost:6789`
+- RabbitMQ: `localhost:5672` (AMQP) e `http://localhost:15672` (painel)
+- Elasticsearch: sem porta no host (`elasticsearch_host:9200`, só na rede interna)
 
 ---
 
@@ -173,6 +226,9 @@ O `src/` é o projeto base do **primeiro bimestre** que evolui ao longo das aula
 | `nodevitehmr-container` | `node:25`             | Servir o frontend via Vite HMR                                | 5172          |
 | `nodevitecompiler-container` | `node:24`        | Pré-compilar o frontend (`vite build --watch`): TypeScript, Bootstrap, Axios e FontAwesome viram JS/CSS puro em `public/`. | —          |
 | `postgres-container`    | `postgres:18`         | Banco de dados PostgreSQL da aplicação.                       | 5432          |
+| `elasticsearch-container` | `elasticsearch:9.5.5` | Banco de busca. Sem porta exposta: só a rede interna (`elasticsearch_host:9200`) acessa. | 9200 |
+| `rabbitmq-container`    | `rabbitmq:3.13.1-management-alpine` | Fila de mensagens (jobs). Painel web em http://localhost:15672. | 5672 / 15672 |
+| `nodeworker-container`  | `node:25`             | Worker: consome a fila e executa os jobs de `app/Jobs` (`nodemon _worker.js`). | — |
 
 ### Volumes Persistentes
 
@@ -181,19 +237,18 @@ O `src/` é o projeto base do **primeiro bimestre** que evolui ao longo das aula
 | `public-volume:/var/www`            | `nginx-container`         | Disponibilizar os arquivos estáticos compilados do frontend (`public/`).  |
 | `./aulas:/var/www/aulas`            | `nginx-container`         | Disponibilizar materiais das aulas (slides, PDFs, etc).                 |
 | `./src/logs/nginx:/var/log/nginx`   | `nginx-container`         | Persistir os logs do NGINX fora do container.                            |
-| `./src/backend:/app/backend`        | `nodeweb-container`       | Disponibilizar o código do backend dentro do container.                  |
-| `./src/_web.js:/app/_web.js`        | `nodeweb-container`       | Arquivo de entrada da aplicação web.                                     |
-| `public-volume:/app/frontend/public`| `nodeweb-container`       | Ler os arquivos compilados do frontend (mesmo volume do NGINX).          |
-| `./src/_command.js:/app/_command.js`| `nodecommand-container`   | Arquivo de entrada dos comandos CLI.                                     |
-| `./src/frontend:/app/frontend`      | `nodevitehmr-container`   | Disponibilizar o código frontend para Vite.                              |
-| `./src/frontend/resources:/app/resources` | `nodevitecompiler-container` | Código-fonte que o Vite observa e compila (`vite build --watch`). |
+| `./src:/app`                        | `nodeweb-container`, `nodecommand-container`, `nodeworker-container` | Disponibilizar o código do projeto (`src/`) dentro do container. |
+| `public-volume:/app/public`         | `nodeweb-container`       | Ler os arquivos compilados do frontend (mesmo volume do NGINX).          |
+| `./src/resources:/app/resources`    | `nodevitehmr-container`, `nodevitecompiler-container` | Código-fonte que o Vite serve (HMR) e compila (`vite build --watch`). |
 | `public-volume:/app/public`         | `nodevitecompiler-container` | Escrever o resultado da compilação (mesmo volume do NGINX e do Node web). |
 | `nodemodules-volume:/app/node_modules` | node containers       | Isolar o `node_modules` instalado em build-time.                        |
 | `postgres-volume:/var/lib/postgresql` | `postgres-container`    | Persistir os dados do banco entre reinicializações.                      |
+| `elastic-volume:/usr/share/elasticsearch/data` | `elasticsearch-container` | Persistir os índices do Elasticsearch.                     |
+| `rabbitmq-volume:/var/lib/rabbitmq` | `rabbitmq-container`  | Persistir filas e usuário do RabbitMQ.                                   |
 
 ### Redes
 
-Todos os containers estão conectados à rede Docker personalizada `app_network`.
+Todos os containers estão conectados à rede Docker personalizada `app-network`. Dentro dela, cada container é encontrado pelo alias (`nodeweb_host`, `postgres_host`, `rabbitmq_host`, `elasticsearch_host`...).
 
 ### Portas Expostas Externamente
 
@@ -202,6 +257,9 @@ Todos os containers estão conectados à rede Docker personalizada `app_network`
 | NGINX       | 80            | **8080**      | http://localhost:8080 |
 | VITE HMR    | 5172          | **5172**      | http://localhost:5172 |
 | PostgreSQL  | 5432          | **6789**      | localhost:6789        |
+| RabbitMQ    | 5672          | **5672**      | localhost:5672 (AMQP) |
+| RabbitMQ    | 15672         | **15672**     | http://localhost:15672 (painel) |
+| Elasticsearch | 9200        | —             | nenhum: só a rede interna |
 
 ---
 
@@ -215,10 +273,16 @@ npm run i
 docker compose up --build
 
 # Rodar migrations pendentes
-npm run migrate
+docker compose run --rm nodecommand-container migrate
 
-# Popular banco com dados iniciais
-npm run seed
+# Popular banco (e o índice do Elasticsearch) com dados iniciais
+docker compose run --rm nodecommand-container seed
+
+# Disparar um job de exemplo na fila (o worker executa)
+docker compose run --rm nodecommand-container create-example-job
+
+# Testar o Elasticsearch de dentro da rede (ele não tem porta no host)
+docker compose exec nodeweb-container curl http://elasticsearch_host:9200
 
 # Ver logs em tempo real
 docker compose logs -f
@@ -251,8 +315,9 @@ npm run dev
 - Os slides estão em PDF em `aulas/[numero]/slide/`
 - Mantenha o `.env` atualizado e **nunca** commite variáveis sensíveis
 - Todos os comandos npm rodam da raiz do repositório
-- Para editar código do backend, modifique em `src/backend/`
-- Para editar código do frontend, modifique em `src/frontend/public/`
+- Código do servidor (Node): `src/app/`, `src/routes/`, `src/database/`...
+- Código do frontend: `src/resources/` (o Vite compila para `src/public/`, nunca edite `public/` à mão)
+- Views do servidor (EJS): `src/resources/views/`
 
 ---
 

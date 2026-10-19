@@ -1,4 +1,4 @@
-# Aula 05 — TypeScript, Generics e API Contextual
+# Aula 05 — Pré Compiladores e Typescript
 
 **Disciplina:** Frontend  
 **Semestre:** 2026.2  
@@ -566,7 +566,7 @@ Esta aula marcou uma evolução crucial em quatro eixos:
 
 ---
 
-## 8. TF Aula 05 - TypeScript, Generics e API Contextual
+## 8. TF Aula 05 - Pré Compiladores e Typescript
 
 📄 **[Descrição completa em TF05.md](./TF05.md)**
 

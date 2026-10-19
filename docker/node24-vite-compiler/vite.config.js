@@ -23,10 +23,10 @@ function copyStaticAssets(root, outDir, items) {
     }
 }
 
-// Vite.config dedicado ao container do compilador: aqui "resources" e
-// "public" são pastas irmãs, direto em /app (ver Dockerfile ao lado),
-// diferente do vite.config.js principal (usado no HMR local), onde tudo
-// fica aninhado dentro de frontend/.
+// Vite.config dedicado ao container do compilador: "resources" e "public"
+// são pastas irmãs, direto em /app (ver Dockerfile ao lado), como no src/
+// do projeto. A diferença para o vite.config.js principal (usado no HMR
+// local) é só a ausência do bloco "server": aqui não há servidor, só build.
 export default defineConfig({
     root: 'resources',
     plugins: [
@@ -44,8 +44,11 @@ export default defineConfig({
         rollupOptions: {
             input: [
                 "./resources/index.html",
-                "./resources/login.html",
-                "./resources/tasks.html"
+                "./resources/tasks.html",
+                // Entradas avulsas, usadas pelas Views (EJS) via helper vite()
+                "./resources/css/app.css",
+                "./resources/js/app.ts",
+                "./resources/js/pages/login.ts"
             ],
             output: {
                 assetFileNames: 'src/[name].[hash][extname]',

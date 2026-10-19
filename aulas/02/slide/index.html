@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 02 — CSS, Seletores e JS Reativo</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="../../../assets/slide.css">
+<link rel="stylesheet" href="../../../assets/slide-16x9.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar" aria-label="Miniaturas dos slides">
+  <a class="sidebar-back" href="../../../index.html">← Voltar</a>
+</aside>
+
+<div class="deck" id="deck">
+
+  <section class="slide" data-eyebrow="abertura">
+    <div class="cover-top">
+      <span class="cover-uni">Unifaat</span>
+      <span class="cover-sem">2026.2</span>
+    </div>
+    <h1><span class="cover-num">02</span> - CSS, Seletores e JS Reativo</h1>
+    <p class="cover-prof">Prof. Luan Lourenço</p>
+  </section>
+
+  <section class="slide" data-eyebrow="repositório">
+    <h2>O repositório <span class="accent">do bimestre</span></h2>
+    <p class="body-text"><a href="https://github.com/luan-tavares/unifaat-frontend-bimestre-01" target="_blank" rel="noopener noreferrer"><code>github.com/luan-tavares/unifaat-frontend-bimestre-01</code></a></p>
+    <p class="payoff">Mesmo repositório da aula 01 — o projeto continua evoluindo nele.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="revisão · aula 01">
+    <h2>Revisão <span class="accent">rápida</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># o que já sabemos</span><br>
+        • DOM = árvore de nós gerada<br>
+          pelo parsing de HTML<br>
+        • JS acessa essa árvore pela Vendor API<br>
+        • <code>append</code> / <code>prepend</code> inserem nós
+      </div>
+      <div class="tree">
+        <span class="dim"># o que vem agora</span><br>
+        • <code>querySelector</code> e <code>querySelectorAll</code><br>
+          com profundidade<br>
+        • CSS como segundo consumidor<br>
+          dos mesmos seletores<br>
+        • JS orientado a eventos
+      </div>
+    </div>
+    <p class="payoff">O traço distintivo do frontend é o JS reativo.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="query selector">
+    <h2><code>querySelector</code> vs. <span class="accent"><code>querySelectorAll</code></span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">console.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line comment">// o primeiro que casa → Element | null</div>
+        <div class="term-line"><span class="cmd">const el = document.querySelector(".destaque");</span></div>
+        <div class="term-line comment">// todos que casam → NodeList (não é array puro)</div>
+        <div class="term-line"><span class="cmd">const lista = document.querySelectorAll(".destaque");</span></div>
+      </div>
+    </div>
+    <p class="payoff">A sintaxe dos seletores é a mesma do CSS: a mesma linguagem, dois contextos.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="cardinalidade">
+    <h2>Cardinalidade: <span class="accent">id</span> vs. <span class="accent">class</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># #id — 1 para 1</span><br>
+        um elemento, um id único<br>
+        no documento<br>
+        <br>
+        querySelector("#cabecalho")<br>
+        → sempre 1 elemento
+      </div>
+      <div class="tree">
+        <span class="dim"># .class — n para n</span><br>
+        um elemento pode ter várias classes;<br>
+        uma classe pode estar em muitos<br>
+        elementos<br>
+        <br>
+        querySelectorAll(".card")<br>
+        → NodeList com N elementos
+      </div>
+    </div>
+    <p class="payoff">É a cardinalidade que explica por que id devolve um e class devolve uma coleção.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="hierarquia do dom">
+    <h2><code>HTMLElement</code>, <code>NodeList</code> e a <span class="accent">hierarquia</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># cadeia de herança</span><br>
+        HTMLElement <strong>herda de</strong><br>
+        Element <strong>herda de</strong><br>
+        Node
+      </div>
+      <div class="tree">
+        <span class="dim"># o que cada um traz</span><br>
+        <code>Node</code>: base — elemento, texto, comentário<br>
+        <code>Element</code>: nós de tags HTML e SVG<br>
+        <code>HTMLElement</code>: <code>classList</code>, <code>style</code>, <code>innerHTML</code>
+      </div>
+    </div>
+    <p class="body-text"><code>NodeList</code> tem índice e <code>length</code>, mas <strong>não é um array</strong>: alguns métodos de array não existem nela.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="navegando na árvore">
+    <h2>Navegando <span class="accent">na árvore</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">console.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">destaque.children           // filhos diretos → HTMLCollection</span></div>
+        <div class="term-line"><span class="cmd">destaque.firstElementChild  // primeiro filho   → Element | null</span></div>
+        <div class="term-line"><span class="cmd">destaque.lastElementChild   // último filho      → Element | null</span></div>
+        <div class="term-line"><span class="cmd">destaque.parentElement      // elemento pai      → Element | null</span></div>
+        <div class="term-line"><span class="cmd">destaque.closest(".box")    // sobe até um ancestral → Element | null</span></div>
+      </div>
+    </div>
+    <p class="payoff"><code>closest()</code> brilha dentro de handlers: sobe a partir do <code>event.target</code> até o elemento clicável.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="style · css via js">
+    <h2><code>style</code>: CSS <span class="accent">via JS</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># regra de conversão</span><br>
+        CSS: kebab-case<br>
+        <code>background-color</code><br>
+        <code>font-size</code><br>
+        <br>
+        JS: camelCase<br>
+        <code>backgroundColor</code><br>
+        <code>fontSize</code>
+      </div>
+      <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">console.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">const el = document.querySelector(".destaque");</span></div>
+        <div class="term-line comment">// equivale a background-color</div>
+        <div class="term-line"><span class="cmd">el.style.backgroundColor = "#f0f0f0";</span></div>
+        <div class="term-line comment">// equivale a font-size</div>
+        <div class="term-line"><span class="cmd">el.style.fontSize = "18px";</span></div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="classlist">
+    <h2><code>element.classList</code></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">console.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line comment">// &lt;div id="card" class="box active highlight"&gt;</div>
+        <div class="term-line"><span class="cmd">const el = document.querySelector("#card");</span></div>
+        <div class="term-line"><span class="cmd">el.classList[0]            // "box"</span></div>
+        <div class="term-line"><span class="cmd">el.classList.length       // 3</span></div>
+        <div class="term-line"><span class="cmd">el.classList.add("novo")        // adiciona</span></div>
+        <div class="term-line"><span class="cmd">el.classList.remove("active")   // remove</span></div>
+        <div class="term-line"><span class="cmd">el.classList.toggle("aberto")  // alterna → boolean</span></div>
+        <div class="term-line"><span class="cmd">el.classList.contains("box")   // existe? → boolean</span></div>
+        <div class="term-line"><span class="cmd">el.classList.replace("box", "caixa")</span></div>
+      </div>
+    </div>
+    <div class="callout">
+      <span class="mark">!</span>
+      <p>Um <code>DOMTokenList</code> parece array, mas não é: sem <code>map</code>/<code>filter</code>. Converta com <code>Array.from()</code>.</p>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="css · seletores">
+    <h2>CSS: a mesma linguagem <span class="accent">de seleção</span></h2>
+    <div class="two-col">
+      <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">basicos.css</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">tag   { }  /* por tag */</span></div>
+        <div class="term-line"><span class="cmd">.cls  { }  /* por classe */</span></div>
+        <div class="term-line"><span class="cmd">#id   { }  /* por id */</span></div>
+        <div class="term-line"><span class="cmd">A B   { }  /* descendente */</span></div>
+        <div class="term-line"><span class="cmd">A &gt; B { }  /* filho direto */</span></div>
+        <div class="term-line"><span class="cmd">A + B { }  /* irmão imediato */</span></div>
+        <div class="term-line"><span class="cmd">A ~ B { }  /* irmãos seguintes */</span></div>
+      </div>
+    </div>
+      <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">atributo-e-estado.css</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">[disabled]       { }</span></div>
+        <div class="term-line"><span class="cmd">[type="text"]    { }</span></div>
+        <div class="term-line"><span class="cmd">[href^="https"]  { }</span></div>
+        <div class="term-line"><span class="cmd">[src$=".png"]    { }</span></div>
+        <div class="term-line"><span class="cmd">[class*="alert"] { }</span></div>
+        <div class="term-line"><span class="cmd">:first-child { }  :last-child { }</span></div>
+        <div class="term-line"><span class="cmd">:nth-child(n) { }</span></div>
+        <div class="term-line"><span class="cmd">:hover { }  :focus { }</span></div>
+      </div>
+    </div>
+    </div>
+    <p class="payoff">Todos funcionam também dentro de <code>querySelector</code> e <code>querySelectorAll</code>.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="css · display">
+    <h2><code>display</code>: o comportamento <span class="accent">no fluxo</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># block</span><br>
+        ocupa 100% da largura,<br>
+        quebra linha<br>
+        ex.: <code>div</code>, <code>p</code>
+      </div>
+      <div class="tree">
+        <span class="dim"># inline</span><br>
+        só o espaço do conteúdo,<br>
+        sem width/height<br>
+        ex.: <code>span</code>, <code>a</code>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># inline-block</span><br>
+        não quebra linha, mas aceita<br>
+        dimensões e margens
+      </div>
+      <div class="tree">
+        <span class="dim"># flex</span><br>
+        container com controle avançado<br>
+        de alinhamento dos filhos
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="css · responsividade">
+    <h2>Responsividade e <span class="accent">media queries</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">responsivo.css</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></div>
+        <div class="term-line comment">/* aplica quando a tela tem até 768px */</div>
+        <div class="term-line"><span class="cmd">@media (max-width: 768px) {</span></div>
+        <div class="term-line"><span class="cmd">  body { background: lightblue; }</span></div>
+        <div class="term-line"><span class="cmd">}</span></div>
+      </div>
+    </div>
+    <p class="payoff">Mobile first: escreva pra tela pequena primeiro e adicione breakpoints com <code>min-width</code>.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="js reativo">
+    <h2>JS reativo: <span class="accent">o traço do frontend</span></h2>
+    <ul class="points">
+      <li><strong>Evento:</strong> ação do usuário ou do navegador — <code>click</code>, <code>input</code>, <code>submit</code>…</li>
+      <li><strong>Listener:</strong> função callback chamada automaticamente quando o evento ocorre</li>
+      <li><strong>Propagação:</strong> o evento sobe pela árvore (bubbling); <code>stopPropagation()</code> interrompe</li>
+    </ul>
+    <p class="payoff">Não é só manipular o DOM — é reagir ao que o usuário faz.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="addeventlistener">
+    <h2><code>addEventListener</code> <span class="accent">na prática</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">console.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">container.addEventListener("click", function (event) {</span></div>
+        <div class="term-line comment">// onde o clique aconteceu (pode ser um filho)</div>
+        <div class="term-line"><span class="cmd">  console.log("target:", event.target);</span></div>
+        <div class="term-line comment">// onde o listener foi registrado</div>
+        <div class="term-line"><span class="cmd">  console.log("currentTarget:", event.currentTarget);</span></div>
+        <div class="term-line comment">// sobe até o elemento clicável</div>
+        <div class="term-line"><span class="cmd">  const item = event.target.closest(".item");</span></div>
+        <div class="term-line comment">// impede propagação pros pais</div>
+        <div class="term-line"><span class="cmd">  event.stopPropagation();</span></div>
+        <div class="term-line"><span class="cmd">});</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="type module">
+    <h2><code>type="module"</code>: <span class="accent">vários arquivos</span></h2>
+    <p class="lede">Scripts de frontend crescem — separar em arquivos é inevitável.</p>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">index.html</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">&lt;script type="module" src="./app.js"&gt;&lt;/script&gt;</span></div>
+      </div>
+    </div>
+    <ul class="points">
+      <li>Habilita <code>import</code> / <code>export</code> nativos no navegador</li>
+      <li>Cada arquivo tem escopo próprio — sem poluir variáveis globais</li>
+    </ul>
+    <p class="payoff">Sem aprofundar em módulos agora: só justificar por que um script inline único não basta.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="css como commodity">
+    <h2>CSS como <span class="accent">commodity</span></h2>
+    <p class="lede">Escrever CSS puro do zero é cada vez mais raro em produção: Bootstrap e Tailwind entregam classes prontas pra layout, espaçamento e componente.</p>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># css manual</span><br>
+        essencial pra entender seletor,<br>
+        display, cascata e especificidade
+      </div>
+      <div class="tree">
+        <span class="dim"># frameworks</span><br>
+        resolvem a estilização repetitiva<br>
+        em produção
+      </div>
+    </div>
+    <p class="payoff">Quem entende a base usa framework com consciência, não como caixa-preta.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="referência rápida · api do dom">
+    <h2>Referência rápida: <span class="accent">API do DOM</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">console.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">querySelector(sel)         → Element | null</span></div>
+        <div class="term-line"><span class="cmd">querySelectorAll(sel)      → NodeList</span></div>
+        <div class="term-line"><span class="cmd">classList.add(cls)         → undefined</span></div>
+        <div class="term-line"><span class="cmd">classList.remove(cls)      → undefined</span></div>
+        <div class="term-line"><span class="cmd">classList.toggle(cls)      → boolean</span></div>
+        <div class="term-line"><span class="cmd">classList.contains(cls)    → boolean</span></div>
+        <div class="term-line"><span class="cmd">element.remove()          → undefined</span></div>
+        <div class="term-line"><span class="cmd">parentElement             → Element | null</span></div>
+        <div class="term-line"><span class="cmd">closest(sel)              → Element | null</span></div>
+        <div class="term-line"><span class="cmd">children                 → HTMLCollection</span></div>
+        <div class="term-line"><span class="cmd">first/lastElementChild   → Element | null</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="fim da aula 02">
+    <h2>Seletores, CSS e eventos.</h2>
+    <p class="lede">A Vendor API ganhou profundidade e o CSS entrou como segundo consumidor dos mesmos seletores. A seguir: <strong>Vite, formulários e listeners</strong>.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="tf 02 · entrega">
+    <span class="kicker-badge">tarefa</span>
+    <h2>TF 02: <span class="accent">CSS, Seletores e JS Reativo</span></h2>
+    <p class="body-text">Entrega pelo formulário abaixo —<br><a href="https://docs.google.com/forms/d/e/1FAIpQLSdJ1DIp8VmDNyzQV2haY4HWodQPi2OSSbwb_CHGk5LzfYtHBw/viewform?usp=dialog" target="_blank" rel="noopener noreferrer"><code>docs.google.com/forms/d/e/1FAIpQLSdJ1DIp8VmDNyzQV2haY4HWodQPi2OSSbwb_CHGk5LzfYtHBw/viewform</code></a></p>
+  </section>
+
+</div>
+
+<nav class="hud">
+  <button id="prevBtn" aria-label="Slide anterior">‹</button>
+  <div class="hud-mid">
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="hud-meta">
+      <span><span id="counterCurrent">01</span> / <span id="counterTotal">19</span> — <span id="eyebrowLabel">abertura</span></span>
+      <span class="hint">use ← → ou espaço para navegar · T alterna o tema</span>
+    </div>
+  </div>
+  <button id="nextBtn" aria-label="Próximo slide">›</button>
+</nav>
+<script src="../../../assets/slide.js"></script>
+<script src="../../../assets/slide-16x9.js"></script>
+</body>
+</html>

@@ -1,0 +1,643 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "User API",
+        "version": "1.0.0",
+        "description": "API de usuários - operações CRUD e vinculação de cursos"
+    },
+    "paths": {
+        "/users": {
+            "get": {
+                "summary": "Listar usuários",
+                "description": "Retorna uma lista paginada de usuários",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        },
+                        "description": "Página desejada"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        },
+                        "description": "Quantidade máxima de itens por página"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de usuários",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Criar usuário",
+                "description": "Cria um novo usuário com email, nome e senha",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    },
+                                    "job_title": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "example": "Dev Frontend"
+                                    },
+                                    "bio": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "example": "Dev Frontend em Atibaia. Trabalha com React e TypeScript."
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "example": "Atibaia"
+                                    },
+                                    "state": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "minLength": 2,
+                                        "maxLength": 2,
+                                        "example": "SP"
+                                    },
+                                    "birth_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "nullable": true,
+                                        "example": "1998-04-12"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuário criado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "summary": "Obter usuário",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuário encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Atualizar usuário",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    },
+                                    "job_title": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "example": "Dev Frontend"
+                                    },
+                                    "bio": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "example": "Dev Frontend em Atibaia. Trabalha com React e TypeScript."
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "example": "Atibaia"
+                                    },
+                                    "state": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "minLength": 2,
+                                        "maxLength": 2,
+                                        "example": "SP"
+                                    },
+                                    "birth_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "nullable": true,
+                                        "example": "1998-04-12"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "email"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuário atualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletar usuário",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Usuário deletado"
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado"
+                    }
+                }
+            }
+        },
+        "/users/image/{id}": {
+            "post": {
+                "summary": "Upload de imagem de usuário",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "required": [
+                                    "image"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Imagem enviada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação de arquivo"
+                    }
+                }
+            }
+        },
+        "/users/search": {
+            "post": {
+                "summary": "Busca de usuários (Elasticsearch + Postgres)",
+                "description": "Busca em **duas etapas**:\n\n1. O **Elasticsearch** aplica os filtros e devolve só os ids dos usuários encontrados.\n2. O **Postgres** busca esses usuários com `WHERE id IN (...)` pela chave primária, e a resposta vem na ordem do Elastic.\n\nPor isso os dados exibidos são sempre os atuais do banco: um usuário excluído há pouco (e ainda não removido do Elastic) não aparece, e um alterado vem com os dados novos.\n\n**Como os filtros funcionam** (todos dentro de `filters`, todos combinados com **E**):\n\n| Campo | Tipo | Como é buscado |\n|---|---|---|\n| `name`, `email`, `job_title`, `bio`, `city`, `state` | texto | **contém**, como `LIKE '%valor%'`, sem diferenciar maiúsculas de minúsculas |\n| `is_active` | booleano | valor exato (`true` ou `false`) |\n| `birth_date`, `created_at` | data | intervalo `{ \"gte\": \"AAAA-MM-DD\", \"lte\": \"AAAA-MM-DD\" }` (pode mandar só um dos dois) |\n\nCampos vazios (`\"\"` ou `null`) são ignorados. `filters: {}` lista todo mundo, paginado. Campo que não está na tabela acima → **400**.\n\nOrdenação: mais recentes primeiro (`created_at` decrescente).\n\n**Atenção:** a busca enxerga o que já foi sincronizado com o Elasticsearch. Depois de criar/editar/excluir um usuário, o job da fila leva alguns milissegundos para atualizar o índice.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "filters": {
+                                        "type": "object",
+                                        "description": "Filtros da busca. Todos opcionais e combinados com E. Veja a tabela na descrição.",
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "description": "Contém, no nome (LIKE '%valor%').",
+                                                "example": "souza"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "description": "Contém, no e-mail.",
+                                                "example": "@example.com"
+                                            },
+                                            "job_title": {
+                                                "type": "string",
+                                                "description": "Contém, no cargo.",
+                                                "example": "dev"
+                                            },
+                                            "bio": {
+                                                "type": "string",
+                                                "description": "Contém, na bio (texto livre).",
+                                                "example": "elasticsearch"
+                                            },
+                                            "city": {
+                                                "type": "string",
+                                                "description": "Contém, na cidade.",
+                                                "example": "paulo"
+                                            },
+                                            "state": {
+                                                "type": "string",
+                                                "description": "Contém, na UF (com 2 letras, na prática vira igual).",
+                                                "example": "SP"
+                                            },
+                                            "is_active": {
+                                                "type": "boolean",
+                                                "description": "Valor exato.",
+                                                "example": true
+                                            },
+                                            "birth_date": {
+                                                "type": "object",
+                                                "description": "Intervalo de datas em birth_date. Mande só `gte` (a partir de), só `lte` (até) ou os dois. Formato AAAA-MM-DD.",
+                                                "properties": {
+                                                    "gte": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "description": "maior ou igual (>=)",
+                                                        "example": "1990-01-01"
+                                                    },
+                                                    "lte": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "description": "menor ou igual (<=)",
+                                                        "example": "1999-12-31"
+                                                    }
+                                                }
+                                            },
+                                            "created_at": {
+                                                "type": "object",
+                                                "description": "Intervalo de datas em created_at. Mande só `gte` (a partir de), só `lte` (até) ou os dois. Formato AAAA-MM-DD.",
+                                                "properties": {
+                                                    "gte": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "description": "maior ou igual (>=)",
+                                                        "example": "2026-10-01"
+                                                    },
+                                                    "lte": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "description": "menor ou igual (<=)",
+                                                        "example": "2026-10-31"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "page": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "default": 1,
+                                        "description": "Página (começa em 1)."
+                                    },
+                                    "limit": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 100,
+                                        "default": 20,
+                                        "description": "Itens por página (1 a 100; fora disso volta para 20)."
+                                    }
+                                }
+                            },
+                            "examples": {
+                                "contem_no_texto": {
+                                    "summary": "Contém em um campo de texto",
+                                    "value": {
+                                        "filters": {
+                                            "bio": "elasticsearch"
+                                        }
+                                    }
+                                },
+                                "varios_filtros": {
+                                    "summary": "Vários filtros juntos (E)",
+                                    "value": {
+                                        "filters": {
+                                            "job_title": "dev",
+                                            "state": "SP",
+                                            "is_active": true
+                                        },
+                                        "page": 1,
+                                        "limit": 10
+                                    }
+                                },
+                                "intervalo_de_datas": {
+                                    "summary": "Nascidos nos anos 90",
+                                    "value": {
+                                        "filters": {
+                                            "birth_date": {
+                                                "gte": "1990-01-01",
+                                                "lte": "1999-12-31"
+                                            }
+                                        }
+                                    }
+                                },
+                                "so_inativos": {
+                                    "summary": "Só usuários inativos",
+                                    "value": {
+                                        "filters": {
+                                            "is_active": false
+                                        }
+                                    }
+                                },
+                                "todos": {
+                                    "summary": "Sem filtro (todos, paginado)",
+                                    "value": {
+                                        "filters": {},
+                                        "page": 2,
+                                        "limit": 20
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuários encontrados, na ordem do Elasticsearch, com os dados atuais do Postgres (sem senha).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "limit": {
+                                            "type": "integer",
+                                            "example": 20
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "description": "Total de usuários que batem com os filtros no Elasticsearch.",
+                                            "example": 16
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Alice Souza"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "example": "alice.souza@example.com"
+                                                    },
+                                                    "picture": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "job_title": {
+                                                        "type": "string",
+                                                        "nullable": true,
+                                                        "example": "Dev Frontend"
+                                                    },
+                                                    "bio": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "city": {
+                                                        "type": "string",
+                                                        "nullable": true,
+                                                        "example": "Atibaia"
+                                                    },
+                                                    "state": {
+                                                        "type": "string",
+                                                        "nullable": true,
+                                                        "example": "SP"
+                                                    },
+                                                    "birth_date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "nullable": true,
+                                                        "example": "1975-01-01"
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Body inválido: `filters` não é objeto, ou campo de busca que não existe.",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "error": "Campo de busca inválido: telefone"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno (por exemplo, Elasticsearch fora do ar).",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "error": "Internal server error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "picture": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "job_title": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "Dev Frontend"
+                    },
+                    "bio": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "Dev Frontend em Atibaia. Trabalha com React e TypeScript."
+                    },
+                    "city": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "Atibaia"
+                    },
+                    "state": {
+                        "type": "string",
+                        "nullable": true,
+                        "minLength": 2,
+                        "maxLength": 2,
+                        "example": "SP"
+                    },
+                    "birth_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true,
+                        "example": "1998-04-12"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                }
+            },
+            "UserListResponse": {
+                "type": "object",
+                "properties": {
+                    "page": {
+                        "type": "integer"
+                    },
+                    "limit": {
+                        "type": "integer"
+                    },
+                    "total": {
+                        "type": "integer"
+                    },
+                    "next": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/User"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

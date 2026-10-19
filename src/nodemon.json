@@ -1,0 +1,8 @@
+{
+    "ignore": [
+        "public/",
+        "resources/",
+        "storage/",
+        "logs/"
+    ]
+}

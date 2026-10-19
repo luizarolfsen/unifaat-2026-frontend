@@ -24,9 +24,9 @@ function copyStaticAssets(root, outDir, items) {
 }
 
 export default defineConfig({
-    root: 'frontend/resources',
+    root: 'resources',
     plugins: [
-        copyStaticAssets('frontend/resources', '../public', ['404.html', 'example.json', 'img'])
+        copyStaticAssets('resources', '../public', ['404.html', 'example.json', 'img'])
     ],
     server: {
         open: (process.env.IS_DOCKER !== "true"),
@@ -45,9 +45,12 @@ export default defineConfig({
         manifest: true,
         rollupOptions: {
             input: [
-                "./frontend/resources/index.html",
-                "./frontend/resources/login.html",
-                "./frontend/resources/tasks.html"
+                "./resources/index.html",
+                "./resources/tasks.html",
+                // Entradas avulsas, usadas pelas Views (EJS) via helper vite()
+                "./resources/css/app.css",
+                "./resources/js/app.ts",
+                "./resources/js/pages/login.ts"
             ],
             output: {
                 assetFileNames: 'src/[name].[hash][extname]',

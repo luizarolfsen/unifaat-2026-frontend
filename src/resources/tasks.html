@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tasks - Minhas Tarefas</title>
+  <link rel="icon" type="image/png" href="./img/favicon.ico">
+  <link rel="stylesheet" href="./css/app.css">
+  <script type="module" src="./js/app.ts"></script>
+  <script type="module" src="./js/pages/tasks.ts"></script>
+<script type="module" src="./js/teste.ts"></script>
+</head>
+
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+  <header class="bg-primary text-white d-flex justify-content-between align-items-center py-4 px-4 shadow-sm">
+    <h1 class="h3 m-0">Minhas Tarefas</h1>
+    <button id="logout-btn" class="btn btn-light btn-sm">Sair</button>
+  </header>
+
+  <main class="container flex-grow-1 py-5 d-flex flex-column flex-lg-row gap-4">
+
+    <section id="tasks-container" class="card shadow-sm p-4 flex-grow-1"></section>
+
+    <section id="add-task-section" class="card shadow-sm p-4 d-flex flex-column gap-2 text-center">
+      <h5>Nova Tarefa</h5>
+      <input type="text" id="task-input" class="form-control" placeholder="Digite a tarefa..." />
+      <button id="add-task-btn" class="btn btn-primary" type="button">Adicionar</button>
+    </section>
+
+  </main>
+
+  <footer class="bg-primary text-white text-center py-3 mt-auto">
+    <div class="small">Frontend 2026.2</div>
+  </footer>
+</body>
+
+</html>

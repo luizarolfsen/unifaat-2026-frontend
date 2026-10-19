@@ -86,10 +86,10 @@
 
 | Volume                              | Utilizado por             | Finalidade                                                              |
 |--------------------------------------|---------------------------|--------------------------------------------------------------------------|
-| `./src/frontend/public:/var/www`        | `nginx-container`         | Disponibilizar os arquivos estáticos da pasta `src/frontend/public/` dentro do container. |
+| `public-volume:/var/www`                | `nginx-container`         | Disponibilizar os arquivos compilados (`src/public/`) dentro do container. |
 | `./src/logs/nginx:/var/log/nginx`       | `nginx-container`         | Persistir os logs do NGINX fora do container.                          |
-| `./src/backend:/app`                    | `nodeweb-container`, `nodecommand-container` | Disponibilizar o código do backend dentro dos containers Node.        |
-| `./src/frontend/public:/app/public`     | `nodeweb-container`       | Disponibilizar os arquivos estáticos para a aplicação Node servir.     |
+| `./src:/app`                            | `nodeweb-container`, `nodecommand-container` | Disponibilizar o código do projeto dentro dos containers Node.        |
+| `public-volume:/app/public`             | `nodeweb-container`       | Disponibilizar os arquivos compilados para a aplicação Node servir.    |
 | `nodemodules-volume:/app/node_modules` | `nodeweb-container`, `nodecommand-container` | Isolar o `node_modules` instalado em build-time dentro dos containers. |
 | `postgres-volume:/var/lib/postgresql` | `postgres-container`    | Persistir os dados do banco entre reinicializações do container.       |
 | `./docker/postgres/init:/docker-entrypoint-initdb.d` | `postgres-container` | Scripts executados na inicialização do banco (setup inicial).          |

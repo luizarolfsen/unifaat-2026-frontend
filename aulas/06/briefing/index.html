@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Briefing · Aula 06 — Revisão Geral</title>
+<link rel="stylesheet" href="../../../assets/briefing.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <a class="back" href="../../../index.html">← Voltar</a>
+    <details class="toc" open><summary>Nesta página</summary><ol><li class="l1"><a href="#topo">06 - Revisão Geral</a></li><li class="l2"><a href="#s1-introdução">1 - Introdução</a></li><li class="l2"><a href="#s2-aula-01-nginx-e-a-diretiva-try_files">2 - Aula 01: Nginx e a diretiva try_files</a></li><li class="l3"><a href="#s2-1-por-que-não-abrir-o-html-direto">2.1 - Por que não abrir o HTML direto</a></li><li class="l3"><a href="#s2-2-nginx-em-docker-a-mecânica-completa">2.2 - Nginx em Docker: a mecânica completa</a></li><li class="l3"><a href="#s2-3-a-diretiva-try_files-mecânica-completa">2.3 - A diretiva `try_files`: mecânica completa</a></li><li class="l2"><a href="#s3-aula-02-a-árvore-dom-e-os-seletores">3 - Aula 02: A Árvore DOM e os Seletores</a></li><li class="l3"><a href="#s3-1-a-árvore-pais-filhos-e-irmãos">3.1 - A árvore: pais, filhos e irmãos</a></li><li class="l3"><a href="#s3-2-a-hierarquia-por-trás-do-dom-node-element-e-htmlelement">3.2 - A hierarquia por trás do DOM: Node, Element e HTMLElement</a></li><li class="l3"><a href="#s3-3-navegação-na-árvore-via-código">3.3 - Navegação na árvore via código</a></li><li class="l3"><a href="#s3-4-os-cinco-métodos-de-seleção-e-a-cardinalidade">3.4 - Os cinco métodos de seleção e a cardinalidade</a></li><li class="l3"><a href="#s3-5-seletores-css-seletores-do-js">3.5 - Seletores CSS = seletores do JS</a></li><li class="l3"><a href="#s3-6-style-e-manipulação">3.6 - `style` e manipulação</a></li><li class="l2"><a href="#s4-aula-03-build-vite-e-listeners">4 - Aula 03: Build, Vite e Listeners</a></li><li class="l3"><a href="#s4-1-o-que-é-um-build">4.1 - O que é um build</a></li><li class="l3"><a href="#s4-2-vite-hmr-e-pré-compilação">4.2 - Vite: HMR e pré-compilação</a></li><li class="l3"><a href="#s4-3-listeners-addeventlistener-e-o-catálogo-de-eventos">4.3 - Listeners: `addEventListener` e o catálogo de eventos</a></li><li class="l3"><a href="#s4-4-target-vs-currenttarget">4.4 - `target` vs `currentTarget`</a></li><li class="l3"><a href="#s4-5-preventdefault-stoppropagation-e-as-três-fases-do-evento">4.5 - `preventDefault()`, `stopPropagation()` e as três fases do evento</a></li><li class="l3"><a href="#s4-6-forms">4.6 - Forms</a></li><li class="l2"><a href="#s5-aula-04-window-e-document">5 - Aula 04: window e document</a></li><li class="l3"><a href="#s5-1-a-hierarquia-completa">5.1 - A hierarquia completa</a></li><li class="l3"><a href="#s5-2-devtools-cookies-jwt-e-cors-revisão-rápida">5.2 - DevTools, cookies, JWT e CORS (revisão rápida)</a></li><li class="l2"><a href="#s6-aula-05-typescript-generics-e-pré-compilação">6 - Aula 05: TypeScript, Generics e Pré-Compilação</a></li><li class="l3"><a href="#s6-1-por-que-o-navegador-só-entende-javascript-puro">6.1 - Por que o navegador só entende JavaScript puro</a></li><li class="l3"><a href="#s6-2-generics-o-problema-e-a-solução">6.2 - Generics: o problema e a solução</a></li><li class="l3"><a href="#s6-3-estrutura-resources-public">6.3 - Estrutura `resources/` → `public/`</a></li><li class="l2"><a href="#s7-referências">7 - Referências</a></li><li class="l2"><a href="#questoes">Questões do TA</a></li></ol></details>
+  </aside>
+  <main class="doc">
+    <header class="cover" id="topo">
+      <p class="eyebrow">UNIFAAT · 2026.2 · Briefing para produção de conteúdo</p>
+      <h1><span class="cn">06</span> - Revisão Geral</h1>
+      <dl class="ficha">
+        <div><dt>Professor</dt><dd>Luan Tavares Lourenço</dd></div>
+        <div><dt>Disciplina</dt><dd>Frontend</dd></div>
+        <div><dt>Aula</dt><dd>06</dd></div>
+        <div><dt>Opção do TA</dt><dd>Texto</dd></div>
+      </dl>
+    </header>
+<h2 id="s1-introdução"><span class="hn">1</span>Introdução</h2>
+<p>Esta é uma aula de revisão — sem conteúdo novo e sem mudança de código. O slide desta aula é propositalmente enxuto (16 telas, para caber numa aula de revisão sem se arrastar); este briefing existe para carregar o que o slide não tem espaço para carregar: a explicação completa, com nuances, exceções e o "por quê" por trás de cada ponto. O foco pedido para esta revisão recai sobre seis pontos específicos, que são tratados aqui com mais profundidade do que em qualquer aula anterior: a diretiva <code>try_files</code> do Nginx, a árvore DOM (pais, filhos, irmãos) por trás dos seletores — incluindo a hierarquia Node → Element → HTMLElement e a diferença entre coleções vivas e estáticas —, o par <code>target</code>/<code>currentTarget</code>, o par <code>preventDefault</code>/<code>stopPropagation</code> (com as três fases do evento), a relação entre <code>window</code> e <code>document</code>, e generics em TypeScript.</p>
+<h2 id="s2-aula-01-nginx-e-a-diretiva-try_files"><span class="hn">2</span>Aula 01: Nginx e a diretiva try_files</h2>
+<h3 id="s2-1-por-que-não-abrir-o-html-direto"><span class="hn">2.1</span>Por que não abrir o HTML direto</h3>
+<p>Antes de chegar em <code>try_files</code>, vale relembrar por que a alternativa mais óbvia — abrir o <code>index.html</code> direto no navegador, via <code>file://</code> — não é usada no curso. Quando um arquivo é aberto assim, o navegador não fala HTTP nenhum: não existem headers de resposta, não existe status code, e o próprio conceito de "rota" desaparece — cada link é resolvido como caminho de arquivo no disco, não como URL de um servidor. Isso quebra qualquer coisa que dependa de HTTP de verdade (fetch/Axios para uma API, cookies, CORS) e não reproduz o ambiente de produção. Um backend inteiro só para servir HTML/CSS/JS resolveria o problema de simular HTTP, mas ao custo de manter um runtime de aplicação (Node, por exemplo) rodando só para devolver bytes estáticos — trabalho que um servidor web dedicado faz de forma mais eficiente e mais simples de configurar.</p>
+<h3 id="s2-2-nginx-em-docker-a-mecânica-completa"><span class="hn">2.2</span>Nginx em Docker: a mecânica completa</h3>
+<p>Rodar o Nginx dentro de um container Docker, orquestrado por <code>docker-compose</code>, monta o seguinte encadeamento:</p>
+<ul><li>O <code>docker-compose.yml</code> declara o serviço do Nginx e cria, implicitamente, uma rede Docker interna compartilhada por todos os serviços definidos no arquivo;</li><li>Um volume mapeia o diretório local <code>./public</code> para <code>/usr/share/nginx/html</code> (ou para o <code>root</code> configurado) dentro do container — ou seja, qualquer arquivo que exista localmente em <code>./public</code> passa a existir, do ponto de vista do Nginx, dentro do container;</li><li>O Nginx expõe a porta 80 internamente, e o <code>docker-compose</code> mapeia essa porta para uma porta do host (<code>ports: - "8080:80"</code>, por exemplo), tornando o conteúdo acessível via <code>http://localhost:8080</code>;</li><li>Diferente de abrir o arquivo direto, aqui existe HTTP de verdade: headers, status codes, e o mesmo comportamento que existiria em um servidor de produção.</li></ul>
+<h3 id="s2-3-a-diretiva-try_files-mecânica-completa"><span class="hn">2.3</span>A diretiva <code>try_files</code>: mecânica completa</h3>
+<pre class="code"><code>server {
+    listen 80;
+    root /var/www;
+    index index.html;
+
+    location / {
+        autoindex on;
+        try_files $uri $uri/ =404;
+    }
+
+    error_page 404 /404.html;
+}</code></pre>
+<p><code>try_files</code> recebe uma lista de argumentos e os testa <strong>em ordem, da esquerda para a direita</strong>, usando o <strong>primeiro que resolver para um arquivo ou diretório existente</strong>:</p>
+<ol><li><code>$uri</code> — o caminho da requisição, tratado como <strong>caminho de arquivo</strong>, relativo a <code>root</code>. Uma requisição <code>GET /sobre.html</code> testa se existe o arquivo <code>/var/www/sobre.html</code>.</li><li><code>$uri/</code> — o mesmo caminho, agora tratado como <strong>diretório</strong> (repare na barra adicionada no fim). Se existir uma pasta <code>/var/www/blog/</code>, o Nginx entra nela e serve o arquivo declarado em <code>index</code> (<code>index.html</code>, aqui) — mecanismo conhecido como "directory index".</li><li><code>=404</code> — um argumento especial: se nada antes dele resolveu, o Nginx interrompe a busca e responde imediatamente com o código informado (<code>404</code> aqui), sem tentar mais nenhum fallback. É esse retorno explícito de status que distingue <code>=404</code> de um simples "próximo candidato" — ele nunca é tratado como caminho de arquivo.</li></ol>
+<p>Dois detalhes que não aparecem no slide, mas que valem a pena fixar:</p>
+<ul><li><strong>A ordem importa e é definitiva</strong>: se o primeiro argumento resolver, os seguintes nem são avaliados. Não existe "testar todos e escolher o melhor" — é sequencial, e para no primeiro sucesso.</li><li><strong><code>autoindex on</code></strong> (na mesma <code>location</code>) só entra em jogo quando <code>try_files</code> resolve para um diretório que <strong>não tem</strong> um arquivo <code>index.html</code> dentro — nesse caso, em vez de dar erro, o Nginx gera automaticamente uma listagem HTML dos arquivos daquela pasta. Sem <code>autoindex on</code>, um diretório sem <code>index.html</code> resultaria em <code>403 Forbidden</code>, não em <code>404</code>.</li><li><strong><code>error_page 404 /404.html</code></strong> só entra depois que <code>try_files</code> já decidiu por <code>=404</code> — ele troca a página de erro padrão do Nginx por uma página customizada, mas não muda o status HTTP retornado (continua <code>404</code>).</li></ul>
+<p>Por que essa diretiva existe: sem ela, o Nginx precisaria de uma regra explícita para cada tipo de URL (arquivo exato vs. pasta com index vs. rota inexistente). <code>try_files</code> resolve isso com uma única linha declarativa, testando do caminho mais específico (arquivo exato) para o mais genérico (pasta com index), e só então desistindo.</p>
+<h2 id="s3-aula-02-a-árvore-dom-e-os-seletores"><span class="hn">3</span>Aula 02: A Árvore DOM e os Seletores</h2>
+<h3 id="s3-1-a-árvore-pais-filhos-e-irmãos"><span class="hn">3.1</span>A árvore: pais, filhos e irmãos</h3>
+<p>O HTML, depois de parseado pelo navegador, deixa de ser texto e se torna uma <strong>árvore de nós</strong> — essa árvore é o DOM (Document Object Model). "Árvore" aqui não é metáfora solta: é a mesma estrutura de dados de uma árvore genealógica ou de um sistema de arquivos, com as mesmas relações:</p>
+<ul><li><strong>Pai (parent)</strong> — o nó que contém outro diretamente em seu corpo.</li><li><strong>Filho (child)</strong> — o nó contido diretamente por outro.</li><li><strong>Irmãos (siblings)</strong> — nós diferentes que compartilham o mesmo pai.</li><li><strong>Ancestral/Descendente</strong> — a mesma relação de pai/filho, mas em qualquer profundidade (não precisa ser direto). Um neto continua sendo descendente do avô.</li></ul>
+<pre class="code"><code>&lt;body&gt;                    &lt;!-- raiz da subárvore visível; pai de header, main, footer --&gt;
+  &lt;header&gt;...&lt;/header&gt;    &lt;!-- filho de body; irmão de main e footer --&gt;
+  &lt;main&gt;
+    &lt;article&gt;...&lt;/article&gt; &lt;!-- filho de main; descendente (neto) de body --&gt;
+  &lt;/main&gt;
+  &lt;footer&gt;...&lt;/footer&gt;    &lt;!-- filho de body; irmão de header e main --&gt;
+&lt;/body&gt;</code></pre>
+<h3 id="s3-2-a-hierarquia-por-trás-do-dom-node-element-e-htmlelement"><span class="hn">3.2</span>A hierarquia por trás do DOM: Node, Element e HTMLElement</h3>
+<p>Isso não aparece no slide, mas é o que explica por que nem todo nó tem os mesmos métodos disponíveis. O DOM é organizado em uma cadeia de herança:</p>
+<ul><li><strong><code>Node</code></strong> — a classe mais genérica. Qualquer coisa que exista na árvore é um <code>Node</code>: uma tag, um nó de texto solto, um comentário <code>&lt;!-- --&gt;</code>, e até o próprio <code>document</code>. É em <code>Node</code> que vivem propriedades bem genéricas, como <code>parentNode</code> e <code>childNodes</code> (que, atenção, incluem nós de texto — quebras de linha e espaços viram nós de texto também).</li><li><strong><code>Element</code></strong> — herda de <code>Node</code>, e representa especificamente nós que são <strong>tags</strong> (HTML ou SVG). É em <code>Element</code> que aparecem <code>parentElement</code>, <code>children</code>, <code>closest()</code> — todos ignorando nós de texto, trabalhando só com tags de verdade.</li><li><strong><code>HTMLElement</code></strong> — herda de <code>Element</code>, e é a especialização para tags <strong>HTML</strong> (em oposição a SVG). É aqui que moram <code>id</code>, <code>className</code>/<code>classList</code>, <code>style</code>, <code>innerText</code>, <code>innerHTML</code> — as propriedades mais usadas no dia a dia.</li></ul>
+<p>Essa cadeia (<code>Node</code> → <code>Element</code> → <code>HTMLElement</code>) explica, por exemplo, por que se usa <code>children</code> (de <code>Element</code>) em vez de <code>childNodes</code> (de <code>Node</code>) quando se quer navegar só pelas tags de um elemento, ignorando quebras de linha e espaços que o navegador também registra como nós.</p>
+<h3 id="s3-3-navegação-na-árvore-via-código"><span class="hn">3.3</span>Navegação na árvore via código</h3>
+<pre class="code"><code>const main = document.querySelector("main");
+
+main.parentElement;         <span class="cm">// Element | null — o pai (body)</span>
+main.children;               <span class="cm">// HTMLCollection — filhos diretos (só tags, sem texto)</span>
+main.firstElementChild;      <span class="cm">// Element | null — primeiro filho</span>
+main.lastElementChild;       <span class="cm">// Element | null — último filho</span>
+main.closest("body");        <span class="cm">// Element | null — sobe pelos ancestrais até achar quem casa</span></code></pre>
+<p><code>closest()</code> sobe a árvore (procura em si mesmo, depois no pai, depois no avô, e assim por diante, até achar um elemento que case com o seletor, ou até chegar no topo sem achar nada — retornando <code>null</code>). <code>children</code> desce <strong>um único nível</strong>, nunca mais que isso. Ambos seguem exatamente essa mesma árvore de <code>Node</code>/<code>Element</code> descrita acima.</p>
+<h3 id="s3-4-os-cinco-métodos-de-seleção-e-a-cardinalidade"><span class="hn">3.4</span>Os cinco métodos de seleção e a cardinalidade</h3>
+<div class="tbl"><table><thead><tr><th>Método</th><th>O que seleciona</th><th>Retorno</th></tr></thead><tbody><tr><td><code>querySelector(seletor)</code></td><td>1º elemento que casa com um seletor <strong>CSS</strong></td><td><code>Element</code> ou <code>null</code></td></tr><tr><td><code>querySelectorAll(seletor)</code></td><td>todos que casam com um seletor <strong>CSS</strong></td><td><code>NodeList</code> <strong>estática</strong></td></tr><tr><td><code>getElementById(id)</code></td><td>elemento com aquele <code>id</code></td><td><code>Element</code> ou <code>null</code></td></tr><tr><td><code>getElementsByClassName(classe)</code></td><td>todos com aquela <code>class</code></td><td><code>HTMLCollection</code> <strong>viva</strong></td></tr><tr><td><code>getElementsByTagName(tag)</code></td><td>todos daquela tag</td><td><code>HTMLCollection</code> <strong>viva</strong></td></tr></tbody></table></div>
+<p>O detalhe que geralmente escapa: <code>querySelectorAll</code> devolve uma <strong>NodeList estática</strong> — é uma foto do DOM no momento da chamada; se elementos forem adicionados ou removidos depois, essa lista <strong>não muda sozinha</strong>. Já <code>getElementsByClassName</code>/<code>getElementsByTagName</code> devolvem uma <strong>HTMLCollection viva</strong> — ela se atualiza automaticamente se o DOM mudar depois (adicionar um elemento com aquela classe faz ele aparecer na coleção já obtida, sem precisar chamar o método de novo). Essa diferença já causou bugs sutis em código real: iterar uma <code>HTMLCollection</code> viva enquanto se remove elementos dela pode pular itens, porque a coleção encolhe no meio da iteração.</p>
+<p>A cardinalidade de <code>id</code> (1 para 1: nunca se repete no documento) e <code>class</code> (n para n: um elemento pode ter várias, e uma classe pode estar em vários elementos) é o que explica, na raiz, por que <code>getElementById</code>/<code>querySelector("#id")</code> nunca retornam lista, e por que os demais sempre retornam coleção.</p>
+<h3 id="s3-5-seletores-css-seletores-do-js"><span class="hn">3.5</span>Seletores CSS = seletores do JS</h3>
+<pre class="code"><code>A B    {}   /* descendente: qualquer filho, em qualquer nível */
+A &gt; B  {}   /* filho direto */
+A + B  {}   /* irmão imediato */
+A ~ B  {}   /* irmãos subsequentes */
+[type="text"] {}    /* atributo com valor exato */
+[href^="https"] {}  /* atributo que começa com */
+:first-child {}     /* primeiro filho do pai */
+:hover {}           /* estado: mouse sobre o elemento */</code></pre>
+<p><code>querySelector</code>/<code>querySelectorAll</code> aceitam qualquer seletor CSS válido — inclusive esses de hierarquia, atributo e pseudo-classe — porque implementam a mesma linguagem de seleção do CSS. Os <code>getElementBy*</code> não: cada um entende apenas o critério do próprio nome (só id, só classe, só tag), nunca uma combinação.</p>
+<h3 id="s3-6-style-e-manipulação"><span class="hn">3.6</span><code>style</code> e manipulação</h3>
+<pre class="code"><code>const destaque = document.querySelector(".destaque");
+
+destaque.style.backgroundColor = "#f0f0f0"; <span class="cm">// kebab-case → camelCase</span>
+destaque.style.fontSize = "18px";
+
+destaque.append(" 🚀");                     <span class="cm">// adiciona no final</span>
+destaque.prepend("🔥 ");                    <span class="cm">// adiciona no início</span>
+destaque.innerText = "Novo texto";          <span class="cm">// só o texto</span>
+destaque.innerHTML = "&lt;em&gt;Novo&lt;/em&gt;";       <span class="cm">// HTML interno</span>
+destaque.remove();                          <span class="cm">// remove da árvore</span>
+
+const botao = document.createElement("button");
+botao.setAttribute("id", "meuBotao");
+document.body.append(botao);</code></pre>
+<h2 id="s4-aula-03-build-vite-e-listeners"><span class="hn">4</span>Aula 03: Build, Vite e Listeners</h2>
+<h3 id="s4-1-o-que-é-um-build"><span class="hn">4.1</span>O que é um build</h3>
+<p><strong>Build</strong> é o processo que transforma o código-fonte (múltiplos arquivos, sintaxes modernas, às vezes código que o navegador não entende direto) no conjunto de arquivos otimizado e compatível que efetivamente vai para produção. Ferramentas que automatizam isso são <strong>build tools</strong> — o Vite é uma delas, entre outras (Webpack, Parcel, esbuild).</p>
+<h3 id="s4-2-vite-hmr-e-pré-compilação"><span class="hn">4.2</span>Vite: HMR e pré-compilação</h3>
+<ul><li><strong>HMR (Hot Module Replacement)</strong>: sem ele, qualquer alteração exige recarregar a página inteira, perdendo todo o estado em memória (valores de formulário, scroll, estado de componentes). O Vite mantém uma conexão viva (via WebSocket) com o navegador; ao salvar um arquivo, ele identifica qual módulo mudou e envia só essa atualização, que o navegador aplica sem recarregar.</li><li><strong>Pré-compilação</strong>: transforma sintaxes que o navegador não entende (TypeScript, por exemplo) em JavaScript puro — aprofundada na Aula 05.</li></ul>
+<h3 id="s4-3-listeners-addeventlistener-e-o-catálogo-de-eventos"><span class="hn">4.3</span>Listeners: <code>addEventListener</code> e o catálogo de eventos</h3>
+<pre class="code"><code>botao.addEventListener("click", function (event) { ... });</code></pre>
+<p>Eventos mais usados: <code>click</code>, <code>dblclick</code> (clique duplo); <code>mouseover</code>/<code>mouseout</code> (o ponteiro entra/sai — <strong>propagam</strong> para filhos); <code>mouseenter</code>/<code>mouseleave</code> (equivalentes que <strong>não propagam</strong>); <code>keydown</code>/<code>keyup</code>; <code>input</code> (a cada digitação); <code>change</code> (ao perder o foco, ou mudar select/checkbox); <code>focus</code>/<code>blur</code>; <code>submit</code>; <code>load</code> (recurso terminou de carregar); <code>DOMContentLoaded</code> (HTML terminou de ser parseado, sem esperar imagens/estilos).</p>
+<h3 id="s4-4-target-vs-currenttarget"><span class="hn">4.4</span><code>target</code> vs <code>currentTarget</code></h3>
+<ul><li><strong><code>event.target</code></strong> — o elemento onde o evento <strong>efetivamente ocorreu</strong>. Pode ser um filho interno.</li><li><strong><code>event.currentTarget</code></strong> — o elemento <strong>no qual o listener foi registrado</strong>. Dentro do próprio handler, <code>this</code> também aponta para <code>currentTarget</code> (quando o handler é uma <code>function</code> tradicional, não uma arrow function).</li></ul>
+<pre class="code"><code>container.addEventListener("click", function (event) {
+  console.log(event.target);         <span class="cm">// pode ser um &lt;span&gt; dentro de um &lt;button&gt;</span>
+  console.log(event.currentTarget);  <span class="cm">// sempre "container"</span>
+  const item = event.target.closest(".item"); <span class="cm">// acha o elemento "clicável" real</span>
+});</code></pre>
+<h3 id="s4-5-preventdefault-stoppropagation-e-as-três-fases-do-evento"><span class="hn">4.5</span><code>preventDefault()</code>, <code>stopPropagation()</code> e as três fases do evento</h3>
+<p>Todo evento percorre até três fases: <strong>capturing</strong> (desce da raiz do documento até o elemento alvo), <strong>target</strong> (chega no elemento onde o evento ocorreu de fato) e <strong>bubbling</strong> (sobe do alvo de volta até a raiz). Por padrão, <code>addEventListener</code> registra o listener para a fase de <strong>bubbling</strong> — a mais comum na prática. A fase de capturing só é ativada passando <code>{ capture: true }</code> como terceiro argumento:</p>
+<pre class="code"><code><span class="cm">// escuta na fase de capturing (menos comum) em vez de bubbling</span>
+container.addEventListener("click", handler, { capture: true });</code></pre>
+<p>É o bubbling que explica por que um clique em um filho também dispara os listeners dos elementos pai (o evento "sobe" por eles). <code>stopPropagation()</code> interrompe exatamente essa subida — nenhum listener de ancestral, registrado no mesmo tipo de evento, é disparado depois dele. Já <code>preventDefault()</code> não tem nada a ver com propagação: ele cancela o <strong>comportamento padrão do navegador</strong> associado àquele evento (um link navegar, um form recarregar a página), continuando a propagação normalmente — os dois podem, inclusive, ser chamados juntos no mesmo handler, resolvendo dois problemas diferentes ao mesmo tempo.</p>
+<h3 id="s4-6-forms"><span class="hn">4.6</span>Forms</h3>
+<p>Atributos: <code>value</code>, <code>placeholder</code>, <code>disabled</code> (não envia no submit), <code>readonly</code> (envia, mas não edita), <code>checked</code>, <code>required</code>, <code>name</code>, <code>type</code>. O listener de <code>submit</code> é sempre registrado no <code>&lt;form&gt;</code> (nunca em cada input isolado, nem só no botão), porque ele engloba todos os campos internos — e <code>preventDefault()</code> ali dentro é o que evita o reload padrão da página ao enviar.</p>
+<h2 id="s5-aula-04-window-e-document"><span class="hn">5</span>Aula 04: window e document</h2>
+<h3 id="s5-1-a-hierarquia-completa"><span class="hn">5.1</span>A hierarquia completa</h3>
+<p><code>document</code> não é um objeto independente — é uma <strong>propriedade</strong> de <code>window</code>, que representa a própria aba/janela do navegador e é o verdadeiro objeto global do JS de frontend:</p>
+<pre class="code"><code>console.log(window.document === document); <span class="cm">// true</span></code></pre>
+<p><code>window</code> é o topo de tudo: não existe nada "acima" dele no ambiente do frontend. Dentro dele vivem, entre outras coisas: <code>document</code> (a árvore DOM da página carregada), <code>localStorage</code>/<code>sessionStorage</code> (armazenamento), <code>fetch</code> (requisições), <code>console</code> (logs), <code>navigator</code> (dados do navegador/dispositivo), <code>location</code> (URL atual) e <code>innerWidth</code>/<code>innerHeight</code> (dimensões da própria janela). O JS de frontend permite omitir o prefixo <code>window.</code> para esses membros globais — por isso se escreve <code>document.querySelector(...)</code> e não <code>window.document.querySelector(...)</code> — mas o prefixo continua existindo por trás, e é por isso que <code>window.document === document</code> é sempre <code>true</code>.</p>
+<p>Uma consequência prática dessa hierarquia: <code>window</code> aceita seus próprios eventos, que pertencem à janela como um todo (não a um elemento específico da árvore de <code>document</code>):</p>
+<pre class="code"><code>window.addEventListener("resize", function () {
+  console.log("nova largura:", window.innerWidth);
+});
+window.addEventListener("scroll", function () {
+  console.log("posição do scroll:", window.scrollY);
+});</code></pre>
+<h3 id="s5-2-devtools-cookies-jwt-e-cors-revisão-rápida"><span class="hn">5.2</span>DevTools, cookies, JWT e CORS (revisão rápida)</h3>
+<p>DevTools (<code>Ctrl+Shift+I</code>): <strong>Elements</strong> mostra o DOM em memória (já parseado, não o HTML original), <strong>Console</strong> exibe logs e executa JS ao vivo contra o <code>window</code>/<code>document</code> da própria aba, <strong>Network</strong> mostra a cascata de requisições. Cookies resolvem o caráter <em>stateless</em> do HTTP (<code>Max-Age</code>, <code>HttpOnly</code>, <code>Secure</code>). JWT é <code>header.payload.signature</code>, com o <em>secret</em> guardado só no backend. CORS existe pela <em>same-origin policy</em> (protocolo + domínio + porta), liberada via <code>Access-Control-Allow-Origin</code>.</p>
+<h2 id="s6-aula-05-typescript-generics-e-pré-compilação"><span class="hn">6</span>Aula 05: TypeScript, Generics e Pré-Compilação</h2>
+<h3 id="s6-1-por-que-o-navegador-só-entende-javascript-puro"><span class="hn">6.1</span>Por que o navegador só entende JavaScript puro</h3>
+<pre class="code"><code>function calcular(valor: number): number { return valor + 10; }
+<span class="cm">// enviado direto ao navegador: ✗ SyntaxError: Unexpected token ':'</span></code></pre>
+<p>TypeScript precisa ser <strong>transpilado</strong> para JavaScript puro antes de chegar ao navegador (ou ao Node) — é essa tarefa que um pré-compilador como o Vite automatiza, junto com minificação (reduz tamanho removendo espaços/comentários e encurtando nomes) e bundling (agrupa múltiplos arquivos em poucos bundles, reduzindo requisições HTTP).</p>
+<h3 id="s6-2-generics-o-problema-e-a-solução"><span class="hn">6.2</span>Generics: o problema e a solução</h3>
+<p>Sem generics, duplica-se a função para cada tipo:</p>
+<pre class="code"><code>function wrapString(valor: string): string { return valor; }
+function wrapNumber(valor: number): number { return valor; }</code></pre>
+<p>Com <code>&lt;T&gt;</code> — um placeholder de tipo que o TypeScript infere na própria chamada:</p>
+<pre class="code"><code>function wrap&lt;T&gt;(valor: T): T { return valor; }
+wrap("hello"); <span class="cm">// T = string</span>
+wrap(42);      <span class="cm">// T = number</span>
+
+<span class="cm">// constraint: T precisa ter uma propriedade id</span>
+function getId&lt;T extends { id: number }&gt;(obj: T): number {
+  return obj.id;
+}</code></pre>
+<p>O uso mais prático no curso é tipar respostas do Axios:</p>
+<pre class="code"><code>async function userListApi(): Promise&lt;Usuario[]&gt; {
+  const response = await clientApi.get&lt;Usuario[]&gt;("/users");
+  return response.data;
+}</code></pre>
+<p><code>clientApi.get&lt;Usuario[]&gt;()</code> diz ao TypeScript que a propriedade <code>data</code> daquela resposta é <code>Usuario[]</code> — uma função de API type-safe para qualquer tipo, sem duplicar código. <code>Promise&lt;T&gt;</code> no retorno de <code>userListApi</code> segue a mesma lógica: é o próprio generic embutido no tipo de retorno de uma função <code>async</code>.</p>
+<h3 id="s6-3-estrutura-resources-public"><span class="hn">6.3</span>Estrutura <code>resources/</code> → <code>public/</code></h3>
+<p>Pasta de origem (<code>resources/</code>, com os <code>.ts</code> e o <code>index.html</code>) e pasta de destino (<code>public/</code>, com o JavaScript compilado). Em desenvolvimento (<code>npm run dev</code>), o Vite serve tudo em memória via watcher; em produção (<code>npm run build</code>), gera de fato os arquivos finais minificados em <code>public/</code>.</p>
+<h2 id="s7-referências"><span class="hn">7</span>Referências</h2>
+<p>MDN — Document Object Model (DOM), Node, Element, HTMLElement</p>
+<p>MDN — Window, EventTarget.addEventListener(), Event.target, Event.currentTarget, Event.preventDefault(), Event.stopPropagation()</p>
+<p>Nginx Documentation — try_files Directive</p>
+<p>Vite Documentation — Features, Server Options, Build Options</p>
+<p>TypeScript Handbook — Generics</p>
+<h2 id="questoes"><span class="hn">TA</span>Questões do TA</h2>
+<article class="questao"><h3><span class="qn">Questão 1</span></h3><p>Sobre a diretiva <code>try_files $uri $uri/ =404;</code> em uma configuração do Nginx, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">O Nginx testa os três argumentos ao mesmo tempo e escolhe aleatoriamente qual resposta enviar.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt"><code>$uri</code> tenta servir o caminho como arquivo; se não existir, <code>$uri/</code> tenta o mesmo caminho como diretório (servindo seu index); se nenhum dos dois existir, <code>=404</code> responde com esse status.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt"><code>=404</code> é sempre executado primeiro, e só depois o Nginx tenta <code>$uri</code> e <code>$uri/</code> como alternativa.</span></li><li class="alt"><span class="ltr">D</span><span class="txt"><code>$uri/</code> serve arquivos estáticos apenas quando o Nginx está rodando fora de um container Docker.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">A diretiva <code>try_files</code> é usada exclusivamente para servir arquivos <code>.html</code>, nunca diretórios.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 2</span></h3><p>Sobre a árvore DOM e a cardinalidade dos atributos <code>id</code> e <code>class</code>, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt"><code>id</code> e <code>class</code> têm a mesma cardinalidade, já que ambos podem se repetir livremente em quantos elementos forem necessários.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt"><code>id</code> estabelece uma relação 1 para 1 (não se repete no documento), enquanto <code>class</code> estabelece uma relação n para n (um elemento pode ter várias classes, e uma classe pode estar em vários elementos) — por isso <code>getElementById</code> sempre retorna um elemento único ou <code>null</code>, enquanto <code>getElementsByClassName</code> retorna uma coleção.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt"><code>class</code> é 1 para 1 e <code>id</code> é n para n, o inverso do que a maioria dos desenvolvedores assume.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">A cardinalidade de <code>id</code> e <code>class</code> depende apenas da ordem em que os elementos aparecem no HTML, não de nenhuma regra fixa.</span></li><li class="alt"><span class="ltr">E</span><span class="txt"><code>getElementById</code> retorna uma <code>HTMLCollection</code>, exatamente como <code>getElementsByClassName</code>.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 3</span></h3><p>Sobre <code>event.target</code> e <code>event.currentTarget</code> dentro de um listener registrado com <code>addEventListener</code>, é correto afirmar que:</p><ol class="alts"><li class="alt ok"><span class="ltr">A</span><span class="txt"><code>event.target</code> é o elemento onde o evento efetivamente ocorreu (podendo ser um filho interno), enquanto <code>event.currentTarget</code> é o elemento no qual o listener foi registrado — o que justifica usar <code>closest()</code> a partir do <code>target</code> para achar o elemento de interesse.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">B</span><span class="txt"><code>event.target</code> e <code>event.currentTarget</code> são sempre idênticos, não importa onde o clique ocorra dentro do elemento.</span></li><li class="alt"><span class="ltr">C</span><span class="txt"><code>event.currentTarget</code> é o elemento onde o evento ocorreu, enquanto <code>event.target</code> é o elemento onde o listener foi registrado.</span></li><li class="alt"><span class="ltr">D</span><span class="txt"><code>event.target</code> só existe em eventos de teclado, nunca em eventos de clique.</span></li><li class="alt"><span class="ltr">E</span><span class="txt"><code>closest()</code> só pode ser chamado a partir de <code>event.currentTarget</code>, nunca a partir de <code>event.target</code>.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 4</span></h3><p>Sobre a relação entre os objetos <code>window</code> e <code>document</code>, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt"><code>window</code> e <code>document</code> são objetos completamente independentes, sem nenhuma relação hierárquica entre si.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt"><code>document</code> é uma propriedade de <code>window</code>, que representa a própria janela/aba do navegador e expõe outras APIs, como <code>localStorage</code> e eventos próprios (<code>resize</code>, <code>scroll</code>), que não pertencem a <code>document</code>.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt"><code>window</code> é uma propriedade de <code>document</code>, acessível apenas depois que o DOM termina de ser parseado.</span></li><li class="alt"><span class="ltr">D</span><span class="txt"><code>window.document === document</code> retorna <code>false</code> em qualquer navegador atualizado.</span></li><li class="alt"><span class="ltr">E</span><span class="txt"><code>document</code> é exclusivo de ambientes de backend (Node), enquanto <code>window</code> é exclusivo do navegador.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 5</span></h3><p>Sobre generics em TypeScript, considerando a função abaixo:</p>
+<pre class="code"><code>function wrap&lt;T&gt;(valor: T): T {
+  return valor;
+}
+é correto afirmar que:</code></pre><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt"><code>&lt;T&gt;</code> obriga o desenvolvedor a especificar manualmente o tipo em toda chamada da função, nunca podendo ser inferido.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt"><code>&lt;T&gt;</code> é um placeholder de tipo que o TypeScript infere a partir do argumento passado na chamada, permitindo que a mesma função funcione para qualquer tipo sem duplicar código e sem perder segurança de tipos.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt">Generics eliminam a necessidade de tipar o retorno da função, que passa a ser sempre <code>any</code>.</span></li><li class="alt"><span class="ltr">D</span><span class="txt"><code>wrap&lt;T&gt;</code> só pode ser usada com tipos primitivos (<code>string</code>, <code>number</code>, <code>boolean</code>), nunca com objetos.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">Generics são exclusivos de bibliotecas como o Axios e não podem ser usados em funções definidas pelo próprio desenvolvedor.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+  </main>
+</div>
+<script src="../../../assets/briefing.js"></script>
+</body>
+</html>

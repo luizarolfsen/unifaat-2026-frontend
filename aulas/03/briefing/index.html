@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Briefing · Aula 03 — Vite, Forms e Listeners</title>
+<link rel="stylesheet" href="../../../assets/briefing.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <a class="back" href="../../../index.html">← Voltar</a>
+    <details class="toc" open><summary>Nesta página</summary><ol><li class="l1"><a href="#topo">03 - Vite, Forms e Listeners</a></li><li class="l2"><a href="#s1-introdução">1 - Introdução</a></li><li class="l2"><a href="#s2-vite-hot-module-reload-e-pré-compilação">2 - Vite: Hot Module Reload e Pré-compilação</a></li><li class="l3"><a href="#s2-1-o-conceito-de-build">2.1 - O conceito de build</a></li><li class="l3"><a href="#s2-2-o-que-é-o-vite">2.2 - O que é o Vite</a></li><li class="l3"><a href="#s2-3-hot-module-reload-hmr">2.3 - Hot Module Reload (HMR)</a></li><li class="l3"><a href="#s2-4-entrypoint-viteconfigjs">2.4 - Entrypoint: vite.config.js</a></li><li class="l3"><a href="#s2-5-execução-do-vite">2.5 - Execução do Vite</a></li><li class="l2"><a href="#s3-listeners-eventos-preventdefault-e-propagação">3 - Listeners: eventos, preventDefault e propagação</a></li><li class="l3"><a href="#s3-1-addeventlistener-revisão">3.1 - addEventListener: revisão</a></li><li class="l3"><a href="#s3-2-principais-eventos">3.2 - Principais eventos</a></li><li class="l3"><a href="#s3-3-preventdefault">3.3 - preventDefault()</a></li><li class="l3"><a href="#s3-4-stoppropagation-e-as-fases-do-evento-capturing-e-bubbling">3.4 - stopPropagation() e as fases do evento: capturing e bubbling</a></li><li class="l2"><a href="#s4-forms">4 - Forms</a></li><li class="l3"><a href="#s4-1-html-de-formulário-e-atributos-principais">4.1 - HTML de formulário e atributos principais</a></li><li class="l3"><a href="#s4-2-o-evento-submit">4.2 - O evento submit</a></li><li class="l2"><a href="#s5-consumindo-a-api-com-axios">5 - Consumindo a API com Axios</a></li><li class="l3"><a href="#s5-1-de-json-para-objeto-a-mesma-lógica-de-sempre">5.1 - De JSON para objeto: a mesma lógica de sempre</a></li><li class="l3"><a href="#s5-2-o-que-é-o-axios">5.2 - O que é o Axios</a></li><li class="l3"><a href="#s5-3-instalação">5.3 - Instalação</a></li><li class="l3"><a href="#s5-4-exemplo-de-uso">5.4 - Exemplo de uso</a></li><li class="l2"><a href="#s6-conclusão">6 - Conclusão</a></li><li class="l2"><a href="#s7-referências">7 - Referências</a></li><li class="l2"><a href="#questoes">Questões do TA</a></li></ol></details>
+  </aside>
+  <main class="doc">
+    <header class="cover" id="topo">
+      <p class="eyebrow">UNIFAAT · 2026.2 · Briefing para produção de conteúdo</p>
+      <h1><span class="cn">03</span> - Vite, Forms e Listeners</h1>
+      <dl class="ficha">
+        <div><dt>Professor</dt><dd>Luan Tavares Lourenço</dd></div>
+        <div><dt>Disciplina</dt><dd>Frontend</dd></div>
+        <div><dt>Aula</dt><dd>03</dd></div>
+        <div><dt>Opção do TA</dt><dd>Texto</dd></div>
+      </dl>
+    </header>
+<h2 id="s1-introdução"><span class="hn">1</span>Introdução</h2>
+<p>A Aula 1 estabeleceu o DOM como árvore de nós e a Vendor API do JS para criar, inserir e selecionar elementos. A Aula 2 aprofundou os seletores (cardinalidade de class e id), aproximou CSS e JS pela mesma linguagem de seleção, e abriu o JS reativo com addEventListener, target e currentTarget. A Aula 3 retoma a comunicação do frontend com o backend: volta ao servidor com API e banco de dados, agora com uma tabela de Usuários e um CRUD completo — por enquanto a API está aberta, sem autenticação, o que fica para a próxima aula, de segurança. Antes de consumir essa API, a aula introduz o Vite como ferramenta de desenvolvimento (HMR e pré-compilação), aprofunda listeners com uma enumeração de eventos e o par preventDefault/stopPropagation, apresenta os principais atributos de formulários HTML e o evento submit, e fecha com o Axios como cliente HTTP para transformar a resposta JSON da API em objeto manipulável — a mesma lógica de parsing já vista desde a Aula 1.</p>
+<h2 id="s2-vite-hot-module-reload-e-pré-compilação"><span class="hn">2</span>Vite: Hot Module Reload e Pré-compilação</h2>
+<h3 id="s2-1-o-conceito-de-build"><span class="hn">2.1</span>O conceito de build</h3>
+<p>Antes de falar de Vite, cabe fixar o que é um build: o processo que pega o código-fonte como o desenvolvedor escreve (múltiplos arquivos, sintaxes modernas, muitas vezes código que o navegador não entende diretamente) e o transforma no conjunto de arquivos que efetivamente vai para produção — otimizado, empacotado, e compatível com o que o navegador sabe interpretar. É esse processo que entrega, por exemplo, a pré-compilação de TypeScript para JavaScript puro, ou a junção de vários módulos em um só arquivo. Ferramentas que fazem esse trabalho são chamadas de build tools (ou bundlers), e é exatamente nessa categoria que o Vite se encaixa.</p>
+<h3 id="s2-2-o-que-é-o-vite"><span class="hn">2.2</span>O que é o Vite</h3>
+<p>O Vite é uma build tool usada no ambiente de desenvolvimento do frontend, com duas finalidades principais: Hot Module Reload (HMR) e pré-compilação. A pré-compilação é a mais relevante para o curso — é ela que permite escrever código em ferramentas como TypeScript e sintaxes mais modernas (isso será aprofundado na aula de TypeScript e Pré-compilação), enquanto o HMR resolve produtividade no dia a dia de desenvolvimento.</p>
+<h3 id="s2-3-hot-module-reload-hmr"><span class="hn">2.3</span>Hot Module Reload (HMR)</h3>
+<p>Sem HMR, qualquer alteração em um arquivo do frontend exige recarregar a página inteira no navegador para ver o resultado — perdendo estado da aplicação (valores digitados em formulário, scroll, estado de componentes). O HMR mantém uma conexão ativa entre o servidor de desenvolvimento do Vite e o navegador; quando um arquivo é salvo, o Vite identifica exatamente qual módulo mudou e envia só essa atualização para o navegador, que substitui o módulo em tempo real, sem recarregar a página inteira e sem perder o estado em memória.</p>
+<h3 id="s2-4-entrypoint-viteconfigjs"><span class="hn">2.4</span>Entrypoint: vite.config.js</h3>
+<p>Toda configuração do Vite — incluindo os parâmetros do HMR — parte de um arquivo de entrada na raiz do projeto, o vite.config.js:</p>
+<pre class="code"><code>import { defineConfig } from 'vite'
+export default defineConfig({
+    root: 'public',
+    server: {
+        open: (process.env.IS_CONTAINER !== "TRUE"),
+        hmr: true,
+        host: true,
+        port: 5173
+    }
+})</code></pre>
+<p>Vale destacar server.host: true — permite que o servidor aceite conexões vindas de fora do localhost (importante quando o navegador está em outro host/rede), e server.port: 5173, a porta padrão do servidor de HMR.</p>
+<h3 id="s2-5-execução-do-vite"><span class="hn">2.5</span>Execução do Vite</h3>
+<p>O Vite é instalado como dependência do projeto (não como pacote global), então o binário fica dentro de node_modules/.bin. Sem usar alias de npm scripts, o comando de execução é:</p>
+<pre class="code"><code>./node_modules/.bin/vite</code></pre>
+<p>ou, de forma equivalente, chamando apenas o nome do binário quando já se está dentro do contexto do projeto:</p>
+<pre class="code"><code>vite</code></pre>
+<p>(esse segundo caso normalmente exige que node_modules/.bin esteja no PATH, o que os npm scripts fazem automaticamente — chamando o binário direto pelo path relativo, como no primeiro exemplo, isso não é necessário).</p>
+<h2 id="s3-listeners-eventos-preventdefault-e-propagação"><span class="hn">3</span>Listeners: eventos, preventDefault e propagação</h2>
+<h3 id="s3-1-addeventlistener-revisão"><span class="hn">3.1</span>addEventListener: revisão</h3>
+<p>Como visto na Aula 2, addEventListener registra uma função callback para reagir a um evento em um elemento, recebendo como parâmetro o objeto event, de onde vêm target (elemento onde o evento ocorreu) e currentTarget (elemento onde o listener foi registrado).</p>
+<h3 id="s3-2-principais-eventos"><span class="hn">3.2</span>Principais eventos</h3>
+<p>Eventos são valores predefinidos (strings) que o navegador dispara em momentos específicos. Os mais usados no dia a dia de frontend:</p>
+<ul><li>click, dblclick — clique simples e duplo clique</li><li>mouseover, mouseout — o ponteiro entra ou sai de um elemento (propaga para filhos)</li><li>mouseenter, mouseleave — equivalentes que não propagam para filhos</li><li>keydown, keyup — tecla pressionada ou solta</li><li>input — valor de um campo muda a cada digitação</li><li>change — valor de um campo muda e perde o foco (ou select/checkbox muda)</li><li>focus, blur — elemento ganha ou perde foco</li><li>submit — formulário é enviado</li><li>load — recurso (página, imagem, script) termina de carregar</li><li>DOMContentLoaded — o HTML terminou de ser parseado, sem esperar imagens/estilos</li></ul>
+<pre class="code"><code><span class="cm">// sintaxe de registro: elemento.addEventListener(evento, callback)</span>
+botao.addEventListener("click", function (event) {
+  console.log("cliquei");
+});</code></pre>
+<h3 id="s3-3-preventdefault"><span class="hn">3.3</span>preventDefault()</h3>
+<p>Vários elementos HTML têm um comportamento padrão do navegador associado a um evento — um link navega ao ser clicado, um formulário recarrega a página ao ser enviado. event.preventDefault() cancela esse comportamento padrão, sem impedir que o evento continue se propagando pela árvore.</p>
+<pre class="code"><code><span class="cm">// clique em uma âncora sem navegar / recarregar a página</span>
+<span class="cm">// Não retorna valor (undefined)</span>
+const link = document.querySelector("a.interno");
+link.addEventListener("click", function (event) {
+  event.preventDefault();
+  console.log("navegação padrão cancelada");
+});</code></pre>
+<h3 id="s3-4-stoppropagation-e-as-fases-do-evento-capturing-e-bubbling"><span class="hn">3.4</span>stopPropagation() e as fases do evento: capturing e bubbling</h3>
+<p>Todo evento disparado em um elemento da árvore percorre até três fases: capturing (o evento desce da raiz do documento até o elemento alvo), o próprio target (o evento chega ao elemento onde de fato ocorreu), e bubbling (o evento sobe do elemento alvo de volta até a raiz). Por padrão, addEventListener escuta na fase de bubbling — a mais usada na prática; a fase de capturing só é ativada explicitamente passando { capture: true } como terceiro argumento.</p>
+<p>Isso explica o comportamento visto na Aula 2: um clique em um elemento filho também dispara os listeners registrados nos elementos pais para o mesmo evento, porque o evento borbulha (bubbling) por eles. event.stopPropagation() interrompe essa propagação, impedindo que listeners de elementos ancestrais (no caso de bubbling) sejam disparados pelo mesmo evento.</p>
+<pre class="code"><code><span class="cm">// registra o listener na fase de capturing (menos comum)</span>
+container.addEventListener("click", handler, { capture: true });
+<span class="cm">// stopPropagation impede que o evento continue subindo (bubbling)</span>
+<span class="cm">// Não retorna valor (undefined)</span>
+item.addEventListener("click", function (event) {
+  event.stopPropagation();
+});</code></pre>
+<h2 id="s4-forms"><span class="hn">4</span>Forms</h2>
+<h3 id="s4-1-html-de-formulário-e-atributos-principais"><span class="hn">4.1</span>HTML de formulário e atributos principais</h3>
+<p>O elemento form agrupa os elementos de entrada de dados. Alguns atributos de input merecem destaque:</p>
+<ul><li>value — o valor atual do campo</li><li>placeholder — texto de exemplo exibido quando o campo está vazio</li><li>disabled — desabilita o campo; ele não é enviado no submit</li><li>readonly — o campo não pode ser editado, mas é enviado no submit</li><li>checked — marca um checkbox ou radio como selecionado</li><li>required — exige preenchimento antes de permitir o submit</li><li>name — identifica o campo dentro do conjunto de dados do formulário</li><li>type — define o tipo de input (text, email, password, checkbox, radio, number, etc.)</li></ul>
+<pre class="code"><code>&lt;form id="form-usuario"&gt;
+  &lt;input type="text" name="nome" placeholder="Nome" required&gt;
+  &lt;input type="email" name="email" value="" required&gt;
+  &lt;input type="checkbox" name="ativo" checked&gt;
+  &lt;input type="text" name="id" value="123" readonly&gt;
+  &lt;button type="submit" disabled&gt;Salvar&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<h3 id="s4-2-o-evento-submit"><span class="hn">4.2</span>O evento submit</h3>
+<p>O listener de submit é registrado no próprio elemento form — que engloba todos os elementos internos —, e não em cada input isoladamente ou no botão de envio. Como o comportamento padrão do navegador ao enviar um formulário é recarregar a página, preventDefault() é praticamente obrigatório aqui quando a intenção é tratar o envio via JS (por exemplo, mandando os dados para a API).</p>
+<pre class="code"><code><span class="cm">// listener registrado no &lt;form&gt;, não no botão</span>
+<span class="cm">// Não retorna valor (undefined)</span>
+const formulario = document.querySelector("#form-usuario");
+formulario.addEventListener("submit", function (event) {
+  <span class="cm">// evita o reload padrão da página</span>
+  event.preventDefault();
+  const nome = formulario.nome.value;
+  const email = formulario.email.value;
+  console.log(nome, email);
+});</code></pre>
+<h2 id="s5-consumindo-a-api-com-axios"><span class="hn">5</span>Consumindo a API com Axios</h2>
+<h3 id="s5-1-de-json-para-objeto-a-mesma-lógica-de-sempre"><span class="hn">5.1</span>De JSON para objeto: a mesma lógica de sempre</h3>
+<p>Desde a Aula 1 essa lógica se repete: HTML, CSS, JS e JSON trafegam pela rede como string, e precisam ser convertidos (parseados) em algo manipulável — objeto, no caso do JSON, DOM, no caso do HTML. Ao consumir a API de Usuários, a resposta chega como texto JSON e precisa virar objeto JS antes de ser usada — isso vale tanto no frontend quanto no próprio backend em Node, que também consome APIs externas da mesma forma.</p>
+<h3 id="s5-2-o-que-é-o-axios"><span class="hn">5.2</span>O que é o Axios</h3>
+<p>Axios é uma lib de cliente HTTP baseada em Promises, usada tanto no frontend quanto no backend (Node) — a mesma API funciona nos dois ambientes. Ele já faz o parsing do JSON de resposta automaticamente, entregando o corpo já como objeto em response.data.</p>
+<h3 id="s5-3-instalação"><span class="hn">5.3</span>Instalação</h3>
+<pre class="code"><code>npm install axios</code></pre>
+<h3 id="s5-4-exemplo-de-uso"><span class="hn">5.4</span>Exemplo de uso</h3>
+<pre class="code"><code>import axios from "axios";
+<span class="cm">// GET: busca a lista de usuários da API</span>
+<span class="cm">// response.data já vem parseado como objeto/array</span>
+async function buscarUsuarios() {
+  const response = await axios.get("http://localhost:3000/usuarios");
+  console.log(response.data);
+}
+<span class="cm">// POST: envia um novo usuário para a API</span>
+async function criarUsuario() {
+  const response = await axios.post("http://localhost:3000/usuarios", {
+    nome: "Ana",
+    email: "ana@email.com",
+  });
+  console.log(response.data);
+}</code></pre>
+<p>O mesmo código, com o mesmo import axios from "axios", funciona dentro de um controller do backend Node para consumir outra API — reforçando que Axios não é uma ferramenta exclusiva de frontend.</p>
+<h2 id="s6-conclusão"><span class="hn">6</span>Conclusão</h2>
+<p>Esta aula fechou o ciclo de comunicação entre frontend e backend iniciado na Aula 1: o conceito de build justificou a existência do Vite, que entrou como ferramenta de desenvolvimento com HMR poupando reloads completos e pré-compilação abrindo caminho para as aulas seguintes, configurado a partir de um entrypoint (vite.config.js) e executado diretamente pelo binário em node_modules/.bin. Os listeners ganharam profundidade com a enumeração dos principais eventos e o par preventDefault/stopPropagation, este último explicado pelas fases de capturing e bubbling do evento. Os formulários trouxeram os atributos que controlam entrada de dados — value, disabled, readonly, checked, required — e o evento submit, registrado no form e não no botão. Por fim, o Axios encerrou a aula como o cliente HTTP que materializa, na prática, a mesma lógica de conversão de JSON em objeto vista desde a primeira aula — tanto no frontend quanto no backend.</p>
+<h2 id="s7-referências"><span class="hn">7</span>Referências</h2>
+<p>Vite — Guia oficial (Getting Started, HMR, Config).</p>
+<p>MDN — EventTarget.addEventListener(), Event.preventDefault(), Event.stopPropagation().</p>
+<p>MDN — Event bubbling e capturing (Introduction to events).</p>
+<p>MDN — The HTML form element, atributos de input.</p>
+<p>Axios — documentação oficial (axios-http.com).</p>
+<h2 id="questoes"><span class="hn">TA</span>Questões do TA</h2>
+<article class="questao"><h3><span class="qn">Questão 1</span></h3><p>Sobre o conceito de build e a finalidade do Vite no ambiente de desenvolvimento do frontend, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">Build é o processo de leitura de arquivos estáticos pelo Nginx, sem relação com transformação de código.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">O HMR do Vite recarrega a página inteira a cada alteração salva, sendo equivalente a um F5 automático.</span></li><li class="alt ok"><span class="ltr">C</span><span class="txt">Build é o processo que transforma o código-fonte em arquivos prontos para o navegador, e o Vite, como build tool, oferece Hot Module Reload (atualiza só o módulo alterado, sem recarregar a página) além de pré-compilação, sua finalidade mais relevante no curso.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">D</span><span class="txt">O Vite substitui o navegador, executando o JavaScript diretamente no servidor sem necessidade de DOM.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">A pré-compilação do Vite é opcional e só existe para projetos que não usam TypeScript.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 2</span></h3><p>Sobre as fases de propagação de um evento no DOM e o método stopPropagation(), é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">Um evento sempre ocorre em uma única fase, e stopPropagation() não tem efeito algum sobre listeners de elementos ancestrais.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt">Um evento pode percorrer até três fases — capturing, target e bubbling —; por padrão addEventListener escuta na fase de bubbling, e stopPropagation() interrompe a propagação, impedindo que listeners de ancestrais sejam disparados pelo mesmo evento.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt">A fase de capturing é a mais usada na prática e não pode ser desativada.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">stopPropagation() cancela o comportamento padrão do navegador para o evento, substituindo a função de preventDefault().</span></li><li class="alt"><span class="ltr">E</span><span class="txt">Bubbling significa que o evento é disparado simultaneamente em todos os elementos da árvore, sem ordem definida.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 3</span></h3><p>Sobre o registro do listener de submit em um formulário HTML, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">O listener deve ser registrado no botão de envio (button type="submit"), nunca no elemento form.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt">O evento submit é disparado automaticamente mesmo sem um botão do tipo submit dentro do form, mas o listener correto é registrado no elemento form, que engloba os campos internos; preventDefault() evita o reload padrão da página ao enviar.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt">preventDefault() dentro do listener de submit impede que os valores dos campos sejam lidos via JS.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Campos com o atributo disabled são enviados normalmente no submit, junto com os demais.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">O atributo readonly impede que o campo seja enviado no submit, assim como disabled.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+  </main>
+</div>
+<script src="../../../assets/briefing.js"></script>
+</body>
+</html>

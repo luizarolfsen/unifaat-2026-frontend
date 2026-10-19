@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Briefing · Aula 01 — Servidor de Arquivos Estáticos e DOM</title>
+<link rel="stylesheet" href="../../../assets/briefing.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <a class="back" href="../../../index.html">← Voltar</a>
+    <details class="toc" open><summary>Nesta página</summary><ol><li class="l1"><a href="#topo">01 - Servidor de Arquivos Estáticos e DOM</a></li><li class="l2"><a href="#s1-introdução-http-arquitetura-cliente-servidor-e-o-papel-do-fr">1 - Introdução: HTTP, Arquitetura Cliente-Servidor e o Papel do Frontend</a></li><li class="l2"><a href="#s2-docker-nginx-para-servir-arquivos-estáticos">2 - Docker + Nginx para Servir Arquivos Estáticos</a></li><li class="l3"><a href="#s2-1-abrir-diretamente-o-arquivo-no-navegador">2.1 - 😔 Abrir diretamente o arquivo no navegador</a></li><li class="l3"><a href="#s2-2-criar-um-backend-que-sirva-arquivos-estáticos">2.2 - 😐 Criar um backend que sirva arquivos estáticos</a></li><li class="l3"><a href="#s2-3-usar-um-servidor-web-no-docker-nginx">2.3 - 😀 Usar um servidor web no Docker (Nginx)</a></li><li class="l2"><a href="#s3-html-semântico-e-atributos">3 - HTML Semântico e Atributos</a></li><li class="l3"><a href="#s3-1-algumas-tags-básicas-não-semânticas">3.1 - Algumas Tags básicas (não semânticas)</a></li><li class="l3"><a href="#s3-2-tags-semânticas-estruturam-com-significado">3.2 - Tags semânticas (estruturam com significado)</a></li><li class="l3"><a href="#s3-3-atributos-principais">3.3 - Atributos principais</a></li><li class="l2"><a href="#s4-javascript-reativo-para-dom-parte-1">4 - JavaScript Reativo para DOM – Parte 1</a></li><li class="l3"><a href="#s4-1-selecionar-elementos">4.1 - Selecionar elementos</a></li><li class="l3"><a href="#s4-2-manipular-elementos">4.2 - Manipular elementos</a></li><li class="l3"><a href="#s4-3-propriedades-dos-elementos">4.3 - Propriedades dos elementos</a></li><li class="l3"><a href="#s4-4-event-listener">4.4 - Event Listener</a></li><li class="l2"><a href="#s5-referências">5 - Referências</a></li><li class="l2"><a href="#questoes">Questões do TA</a></li></ol></details>
+  </aside>
+  <main class="doc">
+    <header class="cover" id="topo">
+      <p class="eyebrow">UNIFAAT · 2026.2 · Briefing para produção de conteúdo</p>
+      <h1><span class="cn">01</span> - Servidor de Arquivos Estáticos e DOM</h1>
+      <dl class="ficha">
+        <div><dt>Professor</dt><dd>Luan Tavares Lourenço</dd></div>
+        <div><dt>Disciplina</dt><dd>Frontend</dd></div>
+        <div><dt>Aula</dt><dd>01</dd></div>
+        <div><dt>Opção do TA</dt><dd>Texto</dd></div>
+      </dl>
+    </header>
+<h2 id="s1-introdução-http-arquitetura-cliente-servidor-e-o-papel-do-fr"><span class="hn">1</span>Introdução: HTTP, Arquitetura Cliente-Servidor e o Papel do Frontend</h2>
+<p>No semestre anterior estudamos backend com Node.js, agora entramos no frontend. Na arquitetura cliente-servidor, o cliente é responsável por consumir os recursos e o servidor por fornecê-los.</p>
+<p>O frontend é tudo que é processado no cliente pelo navegador:</p>
+<ul><li>renderização de HTML,</li><li>estilização com CSS,</li><li>processamento de lógica com JavaScript.</li></ul>
+<p>Mas é importante reforçar: nem tudo que roda no cliente é frontend. Exemplo: quando usamos curl no terminal para fazer uma requisição HTTP, o curl atua como cliente, mas não é frontend, porque não processa nem renderiza nada visualmente.</p>
+<p>O navegador é quem interpreta e processa o frontend, transformando arquivos em páginas interativas.</p>
+<p>De forma mais detalhada: o frontend cuida da interface do usuário, enquanto o backend cuida da lógica de negócio e do acesso a dados. O HTTP é o elo que conecta essas duas partes. O navegador envia requisições HTTP ao servidor e recebe como resposta páginas, estilos e scripts, que então são processados e exibidos ao usuário. É por isso que o frontend é fundamental: sem ele, mesmo que o servidor envie dados, o usuário não teria uma interface amigável para interagir.</p>
+<h2 id="s2-docker-nginx-para-servir-arquivos-estáticos"><span class="hn">2</span>Docker + Nginx para Servir Arquivos Estáticos</h2>
+<p>Existem três formas comuns de abrir arquivos HTML:</p>
+<h3 id="s2-1-abrir-diretamente-o-arquivo-no-navegador"><span class="hn">2.1</span>😔 Abrir diretamente o arquivo no navegador</h3>
+<p>Método iniciante, basta dar dois cliques no arquivo index.html. Funciona, mas é limitado, não queremos seguir por aí.</p>
+<h3 id="s2-2-criar-um-backend-que-sirva-arquivos-estáticos"><span class="hn">2.2</span>😐 Criar um backend que sirva arquivos estáticos</h3>
+<p>Funciona, mas é custoso porque precisamos de um servidor backend sem necessidade.</p>
+<h3 id="s2-3-usar-um-servidor-web-no-docker-nginx"><span class="hn">2.3</span>😀 Usar um servidor web no Docker (Nginx)</h3>
+<p>Essa será a nossa abordagem. Criamos um container Nginx via docker-compose que mapeia o diretório ./public e serve os arquivos diretamente, simulando como seria em produção. Ambiente real de servidor, sem backend e padronização com Docker.</p>
+<p>Além disso, o docker-compose cria automaticamente uma rede interna para os containers definidos. O Nginx fica acessível nessa rede e, ao referenciar a pasta local ./public no diretório /usr/share/nginx/html dentro do container, os arquivos estáticos ficam disponíveis diretamente para o navegador acessar via <a href="http://localhost:[porta]" target="_blank" rel="noopener">http://localhost:[porta]</a>. Ou seja: tudo que colocamos no diretório ./public é servido pelo Nginx como se estivéssemos em produção.</p>
+<p>O nginx é configurado desta forma, internamente para a porta 80:</p>
+<pre class="code"><code>server {
+    listen 80;
+    root /var/www;
+    index index.html;
+    location / {
+        autoindex on;
+        try_files $uri $uri/ =404;
+    }
+    error_page 404 /404.html;
+}</code></pre>
+<h2 id="s3-html-semântico-e-atributos"><span class="hn">3</span>HTML Semântico e Atributos</h2>
+<p>Um erro comum é usar apenas divs para estruturar a página:</p>
+<pre class="code"><code>&lt;!-- Estrutura só com divs --&gt;
+&lt;div class="header"&gt;
+  &lt;div class="menu"&gt;Menu&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="content"&gt;
+  &lt;div class="article"&gt;Artigo principal&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="footer"&gt;
+  &lt;div class="info"&gt;Rodapé&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<p>Essa versão funciona, mas não diz nada sobre o significado de cada parte. Agora, usando tags semânticas:</p>
+<pre class="code"><code>&lt;!-- Estrutura semântica --&gt;
+&lt;header&gt;
+  &lt;nav&gt;Menu&lt;/nav&gt;
+&lt;/header&gt;
+&lt;main&gt;
+  &lt;article&gt;Artigo principal&lt;/article&gt;
+&lt;/main&gt;
+&lt;footer&gt;
+  &lt;p&gt;Rodapé&lt;/p&gt;
+&lt;/footer&gt;</code></pre>
+<p>No segundo exemplo, só de ler o HTML já entendemos o que cada seção representa. Além disso, navegadores, mecanismos de busca e leitores de tela também interpretam melhor a página.</p>
+<h3 id="s3-1-algumas-tags-básicas-não-semânticas"><span class="hn">3.1</span>Algumas Tags básicas (não semânticas)</h3>
+<ul><li>div → contêiner genérico de bloco.</li><li>span → contêiner em linha.</li><li>img → exibe imagens.</li><li>button → cria botões.</li><li>a → links.</li><li>ul / li → listas.</li><li>form → formulários (veremos mais à frente).</li></ul>
+<h3 id="s3-2-tags-semânticas-estruturam-com-significado"><span class="hn">3.2</span>Tags semânticas (estruturam com significado)</h3>
+<ul><li>header → cabeçalho da página ou seção.</li><li>nav → área de navegação.</li><li>main → conteúdo principal.</li><li>section → seção temática.</li><li>article → conteúdo independente.</li><li>aside → informações adicionais.</li><li>footer → rodapé.</li></ul>
+<h3 id="s3-3-atributos-principais"><span class="hn">3.3</span>Atributos principais</h3>
+<ul><li>class → agrupar elementos para CSS/JS.</li><li>id → identificador único.</li><li>src → origem de imagens e scripts.</li><li>data-* → atributos de armazenamento de dado usado no JS.</li><li>value → atributo de valor usado em input, textarea, select, etc.</li></ul>
+<h2 id="s4-javascript-reativo-para-dom-parte-1"><span class="hn">4</span>JavaScript Reativo para DOM – Parte 1</h2>
+<p>O DOM (Document Object Model) é a representação da página no navegador em forma de árvore de objetos. Cada tag HTML vira um nó que pode ser acessado e manipulado pelo JavaScript.</p>
+<p>Mas por que usar JavaScript para manipular o DOM? Porque o HTML sozinho é estático: ele mostra a página como ela foi carregada. Se quisermos que a página responda a ações do usuário, como clicar em um botão, abrir um menu, validar um formulário, adicionar ou remover conteúdo dinamicamente, precisamos do JavaScript. Ele é o elo que torna a interface interativa, reagindo em tempo real sem precisar recarregar toda a página.</p>
+<h3 id="s4-1-selecionar-elementos"><span class="hn">4.1</span>Selecionar elementos</h3>
+<ul><li>querySelector: seleciona o primeiro elemento que corresponde ao seletor CSS. Elemento ou nulo.</li><li>querySelectorAll: seleciona todos os elementos que correspondem ao seletor CSS. Collection de Elementos.</li><li>getElementById: seleciona um elemento pelo seu id. Elemento ou nulo.</li><li>getElementsByClassName: seleciona todos os elementos com a mesma classe. Collection de Elementos.</li><li>getElementsByTagName: seleciona todos os elementos de uma determinada tag. Collection de Elementos.</li></ul>
+<p>Exemplos:</p>
+<pre class="code"><code>const titulo = document.querySelector("h1"); <span class="cm">// seleciona o primeiro &lt;h1&gt;</span>
+const itens = document.querySelectorAll("li"); <span class="cm">// seleciona todos os &lt;li&gt;</span>
+const form = document.getElementById("loginForm"); <span class="cm">// seleciona pelo id</span>
+const botoes = document.getElementsByClassName("btn"); <span class="cm">// seleciona pela classe</span>
+const paragrafos = document.getElementsByTagName("p"); <span class="cm">// seleciona pela tag</span></code></pre>
+<h3 id="s4-2-manipular-elementos"><span class="hn">4.2</span>Manipular elementos</h3>
+<p>Exemplo de HTML:</p>
+<pre class="code"><code>&lt;h1 id="titulo"&gt;Título original&lt;/h1&gt;</code></pre>
+<p>JS:</p>
+<ul><li>append: adiciona conteúdo no final do elemento.</li><li>prepend: adiciona conteúdo no início do elemento.</li><li>innerText: altera apenas o texto interno.</li><li>innerHTML: altera o HTML interno.</li><li>remove: remove o elemento.</li><li>createElement: cria um novo elemento.</li><li>getAttribute: obtém o valor de um atributo do elemento.</li><li>setAttribute: altera o valor do atributo do elemento.</li></ul>
+<pre class="code"><code>const titulo = document.getElementById("titulo");
+<span class="cm">// Adicionar conteúdo no final</span>
+titulo.append(" 🚀");
+<span class="cm">// Adicionar conteúdo no início</span>
+titulo.prepend("🔥 ");
+<span class="cm">// Muda apenas o texto interno</span>
+titulo.innerText = "Novo título";
+<span class="cm">// Muda o HTML interno</span>
+titulo.innerHTML = "&lt;em&gt;Novo título&lt;/em&gt;";
+<span class="cm">// Remove o elemento</span>
+titulo.remove();</code></pre>
+<pre class="code"><code><span class="cm">// Cria botão</span>
+const botao = document.createElement("button");
+<span class="cm">// Adiciona um texto no botão</span>
+botao.innerText = "Clique aqui";
+<span class="cm">// Adicionando atributos</span>
+botao.setAttribute("id", "meuBotao");
+<span class="cm">// Adicionando o elemento como filho do body na árvore DOM</span>
+document.body.append(botao);
+<span class="cm">// Obtendo um atributo</span>
+console.log(botao.getAttribute("id"));     <span class="cm">// "meuBotao"</span></code></pre>
+<h3 id="s4-3-propriedades-dos-elementos"><span class="hn">4.3</span>Propriedades dos elementos</h3>
+<ul><li>value: valor de um tag input (podendo obter ou alterar).</li><li>parentElement: obtém o elemento pai do nó. Elemento único ou nulo.</li><li>children: obtém os filhos. Collection de elementos.</li><li>firstElementChild: obtém o primeiro filho. Elemento único ou nulo.</li><li>lastElementChild: obtém o último filho. Elemento único ou nulo.</li></ul>
+<pre class="code"><code>&lt;div id="pai"&gt;
+  &lt;input type="text" id="meuInput" value="Texto inicial"&gt;
+  &lt;p&gt;Primeiro filho&lt;/p&gt;
+  &lt;span&gt;Segundo filho&lt;/span&gt;
+  &lt;button&gt;Terceiro filho&lt;/button&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  const input = document.getElementById("meuInput");
+  <span class="cm">// value → obter e alterar</span>
+  console.log("Valor inicial:", input.value); <span class="cm">// pega o valor</span>
+  input.value = "Novo valor"; <span class="cm">// altera o valor</span>
+  console.log("Valor alterado:", input.value);
+  <span class="cm">// parentElement → pai do input</span>
+  const pai = input.parentElement;
+  console.log("Pai do input:", pai.id); <span class="cm">// "pai"</span>
+  <span class="cm">// children → lista dos filhos do pai</span>
+  console.log("Filhos do pai:", pai.children);
+  <span class="cm">// firstElementChild e lastElementChild</span>
+  console.log("Primeiro filho:", pai.firstElementChild.tagName);
+  console.log("Último filho:", pai.lastElementChild.tagName);
+&lt;/script&gt;</code></pre>
+<h3 id="s4-4-event-listener"><span class="hn">4.4</span>Event Listener</h3>
+<p>Exemplo de HTML:</p>
+<pre class="code"><code>&lt;button id="meuBotao"&gt;Clique aqui&lt;/button&gt;</code></pre>
+<p>JS:</p>
+<pre class="code"><code>const botao = document.getElementById("meuBotao");
+botao.addEventListener("click", () =&gt; {
+  console.log("Botão clicado!");
+});</code></pre>
+<h2 id="s5-referências"><span class="hn">5</span>Referências</h2>
+<ul><li>MDN Web Docs – Client-Server Overview</li><li>MDN – HTML Semântico</li><li>MDN – Document Object Model (DOM)</li><li>MDN – Manipulating the DOM</li></ul>
+<h2 id="questoes"><span class="hn">TA</span>Questões do TA</h2>
+<article class="questao"><h3><span class="qn">Questão 1</span></h3><p>Qual das alternativas descreve corretamente a vantagem de usar um container Nginx com Docker para servir arquivos estáticos em vez de abrir o arquivo HTML diretamente no navegador?</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">Permite que o navegador renderize a página sem precisar do protocolo HTTP.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">Garante que o código JavaScript seja executado sem precisar de um navegador.</span></li><li class="alt ok"><span class="ltr">C</span><span class="txt">Cria um ambiente de servidor real, simulando como os arquivos seriam servidos em produção.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Torna desnecessário o uso do navegador, pois o Nginx já renderiza o HTML.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">Substitui completamente a necessidade de HTML e CSS no frontend.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 2</span></h3><p>Por que usar tags semânticas (como &lt;header&gt;, &lt;nav&gt;, &lt;main&gt;, &lt;footer&gt;) em vez de apenas divs em um documento HTML?</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">Porque as tags semânticas deixam a página mais colorida automaticamente.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">Porque os navegadores não conseguem interpretar div.</span></li><li class="alt ok"><span class="ltr">C</span><span class="txt">Porque melhoram a interpretação do conteúdo por navegadores, mecanismos de busca e leitores de tela.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Porque as tags semânticas eliminam a necessidade de CSS.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">Porque o HTML semântico é obrigatório para que o JavaScript funcione.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 3</span></h3><p>No contexto do DOM (Document Object Model), qual das alternativas abaixo descreve corretamente o uso de querySelector?</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">Cria um novo elemento no DOM e insere dentro de um nó pai.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">Seleciona todos os elementos que possuem um atributo específico.</span></li><li class="alt ok"><span class="ltr">C</span><span class="txt">Seleciona o primeiro elemento que corresponde a um seletor CSS fornecido.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Remove o elemento selecionado do DOM.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">Adiciona um evento de clique a um botão.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+  </main>
+</div>
+<script src="../../../assets/briefing.js"></script>
+</body>
+</html>

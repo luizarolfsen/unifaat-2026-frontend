@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Briefing · Aula 07 — Views e Elasticsearch</title>
+<link rel="stylesheet" href="../../../assets/briefing.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <a class="back" href="../../../index.html">← Voltar</a>
+    <details class="toc" open><summary>Nesta página</summary><ol><li class="l1"><a href="#topo">07 - Views e Elasticsearch</a></li><li class="l2"><a href="#s1-introdução">1 - Introdução</a></li><li class="l2"><a href="#s2-conteúdo-estático-x-conteúdo-dinâmico">2 - Conteúdo Estático x Conteúdo Dinâmico</a></li><li class="l3"><a href="#s2-1-o-que-foi-estático-até-aqui">2.1 - O Que Foi Estático Até Aqui</a></li><li class="l3"><a href="#s2-2-conteúdo-dinâmico-qualquer-arquivo-pode-sair-do-backend">2.2 - Conteúdo Dinâmico: Qualquer Arquivo Pode Sair do Backend</a></li><li class="l3"><a href="#s2-3-o-html-também-é-só-texto-o-papel-do-content-type">2.3 - O HTML Também É Só Texto: o Papel do Content-Type</a></li><li class="l2"><a href="#s3-views-o-v-que-faltava-no-mvc">3 - Views: o V Que Faltava no MVC</a></li><li class="l3"><a href="#s3-1-um-controller-que-monta-html">3.1 - Um Controller Que Monta HTML</a></li><li class="l3"><a href="#s3-2-separando-a-view">3.2 - Separando a View</a></li><li class="l3"><a href="#s3-3-o-html-dentro-do-ciclo-de-vida-http">3.3 - O HTML Dentro do Ciclo de Vida HTTP</a></li><li class="l3"><a href="#s3-4-exemplo-a-tela-de-login-com-middleware-de-sessão">3.4 - Exemplo: a Tela de Login com Middleware de Sessão</a></li><li class="l3"><a href="#s3-5-cuidado-com-o-try_files-do-nginx">3.5 - Cuidado com o try_files do Nginx</a></li><li class="l3"><a href="#s3-6-uma-pasta-só-resources-public-e-views">3.6 - Uma Pasta Só: resources, public e views</a></li><li class="l2"><a href="#s4-ejs-facilitando-a-escrita-de-views">4 - EJS: Facilitando a Escrita de Views</a></li><li class="l3"><a href="#s4-1-o-que-é-e-como-instalar">4.1 - O Que É e Como Instalar</a></li><li class="l3"><a href="#s4-2-as-marcações-do-ejs">4.2 - As Marcações do EJS</a></li><li class="l3"><a href="#s4-3-hello-world">4.3 - Hello World</a></li><li class="l3"><a href="#s4-4-carregando-o-css-e-o-js-compilados-o-helper-vite">4.4 - Carregando o CSS e o JS Compilados: o Helper vite()</a></li><li class="l3"><a href="#s4-5-a-view-de-login">4.5 - A View de Login</a></li><li class="l3"><a href="#s4-6-partials-reaproveitando-pedaços">4.6 - Partials: Reaproveitando Pedaços</a></li><li class="l2"><a href="#s5-elasticsearch-um-banco-de-dados-para-buscar">5 - Elasticsearch: um Banco de Dados Para Buscar</a></li><li class="l3"><a href="#s5-1-o-problema-filtros-complexos-por-n-campos">5.1 - O Problema: Filtros Complexos por N Campos</a></li><li class="l3"><a href="#s5-2-o-que-é-o-elasticsearch">5.2 - O Que É o Elasticsearch</a></li><li class="l3"><a href="#s5-3-busca-vetorial-em-poucas-palavras">5.3 - Busca Vetorial, em Poucas Palavras</a></li><li class="l3"><a href="#s5-4-mais-um-container">5.4 - Mais um Container</a></li><li class="l2"><a href="#s6-a-busca-em-duas-etapas">6 - A Busca em Duas Etapas</a></li><li class="l3"><a href="#s6-1-o-postgres-continua-sendo-a-fonte-da-verdade">6.1 - O Postgres Continua Sendo a Fonte da Verdade</a></li><li class="l3"><a href="#s6-2-etapa-1-a-query-complexa-no-elasticsearch">6.2 - Etapa 1: a Query Complexa no Elasticsearch</a></li><li class="l3"><a href="#s6-3-etapa-2-where-in-de-volta-no-postgres">6.3 - Etapa 2: WHERE IN de Volta no Postgres</a></li><li class="l3"><a href="#s6-4-por-que-os-dados-voltam-sempre-íntegros">6.4 - Por Que os Dados Voltam Sempre Íntegros</a></li><li class="l2"><a href="#s7-alimentando-o-elasticsearch-a-api-rest">7 - Alimentando o Elasticsearch: a API REST</a></li><li class="l3"><a href="#s7-1-criando-o-índice-mapping">7.1 - Criando o Índice (Mapping)</a></li><li class="l3"><a href="#s7-2-inserir-e-atualizar-upsert">7.2 - Inserir e Atualizar: Upsert</a></li><li class="l3"><a href="#s7-3-excluir">7.3 - Excluir</a></li><li class="l3"><a href="#s7-4-ler">7.4 - Ler</a></li><li class="l3"><a href="#s7-5-carga-inicial-_bulk">7.5 - Carga Inicial: _bulk</a></li><li class="l2"><a href="#s8-sincronização-assíncrona-filas-rabbitmq-e-worker">8 - Sincronização Assíncrona: Filas, RabbitMQ e Worker</a></li><li class="l3"><a href="#s8-1-por-que-não-atualizar-o-elasticsearch-no-ciclo-http">8.1 - Por Que Não Atualizar o Elasticsearch no Ciclo HTTP</a></li><li class="l3"><a href="#s8-2-três-containers-a-mais">8.2 - Três Containers a Mais</a></li><li class="l3"><a href="#s8-3-o-job-de-sincronização">8.3 - O Job de Sincronização</a></li><li class="l3"><a href="#s8-4-disparando-o-job-nos-controllers">8.4 - Disparando o Job nos Controllers</a></li><li class="l3"><a href="#s8-5-consistência-eventual-o-preço-e-a-garantia">8.5 - Consistência Eventual: o Preço e a Garantia</a></li><li class="l2"><a href="#s9-conclusão">9 - Conclusão</a></li><li class="l2"><a href="#s10-referências">10 - Referências</a></li><li class="l2"><a href="#questoes">Questões do TA</a></li></ol></details>
+  </aside>
+  <main class="doc">
+    <header class="cover" id="topo">
+      <p class="eyebrow">UNIFAAT · 2026.2 · Briefing para produção de conteúdo</p>
+      <h1><span class="cn">07</span> - Views e Elasticsearch</h1>
+      <dl class="ficha">
+        <div><dt>Professor</dt><dd>Luan Tavares Lourenço</dd></div>
+        <div><dt>Disciplina</dt><dd>Frontend</dd></div>
+        <div><dt>Aula</dt><dd>07</dd></div>
+        <div><dt>Opção do TA</dt><dd>Texto</dd></div>
+      </dl>
+    </header>
+<h2 id="s1-introdução"><span class="hn">1</span>Introdução</h2>
+<p>Durante todo o primeiro bimestre a palavra de ordem foi estático. O HTML, o CSS, o JavaScript compilado pelo Vite, as imagens e as fontes ficaram em uma pasta e foram entregues pelo Nginx, sem nenhum processamento no servidor. O Nginx não abre o arquivo, não executa nada e não consulta banco: ele encontra o arquivo no disco e devolve. Essa é a forma mais barata e mais rápida de entregar conteúdo, e por isso insistimos tanto nela.</p>
+<p>O contrário de estático é dinâmico: conteúdo que só existe depois que o servidor executa código. Isso não é novidade para a turma. No semestre passado, em Desenvolvimento Web, cada rota da API montava um JSON a partir de dados do banco e devolvia como resposta. Esse JSON não existia em disco: era gerado na hora, a cada requisição.</p>
+<p>Esta aula começa juntando as duas pontas. O HTML, o arquivo inicial de qualquer página no navegador, também pode vir dinamicamente na resposta, exatamente como o JSON vinha. Isso abre a porta para a camada que faltava no nosso projeto de desenvolvimento web: a View, o V do MVC. Models e Controllers já fazem parte do projeto desde o semestre passado. Com a View, o HTML passa a viajar pelo ciclo de vida HTTP completo, passando por middlewares, controladores e camada de dados, e isso permite coisas que eram impossíveis com estático, como proteger uma página inteira com sessão antes de ela sair do servidor. Para escrever views sem sofrimento, vamos apresentar o EJS.</p>
+<p>Na segunda parte, a aula sai do HTML e vai para a busca. Filtros complexos por vários campos ao mesmo tempo, com texto livre, em uma base grande, são caros para o banco relacional. Para isso existe o Elasticsearch: outro tipo de banco de dados, especializado em busca. Ele não substitui o Postgres. Ele trabalha ao lado dele, como um auxiliar de busca, em um modelo de duas etapas: a busca complexa acontece no Elasticsearch, que devolve só os ids, e esses ids voltam para o Postgres em um <code>WHERE IN</code> simples pela chave primária.</p>
+<p>O ponto delicado é manter o Elasticsearch alimentado. Cada inserção, atualização e exclusão feita no Postgres precisa chegar ao Elasticsearch, mas isso não pode acontecer dentro do ciclo HTTP. Por isso voltam dois velhos conhecidos de Desenvolvimento Web: o RabbitMQ e o worker. A aula termina com três containers a mais no docker-compose, dois conhecidos e um novo, e com uma discussão importante sobre consistência: a busca pode atrasar alguns milissegundos, mas os dados que o usuário vê continuam sempre íntegros.</p>
+<h2 id="s2-conteúdo-estático-x-conteúdo-dinâmico"><span class="hn">2</span>Conteúdo Estático x Conteúdo Dinâmico</h2>
+<h3 id="s2-1-o-que-foi-estático-até-aqui"><span class="hn">2.1</span>O Que Foi Estático Até Aqui</h3>
+<p>Relembrando a configuração do Nginx da Aula 01:</p>
+<pre class="code"><code>location / {
+    try_files $uri.html $uri $uri/ @node;
+}</code></pre>
+<p>Quando o navegador pede <code>/login</code>, o Nginx procura <code>login.html</code>, depois <code>login</code>, depois o diretório <code>login/</code>. Se encontrar, devolve o arquivo como ele está no disco. Só se não encontrar nada é que a requisição vai para o Node (bloco <code>@node</code>). O conteúdo estático tem três características:</p>
+<ul><li><strong>Está pronto antes da requisição chegar:</strong> é um arquivo no disco;</li><li><strong>É igual para todo mundo:</strong> o usuário A e o usuário B recebem exatamente os mesmos bytes;</li><li><strong>Não exige processamento:</strong> nenhum código roda no servidor backend para entregá-lo.</li></ul>
+<p>Tudo que o frontend tinha de dinâmico (lista de tarefas, nome do usuário logado) chegava depois, por JavaScript: o navegador recebia o HTML estático vazio, o JS rodava, chamava a API com Axios e preenchia o DOM.</p>
+<h3 id="s2-2-conteúdo-dinâmico-qualquer-arquivo-pode-sair-do-backend"><span class="hn">2.2</span>Conteúdo Dinâmico: Qualquer Arquivo Pode Sair do Backend</h3>
+<p>Conteúdo dinâmico é aquele que o servidor produz ao receber a requisição, executando código. No semestre passado, isso era o JSON:</p>
+<pre class="code"><code>export default async function ListTaskController(request, response) {
+    const tasks = await TaskModel.findAll();
+
+    return response.status(200).json(tasks);
+}</code></pre>
+<p>O texto JSON é montado a partir do banco, na hora, e muda conforme os dados. Mas não é só JSON que pode sair do backend. Qualquer tipo de arquivo que o Nginx entrega como estático também pode ser entregue pelo Node: HTML, CSS, JS, imagem, vídeo, fonte. O próprio projeto já tem um exemplo: o <code>GetFileController</code>, que devolve um arquivo pela rota <code>/arquivo?file=nome_do_arquivo</code>. Para o navegador, não existe diferença entre um arquivo que veio do disco via Nginx e um conteúdo que o Node gerou: ele só enxerga a resposta HTTP.</p>
+<h3 id="s2-3-o-html-também-é-só-texto-o-papel-do-content-type"><span class="hn">2.3</span>O HTML Também É Só Texto: o Papel do Content-Type</h3>
+<p>Uma resposta HTTP é um conjunto de headers mais um corpo. O corpo é só uma sequência de bytes. Quem diz ao navegador o que fazer com esses bytes é o header <code>Content-Type</code>:</p>
+<ul><li><code>Content-Type: application/json</code> → o navegador trata como dado (o Axios faz o parse);</li><li><code>Content-Type: text/css</code> → o navegador aplica como folha de estilo;</li><li><code>Content-Type: image/png</code> → o navegador desenha a imagem;</li><li><code>Content-Type: text/html; charset=utf-8</code> → o navegador monta a página e cria o DOM.</li></ul>
+<p>Quando o Nginx entrega um <code>.html</code> estático, ele mesmo coloca <code>text/html</code> no header, com base na extensão do arquivo. Quando o Node monta um HTML como texto e devolve com o mesmo header, o navegador faz exatamente a mesma coisa: monta a página, cria o DOM, baixa o CSS e o JS referenciados. O navegador não sabe, e não precisa saber, se aquele HTML existia em disco ou foi gerado há um milissegundo.</p>
+<pre class="code"><code><span class="cm">// o mesmo corpo, entregue como texto puro ou como página</span>
+response.set("Content-Type", "text/plain; charset=utf-8");
+response.send("&lt;h1&gt;Olá&lt;/h1&gt;"); // navegador mostra os caracteres &lt;h1&gt;Olá&lt;/h1&gt;
+
+response.set("Content-Type", "text/html; charset=utf-8");
+response.send("&lt;h1&gt;Olá&lt;/h1&gt;"); // navegador mostra um título "Olá"</code></pre>
+<p>No Express, o <code>response.send()</code> com uma string já define <code>text/html</code> automaticamente se nenhum <code>Content-Type</code> foi informado. Aqui o header foi colocado de forma explícita para deixar claro que é ele que decide.</p>
+<h2 id="s3-views-o-v-que-faltava-no-mvc"><span class="hn">3</span>Views: o V Que Faltava no MVC</h2>
+<h3 id="s3-1-um-controller-que-monta-html"><span class="hn">3.1</span>Um Controller Que Monta HTML</h3>
+<p>O primeiro impulso é montar o HTML dentro do próprio controller, do mesmo jeito que montávamos o JSON:</p>
+<pre class="code"><code>import TaskModel from "../../Models/TaskModel.js";
+
+export default async function TasksPageController(request, response) {
+    const tasks = await TaskModel.findAll({
+        where: { id_user: request.user.id }
+    });
+
+    let items = "";
+
+    for (const task of tasks) {
+        items += `&lt;li&gt;${task.name}&lt;/li&gt;`;
+    }
+
+    const html = `&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Minhas tarefas&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Minhas tarefas&lt;/h1&gt;
+    &lt;ul&gt;${items}&lt;/ul&gt;
+&lt;/body&gt;
+&lt;/html&gt;`;
+
+    response.set("Content-Type", "text/html; charset=utf-8");
+
+    return response.status(200).send(html);
+}</code></pre>
+<p>Funciona: o navegador recebe uma página completa, já com as tarefas do usuário, sem nenhuma chamada de API depois. Mas é uma má prática, por três motivos:</p>
+<ul><li><strong>Mistura de responsabilidades:</strong> o mesmo arquivo cuida da lógica da requisição HTTP (ler o usuário, consultar o banco, definir status e headers) e da formatação do texto HTML. Qualquer mudança visual obriga a mexer no controller;</li><li><strong>Não escala:</strong> uma página real tem cabeçalho, menu, rodapé, formulários. Concatenar tudo isso em template strings vira um arquivo ilegível, e o cabeçalho acaba copiado em todo controller;</li><li><strong>Não escapa o conteúdo:</strong> <code>${task.name}</code> entra no HTML exatamente como está no banco. Se alguém cadastrar uma tarefa chamada <code>&lt;script&gt;...&lt;/script&gt;</code>, esse script roda no navegador de quem abrir a página. Esse problema (XSS) é assunto da próxima aula, de Segurança.</li></ul>
+<h3 id="s3-2-separando-a-view"><span class="hn">3.2</span>Separando a View</h3>
+<p>A solução é a mesma que o MVC já aplicou ao banco. Os Models isolaram o acesso a dados; os Controllers isolaram a lógica HTTP. Falta isolar a apresentação: essa é a View. A View recebe dados prontos e devolve o texto HTML. Ela não sabe de onde os dados vieram, não lê cookie, não define status, não consulta banco.</p>
+<ul><li><strong>Model:</strong> acessa e representa os dados (<code>TaskModel</code>, <code>UserModel</code>);</li><li><strong>Controller:</strong> recebe a requisição, chama os Models, escolhe a resposta;</li><li><strong>View:</strong> transforma os dados em HTML.</li></ul>
+<p>O controller passa a só entregar os dados para a View:</p>
+<pre class="code"><code>export default async function TasksPageController(request, response) {
+    const tasks = await TaskModel.findAll({
+        where: { id_user: request.user.id }
+    });
+
+    return response.status(200).render("tasks", { tasks: tasks });
+}</code></pre>
+<p>O <code>response.render()</code> procura a view tasks, executa com os dados recebidos, coloca o <code>Content-Type</code> <code>text/html</code> e devolve. O arquivo da view é apresentado na seção 4.</p>
+<h3 id="s3-3-o-html-dentro-do-ciclo-de-vida-http"><span class="hn">3.3</span>O HTML Dentro do Ciclo de Vida HTTP</h3>
+<p>Esta é a ideia central da primeira parte da aula. Com o arquivo estático, o HTML ficava fora do backend: o Nginx o devolvia antes de qualquer código rodar. Com a View, o HTML passa a percorrer o mesmo caminho que o JSON da API sempre percorreu:</p>
+<pre class="code"><code>requisição GET /tasks
+        ↓
+middlewares (cookies, autenticação)
+        ↓
+controller
+        ↓
+models / serviços (Postgres)
+        ↓
+view (monta o HTML com os dados)
+        ↓
+resposta Content-Type: text/html</code></pre>
+<p>Isso significa que tudo que já existe no backend para proteger e preparar uma requisição de API passa a valer também para a página: middleware de cookie, middleware de autenticação, consultas ao banco, regras de negócio.</p>
+<h3 id="s3-4-exemplo-a-tela-de-login-com-middleware-de-sessão"><span class="hn">3.4</span>Exemplo: a Tela de Login com Middleware de Sessão</h3>
+<p>Até agora, o login era o arquivo estático <code>login.html</code>. O Nginx o entregava para qualquer pessoa, e quem decidia se o usuário já estava logado era o JavaScript do próprio navegador: o <code>login.ts</code> chamava <code>checkAuthentication()</code> (uma requisição para <code>/users/me</code>) e, se o token fosse válido, redirecionava para as tarefas. Tudo isso acontecia depois que a página já tinha chegado. Com conteúdo estático não havia outra opção: o Nginx não sabe o que é um JWT.</p>
+<p>Com View, essa decisão passa para o servidor, <strong>antes de o HTML existir</strong>. Um middleware de página lê o cookie <code>auth_token</code>: se o token é válido, o usuário já está logado e é redirecionado para as tarefas; se não há cookie, ou o token é inválido ou expirou, a requisição segue para o controller, que mostra o login.</p>
+<p>Arquivo <code>app/Http/Middlewares/RedirectIfAuthenticatedMiddleware.js</code>:</p>
+<pre class="code"><code>import jwt from "jsonwebtoken";
+
+export default function RedirectIfAuthenticatedMiddleware(request, response, next) {
+    const token = request.cookies.auth_token;
+
+    if (!token) {
+        return next();
+    }
+
+    try {
+        jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+        return next();
+    }
+
+    return response.redirect("/tasks.html");
+}</code></pre>
+<p>O controller só manda renderizar a view:</p>
+<pre class="code"><code>export default function LoginViewController(request, response) {
+    return response.status(200).render("login");
+}</code></pre>
+<p>E a rota da página usa o middleware exatamente como uma rota de API usa:</p>
+<pre class="code"><code>router.get("/login", RedirectIfAuthenticatedMiddleware, LoginViewController);</code></pre>
+<p>O caminho de uma requisição <code>GET /login</code> passa a ser: <code>ParseCookiesMiddleware</code> → <code>RedirectIfAuthenticatedMiddleware</code> → <code>LoginViewController</code> → view <code>login.ejs</code>. Quem já tem sessão recebe um 302 para <code>/tasks.html</code> e nenhum byte do formulário de login.</p>
+<p>O mesmo raciocínio protege uma página privada, no sentido inverso: um middleware que, sem token válido, redireciona para <code>/login</code> em vez de responder 401 com JSON, como a API faz:</p>
+<pre class="code"><code>export default function WebAuthMiddleware(request, response, next) {
+    const token = request.cookies.auth_token;
+
+    if (!token) {
+        return response.redirect("/login");
+    }
+
+    try {
+        request.user = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+        return response.redirect("/login");
+    }
+
+    return next();
+}</code></pre>
+<h3 id="s3-5-cuidado-com-o-try_files-do-nginx"><span class="hn">3.5</span>Cuidado com o try_files do Nginx</h3>
+<p>O Nginx continua na frente de tudo. A regra <code>try_files $uri.html $uri $uri/ @node</code> procura primeiro um arquivo estático. Se existir um <code>login.html</code> na pasta <code>public/</code>, o Nginx entrega esse arquivo em <code>/login</code> e a requisição nunca chega ao Node. Por isso, ao transformar o login em View, o <code>login.html</code> saiu do projeto e da lista de entradas do Vite. Regra geral: <strong>uma rota de View não pode ter um arquivo estático com o mesmo nome.</strong> Os assets (CSS, JS compilado pelo Vite, imagens) continuam estáticos e servidos pelo Nginx: a View gera só o HTML inicial e referencia esses arquivos.</p>
+<h3 id="s3-6-uma-pasta-só-resources-public-e-views"><span class="hn">3.6</span>Uma Pasta Só: resources, public e views</h3>
+<p>A separação entre <code>backend/</code> e <code>frontend/</code> dentro de <code>src/</code> deixou de fazer sentido: a View é HTML gerado pelo servidor, mas é frontend. A partir desta aula, tudo fica na raiz de <code>src/</code>:</p>
+<pre class="code"><code>src/
+├── app/            Controllers, Middlewares, Models, Commands
+├── bootstrap/  database/  routes/  utils/  docs/  storage/
+├── resources/      fonte do frontend: HTML, TypeScript, CSS, imagens
+│   └── views/      templates EJS, o HTML montado pelo servidor
+├── public/         saída compilada pelo Vite (servida pelo Nginx)
+├── _web.js  _command.js
+└── vite.config.js  tsconfig.json  package.json</code></pre>
+<p>É a mesma ideia da Aula 05, <code>resources/</code> (fonte) e <code>public/</code> (compilado), agora na raiz. As views ficam dentro de <code>resources/</code>, junto com o resto do frontend.</p>
+<h2 id="s4-ejs-facilitando-a-escrita-de-views"><span class="hn">4</span>EJS: Facilitando a Escrita de Views</h2>
+<h3 id="s4-1-o-que-é-e-como-instalar"><span class="hn">4.1</span>O Que É e Como Instalar</h3>
+<p>Escrever HTML dentro de template string é exatamente o que tornou o controller da seção 3.1 ilegível. Um template engine resolve isso: escrevemos um arquivo que é praticamente HTML, com marcações especiais onde entram os dados. O EJS (Embedded JavaScript) é um dos mais simples do ecossistema Node, porque dentro das marcações se escreve JavaScript comum.</p>
+<p>Instalação, como qualquer lib do Node:</p>
+<pre class="code"><code>npm install ejs</code></pre>
+<p>Configuração no Express, no arquivo que cria a aplicação (<code>_web.js</code>):</p>
+<pre class="code"><code>const web = express();
+
+web.set("view engine", "ejs");
+web.set("views", path.join(CONSTANTS.DIR, "resources", "views"));</code></pre>
+<p>A primeira linha diz que, ao chamar <code>response.render</code>("login"), o Express deve procurar <code>login.ejs</code>. A segunda diz em qual pasta: <code>src/resources/views</code> (CONSTANTS.DIR é a raiz do projeto).</p>
+<p>Atenção no Docker: o <code>node_modules</code> dos containers fica em um volume nomeado, criado uma única vez. Uma dependência nova (como o ejs) não aparece no container só com rebuild da imagem; é preciso recriar o volume:</p>
+<pre class="code"><code>docker compose down
+docker volume rm fe-2026_nodemodules-volume
+docker compose up -d --build</code></pre>
+<h3 id="s4-2-as-marcações-do-ejs"><span class="hn">4.2</span>As Marcações do EJS</h3>
+<ul><li><code>&lt;%= valor %&gt;</code> → imprime o valor escapado: caracteres como <code>&lt;</code> e <code>&gt;</code> viram <code>&amp;lt;</code> e <code>&amp;gt;</code>, então um nome de tarefa com <code>&lt;script&gt;</code> aparece como texto e não executa;</li><li><code>&lt;%- valor %&gt;</code> → imprime o valor sem escapar: usado para incluir HTML confiável, como outras views;</li><li><code>&lt;% código %&gt;</code> → executa JavaScript sem imprimir nada: <code>if</code>, laços, variáveis;</li><li><code>&lt;%# comentário %&gt;</code> → comentário da view: não aparece no HTML entregue ao navegador (e não pode conter outra tag <code>&lt;%</code> dentro).</li></ul>
+<h3 id="s4-3-hello-world"><span class="hn">4.3</span>Hello World</h3>
+<p>A primeira View do projeto, na rota <code>GET /hello</code>. O controller não monta HTML, só decide os dados:</p>
+<pre class="code"><code>export default function HelloWorldController(request, response) {
+    let nome = "mundo";
+
+    if (request.query.nome) {
+        nome = request.query.nome;
+    }
+
+    return response.status(200).render("hello", {
+        nome: nome,
+        agora: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
+    });
+}</code></pre>
+<p>Arquivo <code>resources/views/hello.ejs</code>:</p>
+<pre class="code"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Hello World - View&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Olá, &lt;%= nome %&gt;!&lt;/h1&gt;
+    &lt;p&gt;Este HTML não existe em disco: o servidor montou agora, às &lt;%= agora %&gt;.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>Acessando <code>/hello?nome=Luan</code>, o navegador recebe "Olá, Luan!" com a hora do servidor. Acessando <code>/hello?nome=&lt;script&gt;alert(1)&lt;/script&gt;</code>, o <code>&lt;%= %&gt;</code> escapa o valor e a página mostra o texto <code>&amp;lt;script&amp;gt;</code>, sem executar nada. Esse escape é assunto da próxima aula, de Segurança.</p>
+<h3 id="s4-4-carregando-o-css-e-o-js-compilados-o-helper-vite"><span class="hn">4.4</span>Carregando o CSS e o JS Compilados: o Helper vite()</h3>
+<p>A View é HTML do servidor, mas precisa do CSS e do JS do frontend, que o Vite compila com um hash no nome do arquivo (<code>src/app.aQR1sM3P.js</code>), para que o navegador nunca use uma versão velha em cache. A View não tem como adivinhar esse nome.</p>
+<p>A solução já estava pronta desde a Aula 05: com <code>build.manifest</code>: true, o Vite grava em <code>public/.vite/manifest.json</code> um mapa do arquivo fonte para o compilado:</p>
+<pre class="code"><code>"js/app.ts": {
+  "file": "src/app.aQR1sM3P.js",
+  "isEntry": true
+}</code></pre>
+<p>O helper <code>utils/vite.js</code> lê esse manifest e devolve as tags prontas. Ele é registrado uma vez no <code>_web.js</code> e fica disponível em todas as views:</p>
+<pre class="code"><code>web.locals.vite = vite;</code></pre>
+<p>Na view:</p>
+<pre class="code"><code>&lt;%- vite(["css/app.css", "js/app.ts"]) %&gt;</code></pre>
+<p>vira:</p>
+<pre class="code"><code>&lt;link rel="stylesheet" href="/src/app.Bg3PD_Gv.css"&gt;
+&lt;script type="module" src="/src/app.aQR1sM3P.js"&gt;&lt;/script&gt;</code></pre>
+<p>Para isso, <code>css/app.css</code> e <code>js/app.ts</code> entram como entradas avulsas no <code>rollupOptions</code>.input do <code>vite.config.js</code>. Aqui se usa <code>&lt;%- %&gt;</code>, sem escape, porque o HTML gerado pelo helper é confiável.</p>
+<h3 id="s4-5-a-view-de-login"><span class="hn">4.5</span>A View de Login</h3>
+<p>O formulário de login era montado pelo <code>loginRender.ts</code>, criando elemento por elemento com document.<code>createElement</code>. Agora ele vem pronto do servidor, como HTML comum, em <code>resources/views/login.ejs</code> (trecho):</p>
+<pre class="code"><code>&lt;head&gt;
+    &lt;title&gt;Login - Tasks&lt;/title&gt;
+    &lt;%- vite(["css/app.css", "js/app.ts", "js/pages/login.ts"]) %&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;form id="login-form" class="d-flex flex-column gap-3"&gt;
+        &lt;h2 class="text-center mb-4"&gt;Login&lt;/h2&gt;
+
+        &lt;label for="email-input" class="form-label"&gt;Email&lt;/label&gt;
+        &lt;input id="email-input" type="email" class="form-control" required&gt;
+
+        &lt;label for="password-input" class="form-label"&gt;Senha&lt;/label&gt;
+        &lt;input id="password-input" type="password" class="form-control" required&gt;
+
+        &lt;button type="submit" class="btn btn-primary btn-lg mt-3"&gt;Entrar&lt;/button&gt;
+
+        &lt;div id="login-message" class="alert alert-danger d-none"&gt;&lt;/div&gt;
+    &lt;/form&gt;
+&lt;/body&gt;</code></pre>
+<p>O <code>loginRender.ts</code> foi apagado, e o <code>login.ts</code> ficou só com os listeners, que continuam encontrando o formulário pelos mesmos ids:</p>
+<pre class="code"><code>import loginListeners from "../listeners/loginListeners";
+
+window.addEventListener("DOMContentLoaded", async () =&gt; {
+  await loginListeners();
+});</code></pre>
+<p>A divisão de responsabilidades ficou assim: o servidor decide se mostra o login (middleware) e monta o HTML (view); o navegador cuida da interação (listener do submit, chamada ao <code>/api/login</code> com Axios, mensagem de erro).</p>
+<h3 id="s4-6-partials-reaproveitando-pedaços"><span class="hn">4.6</span>Partials: Reaproveitando Pedaços</h3>
+<p>O <code>include()</code> permite quebrar a página em pedaços reutilizáveis. Um cabeçalho que se repete em várias páginas vira um arquivo só, <code>resources/views/partials/header.ejs</code>:</p>
+<pre class="code"><code>&lt;header&gt;
+    &lt;span&gt;Olá, &lt;%= user.name %&gt;&lt;/span&gt;
+    &lt;a href="/logout"&gt;Sair&lt;/a&gt;
+&lt;/header&gt;</code></pre>
+<p>E é incluído em qualquer view, recebendo os dados que precisa:</p>
+<pre class="code"><code>&lt;%- include("partials/header", { user: user }) %&gt;</code></pre>
+<p>Uma página de tarefas montada no servidor usaria o partial, um laço e uma condição, sempre sem else:</p>
+<pre class="code"><code>&lt;% if (tasks.length === 0) { %&gt;
+    &lt;p&gt;Nenhuma tarefa cadastrada.&lt;/p&gt;
+&lt;% } %&gt;
+
+&lt;ul&gt;
+    &lt;% for (const task of tasks) { %&gt;
+        &lt;li class="&lt;%= task.is_done ? 'done' : '' %&gt;"&gt;&lt;%= task.name %&gt;&lt;/li&gt;
+    &lt;% } %&gt;
+&lt;/ul&gt;</code></pre>
+<p>A lógica de apresentação (laço, condição, classe CSS) fica na View; a lógica HTTP (quem é o usuário, quais tarefas buscar) fica no controller.</p>
+<h2 id="s5-elasticsearch-um-banco-de-dados-para-buscar"><span class="hn">5</span>Elasticsearch: um Banco de Dados Para Buscar</h2>
+<h3 id="s5-1-o-problema-filtros-complexos-por-n-campos"><span class="hn">5.1</span>O Problema: Filtros Complexos por N Campos</h3>
+<p>Pense em uma tela de busca de tarefas com vários filtros ao mesmo tempo: texto livre no nome, situação (concluída ou não), dono, intervalo de datas, ordenação por relevância. Em SQL, isso vira algo assim:</p>
+<pre class="code"><code>SELECT * FROM tasks
+WHERE id_user = 7
+  AND is_done = false
+  AND created_at &gt;= '2026-10-01'
+  AND name ILIKE '%relatorio%'
+ORDER BY created_at DESC
+LIMIT 20 OFFSET 40;</code></pre>
+<p>Com poucos dados, o Postgres resolve isso sem esforço. Com milhões de linhas, alguns problemas aparecem:</p>
+<ul><li>O <code>ILIKE '%texto%'</code> não usa índice comum: o banco precisa ler linha por linha;</li><li>Cada combinação de filtros pede um índice diferente, e não dá para criar índice para todas as combinações;</li><li><strong>Não existe relevância:</strong> o SQL sabe dizer se a linha bate ou não, mas não qual bate melhor;</li><li><strong>Não entende linguagem:</strong> "relatório", "relatorio" e "relatórios" são textos diferentes para o <code>ILIKE</code>.</li></ul>
+<p>E isso acontece na camada de API, no protocolo HTTP, que foi o centro do ano inteiro nas duas matérias: cada requisição de busca segura uma conexão com o banco que também está atendendo todas as gravações do sistema.</p>
+<h3 id="s5-2-o-que-é-o-elasticsearch"><span class="hn">5.2</span>O Que É o Elasticsearch</h3>
+<p>O Elasticsearch é um banco de dados otimizado para busca. Ele guarda documentos em JSON, organizados em índices:</p>
+<ul><li>Índice → parecido com uma tabela (ex.: tasks);</li><li>Documento → parecido com uma linha, mas em JSON;</li><li><code>_id</code> → o identificador do documento. Vamos usar o mesmo id da chave primária do Postgres.</li></ul>
+<p>A diferença está em como ele organiza os dados por dentro. Para campos de texto, ele monta um índice invertido: em vez de guardar "a tarefa 42 tem o nome Entregar relatório", ele guarda "a palavra relatorio aparece nas tarefas 42, 57 e 90". Antes disso, ele normaliza o texto (minúsculas, acentos, plurais, dependendo da configuração). Buscar por uma palavra vira consultar uma lista pronta, e combinar vários campos vira cruzar listas. Por isso filtros por N campos, que custam caro no banco relacional, são o caso comum no Elasticsearch, e cada resultado vem com uma nota de relevância (score).</p>
+<h3 id="s5-3-busca-vetorial-em-poucas-palavras"><span class="hn">5.3</span>Busca Vetorial, em Poucas Palavras</h3>
+<p>O Elasticsearch também faz busca vetorial. A ideia, de forma bem simples: um modelo de IA transforma um texto em um vetor, uma lista de números que representa o significado daquele texto. Textos com significados parecidos geram vetores próximos. A busca vetorial procura os documentos cujos vetores estão mais perto do vetor da pergunta. Assim, buscar por "pagar boleto" pode encontrar uma tarefa chamada "quitar conta de luz", mesmo sem nenhuma palavra em comum. É a base das buscas semânticas e de boa parte das aplicações com IA. Nesta aula vamos usar a busca tradicional por campos; a vetorial fica como conceito.</p>
+<h3 id="s5-4-mais-um-container"><span class="hn">5.4</span>Mais um Container</h3>
+<p>Do ponto de vista da infraestrutura, não há nada de novo: o Elasticsearch é um servidor como o Postgres e o Nginx, que roda em um container, fala TCP/IP, tem porta e host. A porta padrão é a 9200, e a comunicação com ele é por uma API REST com JSON, o mesmo HTTP que usamos o ano todo.</p>
+<p>A diferença está em quem pode falar com ele. <strong>O Elasticsearch não tem porta exposta</strong>: o docker-compose não tem o bloco ports nesse container, então nenhuma porta da máquina hospedeira aponta para ele. Ele só é acessível dentro da rede interna do Docker (app-network), pelo host <code>elasticsearch_host</code> na porta 9200, e só dois containers precisam falar com ele: o servidor web (nodeweb), que faz a busca, e o worker, que alimenta o índice. <strong>O navegador e qualquer outra máquina de fora nunca falam direto com o Elasticsearch</strong>: toda busca passa pela API, pelos middlewares e controllers, e volta pelo Postgres. É o mesmo princípio de não expor um banco de dados para a internet, e é o que torna aceitável, em ambiente local, subir o Elasticsearch sem usuário e senha.</p>
+<pre class="code"><code>elasticsearch-container:
+  image: elasticsearch:9.5.5
+  restart: unless-stopped
+  environment:
+    - discovery.type=single-node
+    - xpack.security.enabled=false
+    - ES_JAVA_OPTS=-Xms512m -Xmx512m
+  <span class="cm"># sem "ports": só a rede interna (app-network) alcança o Elasticsearch</span>
+  volumes:
+    - elastic-volume:/usr/share/elasticsearch/data
+  networks:
+    app-network:
+      aliases:
+        - elasticsearch_host</code></pre>
+<ul><li><code>discovery.type=single-node</code> → um nó só, sem cluster (desenvolvimento);</li><li><code>xpack.security.enabled=false</code> → sem usuário e senha nem HTTPS, apenas para ambiente local, e só porque o container não tem porta exposta;</li><li><code>ES_JAVA_OPTS</code> → limita a memória da JVM, porque o Elasticsearch é escrito em Java e por padrão tenta usar bastante memória.</li></ul>
+<p>Como não há porta exposta, um curl http://localhost:9200 na máquina hospedeira não responde. Para testar, o curl precisa partir de dentro da rede interna, por exemplo de dentro do container do servidor web:</p>
+<pre class="code"><code>docker compose exec nodeweb-container curl http://elasticsearch_host:9200</code></pre>
+<p>A resposta é um JSON com o nome do nó e a versão. No .env, <code>ELASTIC_HOST</code>=<code>elasticsearch_host</code> e <code>ELASTIC_PORT</code>=9200 são o endereço interno usado pelo servidor web e pelo worker.</p>
+<h2 id="s6-a-busca-em-duas-etapas"><span class="hn">6</span>A Busca em Duas Etapas</h2>
+<h3 id="s6-1-o-postgres-continua-sendo-a-fonte-da-verdade"><span class="hn">6.1</span>O Postgres Continua Sendo a Fonte da Verdade</h3>
+<p>O Elasticsearch não substitui o Postgres. O Postgres continua sendo a fonte da verdade: é nele que os dados são gravados primeiro, com transação, chave estrangeira e integridade. O Elasticsearch guarda uma cópia, organizada para busca. Essa cópia pode estar atrasada (veremos por quê na seção 8), então a busca é feita em duas etapas.</p>
+<h3 id="s6-2-etapa-1-a-query-complexa-no-elasticsearch"><span class="hn">6.2</span>Etapa 1: a Query Complexa no Elasticsearch</h3>
+<p>A busca com todos os filtros vai para o Elasticsearch, e ele devolve só os ids que satisfazem a consulta, já ordenados por relevância. O "<code>_source</code>": false pede para não trazer o documento, apenas os ids:</p>
+<pre class="code"><code>POST /tasks/_search
+{
+  "_source": false,
+  "size": 20,
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "name": "relatorio" } }
+      ],
+      "filter": [
+        { "term": { "id_user": 7 } },
+        { "term": { "is_done": false } },
+        { "range": { "created_at": { "gte": "2026-10-01" } } }
+      ]
+    }
+  }
+}</code></pre>
+<p>Resposta (resumida):</p>
+<pre class="code"><code>{
+  "hits": {
+    "total": { "value": 3 },
+    "hits": [
+      { "_id": "57", "_score": 2.1 },
+      { "_id": "42", "_score": 1.8 },
+      { "_id": "90", "_score": 0.9 }
+    ]
+  }
+}</code></pre>
+<p>No bool, o must é a parte que conta para a relevância (busca textual), e o filter são condições exatas, que só incluem ou excluem documentos.</p>
+<h3 id="s6-3-etapa-2-where-in-de-volta-no-postgres"><span class="hn">6.3</span>Etapa 2: WHERE IN de Volta no Postgres</h3>
+<p>Com os ids em mãos, a consulta no Postgres é a mais simples e rápida que existe, pela chave primária:</p>
+<pre class="code"><code>SELECT * FROM tasks WHERE id IN (57, 42, 90);</code></pre>
+<p>Com Sequelize, passar um array no where já gera o IN:</p>
+<pre class="code"><code>const tasks = await TaskModel.findAll({
+    where: { id: ids }
+});</code></pre>
+<p>O <code>WHERE IN</code> não garante a ordem da lista. Como a ordem de relevância veio do Elasticsearch, é preciso reordenar o resultado pelos ids recebidos:</p>
+<pre class="code"><code>const tasksById = new Map(tasks.map((task) =&gt; [task.id, task]));
+
+const ordered = ids
+    .map((id) =&gt; tasksById.get(id))
+    .filter((task) =&gt; task !== undefined);</code></pre>
+<p>O controller de busca completo, falando com o Elasticsearch pela API REST via Axios:</p>
+<pre class="code"><code>import axios from "axios";
+import TaskModel from "../../../Models/TaskModel.js";
+
+const elastic = axios.create({
+    baseURL: `http://${process.env.ELASTIC_HOST}:${process.env.ELASTIC_PORT}`
+});
+
+export default async function SearchTaskController(request, response) {
+    const idUser = request.user.id;
+    const { q, is_done } = request.query;
+
+    const must = [];
+    const filter = [{ term: { id_user: idUser } }];
+
+    if (q) {
+        must.push({ match: { name: q } });
+    }
+
+    if (is_done !== undefined) {
+        filter.push({ term: { is_done: is_done === "true" } });
+    }
+
+    <span class="cm">// Etapa 1: busca complexa no Elasticsearch, só os ids</span>
+    const { data } = await elastic.post("/tasks/_search", {
+        _source: false,
+        size: 20,
+        query: { bool: { must: must, filter: filter } }
+    });
+
+    const ids = data.hits.hits.map((hit) =&gt; Number(hit._id));
+
+    if (ids.length === 0) {
+        return response.status(200).json([]);
+    }
+
+    <span class="cm">// Etapa 2: WHERE IN pela chave primária, na fonte da verdade</span>
+    const tasks = await TaskModel.findAll({
+        where: { id: ids, id_user: idUser }
+    });
+
+    const tasksById = new Map(tasks.map((task) =&gt; [task.id, task]));
+
+    const ordered = ids
+        .map((id) =&gt; tasksById.get(id))
+        .filter((task) =&gt; task !== undefined);
+
+    return response.status(200).json(ordered);
+}</code></pre>
+<h3 id="s6-4-por-que-os-dados-voltam-sempre-íntegros"><span class="hn">6.4</span>Por Que os Dados Voltam Sempre Íntegros</h3>
+<p><strong>Este é o ponto mais importante da segunda parte da aula.</strong> O Elasticsearch decide quais registros entram no resultado e em que ordem. Mas o que o usuário vê, cada campo de cada tarefa, sempre vem do Postgres, no momento da requisição. Isso protege a resposta das três situações em que a cópia do Elasticsearch está atrasada:</p>
+<ul><li><strong>Tarefa excluída no Postgres, mas ainda no Elasticsearch:</strong> o id volta na etapa 1, mas o <code>WHERE IN</code> não encontra a linha, e ela simplesmente não aparece. O usuário nunca vê um registro que não existe mais;</li><li><strong>Tarefa alterada no Postgres, mas com a versão antiga no Elasticsearch:</strong> o <code>WHERE IN</code> traz a versão atual. O usuário vê o nome novo, nunca o antigo;</li><li><strong>Tarefa recém-criada, ainda não indexada:</strong> ela não aparece na busca por alguns milissegundos e aparece na próxima.</li></ul>
+<p>Ou seja: <strong>a busca pode ficar levemente desatualizada, mas o dado nunca fica errado.</strong></p>
+<h2 id="s7-alimentando-o-elasticsearch-a-api-rest"><span class="hn">7</span>Alimentando o Elasticsearch: a API REST</h2>
+<p>Toda operação no Elasticsearch é uma requisição HTTP com JSON. Os exemplos abaixo mostram o verbo e o caminho; no código, viram chamadas Axios para <code>http://elasticsearch_host:9200</code>.</p>
+<h3 id="s7-1-criando-o-índice-mapping"><span class="hn">7.1</span>Criando o Índice (Mapping)</h3>
+<p>O mapping diz o tipo de cada campo, como o CREATE TABLE do SQL. É ele que define se o campo é texto analisado (busca por palavras) ou valor exato (filtro):</p>
+<pre class="code"><code>PUT /tasks
+{
+  "mappings": {
+    "properties": {
+      "name":       { "type": "text" },
+      "is_done":    { "type": "boolean" },
+      "id_user":    { "type": "integer" },
+      "created_at": { "type": "date" }
+    }
+  }
+}</code></pre>
+<p>Só os campos usados na busca precisam ir para o Elasticsearch. Ele não precisa ter tudo que o Postgres tem, porque o dado completo sempre volta do Postgres.</p>
+<h3 id="s7-2-inserir-e-atualizar-upsert"><span class="hn">7.2</span>Inserir e Atualizar: Upsert</h3>
+<p>O PUT em <code>/indice/_doc/id</code> cria o documento se ele não existe e o substitui inteiro se já existe. É um upsert, e por isso a mesma chamada serve para inserir e para atualizar:</p>
+<pre class="code"><code>PUT /tasks/_doc/42
+{
+  "name": "Entregar relatório",
+  "is_done": false,
+  "id_user": 7,
+  "created_at": "2026-10-19T19:00:00Z"
+}</code></pre>
+<p>A resposta informa o que aconteceu: "result": "created" na primeira vez, "result": "updated" nas seguintes. Para atualizar só alguns campos, existe o <code>_update</code>:</p>
+<pre class="code"><code>POST /tasks/_update/42
+{
+  "doc": { "is_done": true },
+  "doc_as_upsert": true
+}</code></pre>
+<h3 id="s7-3-excluir"><span class="hn">7.3</span>Excluir</h3>
+<pre class="code"><code>DELETE /tasks/_doc/42</code></pre>
+<p>Se o documento não existir, o Elasticsearch responde 404 com "result": "<code>not_found</code>". Para a sincronização isso não é erro: o objetivo era que o documento não existisse, e ele não existe.</p>
+<h3 id="s7-4-ler"><span class="hn">7.4</span>Ler</h3>
+<p>Um documento pelo id:</p>
+<pre class="code"><code>GET /tasks/_doc/42</code></pre>
+<p>E a busca com queries complexas, pelo <code>_search</code>, como na seção 6.2. Os blocos mais usados dentro do bool:</p>
+<ul><li><code>match</code> → busca textual em campo text, com relevância;</li><li><code>term</code> → valor exato (id, booleano, status);</li><li><code>terms</code> → valor exato dentro de uma lista;</li><li><code>range</code> → intervalo (gte, lte) para números e datas.</li></ul>
+<h3 id="s7-5-carga-inicial-_bulk"><span class="hn">7.5</span>Carga Inicial: _bulk</h3>
+<p>As tarefas que já existem no Postgres antes do Elasticsearch subir precisam ser indexadas uma vez. Para isso existe o <code>_bulk</code>, que recebe várias operações em uma requisição, no formato NDJSON (um JSON por linha: a ação e, em seguida, o documento):</p>
+<pre class="code"><code>POST /_bulk
+{ "index": { "_index": "tasks", "_id": "1" } }
+{ "name": "Estudar EJS", "is_done": false, "id_user": 7, "created_at": "2026-10-10T10:00:00Z" }
+{ "index": { "_index": "tasks", "_id": "2" } }
+{ "name": "Subir o Elasticsearch", "is_done": true, "id_user": 7, "created_at": "2026-10-11T10:00:00Z" }</code></pre>
+<p>Esse é um bom candidato a comando (como os de migration e seed do projeto), executado uma vez ou sempre que for preciso reconstruir o índice.</p>
+<h2 id="s8-sincronização-assíncrona-filas-rabbitmq-e-worker"><span class="hn">8</span>Sincronização Assíncrona: Filas, RabbitMQ e Worker</h2>
+<h3 id="s8-1-por-que-não-atualizar-o-elasticsearch-no-ciclo-http"><span class="hn">8.1</span>Por Que Não Atualizar o Elasticsearch no Ciclo HTTP</h3>
+<p>A forma ingênua seria, no <code>CreateTaskController</code>, gravar no Postgres e logo em seguida chamar o PUT do Elasticsearch, antes de responder. Isso traz três problemas:</p>
+<ul><li><strong>Latência:</strong> o usuário espera duas gravações em dois bancos para receber o 201;</li><li><strong>Acoplamento de falhas:</strong> se o Elasticsearch estiver fora do ar, a criação da tarefa quebra, mesmo com o dado já salvo no Postgres, que é o que importa;</li><li><strong>Dependência do processo HTTP:</strong> a indexação fica presa à requisição. Com fila, a mensagem fica guardada no RabbitMQ; se o worker estiver parado, as mensagens se acumulam e são processadas quando ele voltar.</li></ul>
+<p>A indexação não é parte do que o usuário pediu. Ele pediu para criar a tarefa. Por isso ela sai do ciclo HTTP e vira um trabalho assíncrono, executado depois, por outro processo.</p>
+<h3 id="s8-2-três-containers-a-mais"><span class="hn">8.2</span>Três Containers a Mais</h3>
+<p>É aqui que voltam os conceitos de Desenvolvimento Web do semestre passado:</p>
+<ul><li><strong>RabbitMQ (conhecido):</strong> o servidor de filas. O controller publica uma mensagem e segue a vida;</li><li><strong>Worker (conhecido):</strong> um processo Node separado, sem rota HTTP, que fica escutando a fila e executa os jobs;</li><li><strong>Elasticsearch (novo):</strong> o banco de busca, alimentado pelo worker.</li></ul>
+<p>No docker-compose, o RabbitMQ e o worker voltam exatamente como estavam no projeto de Desenvolvimento Web. O RabbitMQ usa a imagem com painel de gerenciamento:</p>
+<pre class="code"><code>rabbitmq-container:
+  image: rabbitmq:3.13.1-management-alpine
+  ports:
+    - "5672:5672"      # conexão com a fila (producers/consumers)
+    - "15672:15672"    # painel de gerenciamento web
+  environment:
+    RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+    RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+  volumes:
+    - rabbitmq-volume:/var/lib/rabbitmq
+  networks:
+    app-network:
+      aliases:
+        - rabbitmq_host</code></pre>
+<p>O worker é mais um entry point do mesmo código Node, ao lado do <code>_web.js</code> e do <code>_command.js</code>. O container dele roda o <code>_worker.js</code> em vez do servidor HTTP:</p>
+<pre class="code"><code>nodeworker-container:
+  build:
+    context: .
+    dockerfile: docker/node-worker/Dockerfile
+  env_file:
+    - .env
+    - .env.docker
+  depends_on:
+    - postgres-container
+    - rabbitmq-container
+  environment:
+    POSTGRES_HOST: postgres_host
+    POSTGRES_PORT: 5432
+    RABBITMQ_HOST: rabbitmq_host
+    RABBITMQ_PORT: 5672
+  networks:
+    app-network:
+      aliases:
+        - nodeworker_host</code></pre>
+<p>O Dockerfile do worker termina com ENTRYPOINT ["nodemon", "<code>_worker.js</code>"]. O <code>_worker.js</code> carrega todos os jobs da pasta <code>app/Jobs</code>, conecta no RabbitMQ e fica consumindo a fila informada em --queue (sem o parâmetro, a fila default). Para cada mensagem, lê o nome do job e o payload e executa o handle correspondente:</p>
+<pre class="code"><code>node _worker.js --queue=default</code></pre>
+<p>O fluxo de uma criação de tarefa fica assim:</p>
+<pre class="code"><code>POST /me/tasks
+    ↓
+controller grava no Postgres (fonte da verdade)
+    ↓
+controller publica o job na fila (RabbitMQ)
+    ↓
+controller responde 201 (sem esperar o Elasticsearch)
+
+... milissegundos depois, em outro container ...
+
+worker consome o job
+    ↓
+worker faz o upsert no Elasticsearch</code></pre>
+<h3 id="s8-3-o-job-de-sincronização"><span class="hn">8.3</span>O Job de Sincronização</h3>
+<p>Os jobs seguem o padrão de Desenvolvimento Web: cada job é um arquivo em <code>app/Jobs</code>, exportado com <code>createJob</code>({ name, handle }). O <code>createJob</code> devolve o próprio job com o método dispatch(fila, payload), que publica no RabbitMQ a mensagem { job: name, payload }; o worker recebe essa mensagem e chama o handle(payload).</p>
+<p>Arquivo <code>app/Jobs/SyncTaskSearchJob.js</code>. Um único job resolve inserção, atualização e exclusão: ele recebe só o id, busca a situação atual no Postgres e espelha no Elasticsearch:</p>
+<pre class="code"><code>import axios from "axios";
+import { createJob } from "../../utils/job.js";
+import TaskModel from "../Models/TaskModel.js";
+
+const elastic = axios.create({
+    baseURL: `http://${process.env.ELASTIC_HOST}:${process.env.ELASTIC_PORT}`
+});
+
+export default createJob({
+    name: "SyncTaskSearchJob",
+    handle: async (payload) =&gt; {
+        const { id } = payload;
+
+        const task = await TaskModel.findByPk(id);
+
+        <span class="cm">// Não existe mais no Postgres: some do Elasticsearch também</span>
+        if (!task) {
+            await elastic.delete(`/tasks/_doc/${id}`, {
+                validateStatus: (status) =&gt; status === 200 || status === 404
+            });
+
+            return;
+        }
+
+        <span class="cm">// Existe: upsert com o estado atual</span>
+        await elastic.put(`/tasks/_doc/${id}`, {
+            name: task.name,
+            is_done: task.is_done,
+            id_user: task.id_user,
+            created_at: task.created_at
+        });
+    }
+});</code></pre>
+<p>Mandar só o id, e não os dados da tarefa, tem uma vantagem: se dois jobs da mesma tarefa forem processados fora de ordem, os dois leem o estado atual do Postgres e o Elasticsearch termina igual à fonte da verdade.</p>
+<h3 id="s8-4-disparando-o-job-nos-controllers"><span class="hn">8.4</span>Disparando o Job nos Controllers</h3>
+<p>Nos controllers de criação, atualização e exclusão, uma linha depois da gravação no Postgres. No <code>CreateTaskController</code>:</p>
+<pre class="code"><code>import SyncTaskSearchJob from "../../../Jobs/SyncTaskSearchJob.js";
+
+<span class="cm">// ...</span>
+
+const task = await TaskModel.create({
+    name: name,
+    is_done: is_done || false,
+    id_user: idUser
+});
+
+await SyncTaskSearchJob.dispatch("default", { id: task.id });
+
+return response.status(201).json(task);</code></pre>
+<p>O dispatch só publica a mensagem na fila default e retorna. Quem fala com o Elasticsearch é o worker. No <code>UpdateTaskController</code> e no <code>DeleteTaskController</code> a chamada é a mesma, com o id da tarefa alterada ou excluída: no caso da exclusão, o job não encontra a tarefa no Postgres e remove o documento do Elasticsearch.</p>
+<h3 id="s8-5-consistência-eventual-o-preço-e-a-garantia"><span class="hn">8.5</span>Consistência Eventual: o Preço e a Garantia</h3>
+<p>Como a indexação é assíncrona, existe uma janela, normalmente de milissegundos, em que o Postgres e o Elasticsearch estão diferentes. Isso se chama <strong>consistência eventual</strong>: os dois bancos ficam iguais, mas não no mesmo instante. Além da fila, o próprio Elasticsearch é quase em tempo real: um documento gravado fica disponível para busca após o próximo refresh do índice, que por padrão acontece a cada segundo.</p>
+<p>O preço dessa janela aparece na camada de busca e de agregação: a contagem de resultados pode estar uma unidade acima ou abaixo, uma tarefa que acabou de ser concluída ainda pode aparecer no filtro de pendentes, uma tarefa recém-criada ainda não aparece.</p>
+<p>E a garantia vem da busca em duas etapas (seção 6.4): como os dados exibidos sempre voltam do Postgres pelo <code>WHERE IN</code>, o usuário nunca vê um dado errado ou um registro que não existe mais. <strong>O Elasticsearch decide quem aparece; o Postgres decide o que aparece.</strong> A integridade fica com quem sempre foi responsável por ela.</p>
+<h2 id="s9-conclusão"><span class="hn">9</span>Conclusão</h2>
+<p>Esta aula fechou dois ciclos.</p>
+<ol><li>Views: o HTML, que passou o bimestre inteiro como arquivo estático, também pode ser conteúdo dinâmico. Basta o <code>Content-Type</code> <code>text/html</code> para o navegador tratá-lo como se tivesse vindo do disco. Montar esse HTML no controller funciona, mas mistura responsabilidades; a View é a camada que isola a apresentação e completa o MVC (Model, View, Controller). Com isso, a página passa pelo ciclo de vida HTTP inteiro, e um middleware consegue decidir sobre a sessão antes que o HTML saia do servidor, como na tela de login, coisa impossível com estático. O EJS facilita escrever views com marcações simples e escape automático, e o helper <code>vite()</code> liga a View ao CSS e JS compilados pelo Vite via <code>manifest.json</code>. Para acomodar as views, o projeto deixou de separar <code>backend/</code> e <code>frontend/</code>: tudo fica na raiz de <code>src/</code>, com <code>resources/views</code> para os templates.</li></ol>
+<ol><li>Elasticsearch: um banco de dados especializado em busca, para filtros complexos por N campos e relevância, e que também oferece busca vetorial. Ele não substitui o Postgres: a busca é feita em duas etapas, com a query complexa no Elasticsearch devolvendo ids e o <code>WHERE IN</code> pela chave primária no Postgres trazendo os dados íntegros. A alimentação é feita pela API REST (PUT para upsert, DELETE para excluir, <code>_search</code> para ler), sempre de forma assíncrona, por jobs publicados no RabbitMQ e executados pelo worker. A busca tem consistência eventual; os dados exibidos, não.</li></ol>
+<h2 id="s10-referências"><span class="hn">10</span>Referências</h2>
+<p>Express: Using template engines with Express (https://expressjs.com/en/guide/using-template-engines.html).</p>
+<p>EJS: documentação oficial (https://ejs.co).</p>
+<p>MDN: <code>Content-Type</code> (https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).</p>
+<p>Elasticsearch Guide: Index API, Update API, Delete API, Search API, Bulk API, Query DSL (bool, match, term, range).</p>
+<p>Elasticsearch Guide: Install Elasticsearch with Docker.</p>
+<p>RabbitMQ: Tutorials, Work Queues (https://www.rabbitmq.com/tutorials).</p>
+<h2 id="questoes"><span class="hn">TA</span>Questões do TA</h2>
+<article class="questao"><h3><span class="qn">Questão 1</span></h3><p>Sobre servir HTML de forma dinâmica pelo backend, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">O navegador só consegue montar o DOM a partir de arquivos .html lidos do disco pelo Nginx; HTML gerado pelo Node é exibido como texto puro.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">Para o navegador entregar a página corretamente, o HTML dinâmico precisa ser convertido em JSON e montado depois via JavaScript.</span></li><li class="alt ok"><span class="ltr">C</span><span class="txt">O HTML é um texto como qualquer outro conteúdo; se o backend o devolver com o header <code>Content-Type: text/html</code>, o navegador o trata exatamente como trataria um arquivo estático.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Conteúdo dinâmico se limita a JSON; HTML, CSS, imagens e fontes só podem ser entregues como arquivos estáticos.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">O header <code>Content-Type</code> é opcional e não influencia em como o navegador interpreta o corpo da resposta.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 2</span></h3><p>Sobre a camada de View no MVC, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">A View deve consultar o banco de dados diretamente, para que o controller fique responsável apenas pelas rotas.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">Montar o HTML com template strings dentro do controller é a prática recomendada, pois mantém toda a lógica da página em um só lugar.</span></li><li class="alt"><span class="ltr">C</span><span class="txt">A View substitui os middlewares, já que a proteção de uma página passa a ser feita dentro do próprio template.</span></li><li class="alt ok"><span class="ltr">D</span><span class="txt">A View isola a formatação do HTML: o controller trata a requisição HTTP e busca os dados, e a View apenas transforma esses dados em HTML; assim, a página percorre o ciclo de vida HTTP e pode ser protegida por middleware antes de sair do servidor.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">E</span><span class="txt">Com Views, os arquivos de CSS e JS deixam de poder ser servidos como estáticos pelo Nginx.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 3</span></h3><p>Sobre a busca em duas etapas com Elasticsearch e Postgres, é correto afirmar que:</p><ol class="alts"><li class="alt ok"><span class="ltr">A</span><span class="txt">O Elasticsearch executa a busca complexa e devolve os ids que satisfazem os filtros; esses ids voltam para o Postgres em um <code>WHERE IN</code> pela chave primária, de modo que os dados exibidos sempre vêm da fonte da verdade.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">B</span><span class="txt">O Elasticsearch substitui o Postgres, passando a ser a fonte da verdade da aplicação.</span></li><li class="alt"><span class="ltr">C</span><span class="txt">O <code>WHERE IN</code> é usado no Elasticsearch, e a busca textual com relevância é feita no Postgres.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Como o Elasticsearch já devolve o documento completo, consultar o Postgres depois da busca é apenas redundância.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">O <code>WHERE IN</code> preserva automaticamente a ordem de relevância calculada pelo Elasticsearch.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 4</span></h3><p>Sobre a sincronização entre Postgres e Elasticsearch, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">A atualização do Elasticsearch deve acontecer dentro do ciclo HTTP, antes da resposta, para garantir que a busca esteja sempre sincronizada no mesmo instante.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">Com filas, a busca no Elasticsearch fica sempre igual ao Postgres, sem nenhum atraso.</span></li><li class="alt ok"><span class="ltr">C</span><span class="txt">O controller grava no Postgres e publica um job no RabbitMQ; o worker faz o upsert ou a exclusão no Elasticsearch de forma assíncrona. A busca pode ficar alguns milissegundos desatualizada, mas os dados continuam íntegros porque são lidos do Postgres via <code>WHERE IN</code>.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Se o Elasticsearch estiver fora do ar, a criação da tarefa deve falhar, já que os dois bancos precisam estar sempre iguais.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">O worker é um endpoint HTTP que o navegador chama depois de criar a tarefa, para atualizar o Elasticsearch.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+  </main>
+</div>
+<script src="../../../assets/briefing.js"></script>
+</body>
+</html>

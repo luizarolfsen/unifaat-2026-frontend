@@ -9,15 +9,20 @@ services:
       - .env
       - .env.docker
     volumes:
-      - ./src/backend:/app/backend
-      - ./src/_web.js:/app/_web.js
-      - public-volume:/app/frontend/public
+      - ./src:/app
+      - public-volume:/app/public
       - nodemodules-volume:/app/node_modules
     depends_on:
       - postgres-container
+      - elasticsearch-container
+      - rabbitmq-container
     environment:
       POSTGRES_HOST: postgres_host
       POSTGRES_PORT: 5432
+      ELASTIC_HOST: elasticsearch_host
+      ELASTIC_PORT: 9200
+      RABBITMQ_HOST: rabbitmq_host
+      RABBITMQ_PORT: 5672
     restart: unless-stopped
     networks:
       app-network:
@@ -33,18 +38,51 @@ services:
       - .env
       - .env.docker
     volumes:
-      - ./src/backend:/app/backend
-      - ./src/_command.js:/app/_command.js
+      - ./src:/app
       - nodemodules-volume:/app/node_modules
     depends_on:
       - postgres-container
+      - elasticsearch-container
+      - rabbitmq-container
     environment:
       POSTGRES_HOST: postgres_host
       POSTGRES_PORT: 5432
+      ELASTIC_HOST: elasticsearch_host
+      ELASTIC_PORT: 9200
+      RABBITMQ_HOST: rabbitmq_host
+      RABBITMQ_PORT: 5672
     networks:
       app-network:
         aliases:
             - nodecommand_host
+
+  #NODE WORKER
+  nodeworker-container:
+    build:
+      context: .
+      dockerfile: docker/node-worker/Dockerfile
+    env_file:
+      - .env
+      - .env.docker
+    volumes:
+      - ./src:/app
+      - nodemodules-volume:/app/node_modules
+    depends_on:
+      - postgres-container
+      - rabbitmq-container
+      - elasticsearch-container
+    environment:
+      POSTGRES_HOST: postgres_host
+      POSTGRES_PORT: 5432
+      ELASTIC_HOST: elasticsearch_host
+      ELASTIC_PORT: 9200
+      RABBITMQ_HOST: rabbitmq_host
+      RABBITMQ_PORT: 5672
+    restart: unless-stopped
+    networks:
+      app-network:
+        aliases:
+          - nodeworker_host
 
   #NODE VITE HMR
   nodevitehmr-container:
@@ -54,7 +92,7 @@ services:
     env_file:
       - .env.docker
     volumes:
-      - ./src/frontend:/app/frontend
+      - ./src/resources:/app/resources
       - nodemodules-volume:/app/node_modules
     restart: unless-stopped
     ports:
@@ -69,7 +107,7 @@ services:
       dockerfile: docker/node24-vite-compiler/Dockerfile
     volumes:
       - public-volume:/app/public
-      - ./src/frontend/resources:/app/resources
+      - ./src/resources:/app/resources
       - nodemodules-volume:/app/node_modules
     restart: unless-stopped
     environment:
@@ -85,7 +123,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8080:80"
+      - "${NGNIX_WEB_PORT}:${NGINX_PORT}"
     volumes:
       - public-volume:/var/www
       - ./aulas:/var/www/aulas
@@ -116,6 +154,39 @@ services:
         aliases:
           - postgres_host
 
+  #ELASTICSEARCH
+  elasticsearch-container:
+    image: elasticsearch:9.5.5
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node # Um nó só, sem cluster
+      - xpack.security.enabled=false # Sem usuário/senha/HTTPS: só porque NÃO tem porta exposta
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m # Limita a memória da JVM
+    # Sem "ports": só a rede interna (app-network) alcança o Elasticsearch
+    volumes:
+      - elastic-volume:/usr/share/elasticsearch/data
+    networks:
+      app-network:
+        aliases:
+          - elasticsearch_host
+
+  #RABBITMQ
+  rabbitmq-container:
+    image: rabbitmq:3.13.1-management-alpine
+    restart: unless-stopped
+    ports:
+      - "5672:5672"    # Porta para conexão com a fila (producers/consumers)
+      - "15672:15672"  # Porta do painel de gerenciamento web
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq-volume:/var/lib/rabbitmq
+    networks:
+      app-network:
+        aliases:
+          - rabbitmq_host
+
 networks:
   app-network:
     driver: bridge
@@ -124,3 +195,5 @@ volumes:
   nodemodules-volume:
   public-volume:
   postgres-volume:
+  elastic-volume:
+  rabbitmq-volume:

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Briefing · Aula 05 — Pré Compiladores e Typescript</title>
+<link rel="stylesheet" href="../../../assets/briefing.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <a class="back" href="../../../index.html">← Voltar</a>
+    <details class="toc" open><summary>Nesta página</summary><ol><li class="l1"><a href="#topo">05 - Pré Compiladores e Typescript</a></li><li class="l2"><a href="#s1-introdução">1 - Introdução</a></li><li class="l2"><a href="#s2-o-navegador-só-entende-javascript-puro">2 - O Navegador Só Entende JavaScript Puro</a></li><li class="l3"><a href="#s2-1-a-vendor-api-o-que-o-navegador-aceita">2.1 - A Vendor API: O que o Navegador Aceita</a></li><li class="l3"><a href="#s2-2-typescript-e-outros-formatos-o-problema">2.2 - TypeScript e Outros Formatos: O Problema</a></li><li class="l3"><a href="#s2-3-compilação-e-transpilação-conceitos">2.3 - Compilação e Transpilação: Conceitos</a></li><li class="l3"><a href="#s2-4-javascript-é-dinamicamente-tipado-o-problema-da-redundância">2.4 - JavaScript é Dinamicamente Tipado: O Problema da Redundância</a></li><li class="l3"><a href="#s2-5-typescript-descobrir-erros-antes-de-enviar-ao-navegador">2.5 - TypeScript: Descobrir Erros Antes de Enviar ao Navegador</a></li><li class="l3"><a href="#s2-4-extensão-de-typescript-ts">2.4 - Extensão de TypeScript: .ts</a></li><li class="l3"><a href="#s2-5-tipos-básicos-em-typescript-a-importância-de-tipar-para-esca">2.5 - Tipos Básicos em TypeScript: A Importância de Tipar para Escalar</a></li><li class="l2"><a href="#s3-generics-código-reutilizável-type-safe-e-escalável">3 - Generics: Código Reutilizável, Type-Safe e Escalável</a></li><li class="l3"><a href="#s3-1-o-problema-duplicar-código-para-cada-tipo">3.1 - O Problema: Duplicar Código para Cada Tipo</a></li><li class="l3"><a href="#s3-2-introduzindo-generics-com-t">3.2 - Introduzindo Generics com &lt;T&gt;</a></li><li class="l3"><a href="#s3-3-generics-com-constraints-limitar-os-tipos-aceitos">3.3 - Generics com Constraints: Limitar os Tipos Aceitos</a></li><li class="l3"><a href="#s3-4-generics-com-axios-e-api-responses">3.4 - Generics com Axios e API Responses</a></li><li class="l3"><a href="#s3-5-generics-com-arrays-e-objetos">3.5 - Generics com Arrays e Objetos</a></li><li class="l2"><a href="#s4-pré-compiladores-conceito-e-o-vite-como-entry-point">4 - Pré Compiladores: Conceito e O Vite como Entry Point</a></li><li class="l3"><a href="#s4-1-o-que-é-um-pré-compilador">4.1 - O que é um Pré Compilador</a></li><li class="l3"><a href="#s4-2-as-duas-serventias-do-vite-hmr-e-pré-compilação">4.2 - As Duas Serventias do Vite: HMR e Pré Compilação</a></li><li class="l4"><a href="#s4-2-1-do-node_modules-para-o-navegador-tudo-compilado">4.2.1 - Do node_modules para o Navegador: Tudo Compilado</a></li><li class="l3"><a href="#s4-3-estrutura-de-pastas-resources-public">4.3 - Estrutura de Pastas: resources/ → public/</a></li><li class="l3"><a href="#s4-4-minificação-e-bundling">4.4 - Minificação e Bundling</a></li><li class="l3"><a href="#s4-5-comandos-do-vite-watcher-vs-build">4.5 - Comandos do Vite: Watcher vs Build</a></li><li class="l3"><a href="#s4-6-entry-points-e-containerização">4.6 - Entry Points e Containerização</a></li><li class="l3"><a href="#s4-7-vite-como-container-no-docker-compose">4.7 - Vite como Container no Docker Compose</a></li><li class="l3"><a href="#s4-8-configurando-typescript-e-compilação">4.8 - Configurando TypeScript e Compilação</a></li><li class="l2"><a href="#s5-api-contextual-eliminando-redundância-via-jwt">5 - API Contextual: Eliminando Redundância via JWT</a></li><li class="l3"><a href="#s5-1-o-padrão-atual-id-na-url">5.1 - O Padrão Atual: ID na URL</a></li><li class="l3"><a href="#s5-2-o-problema-confiança-sem-verificação">5.2 - O Problema: Confiança sem verificação</a></li><li class="l3"><a href="#s5-3-introduzindo-api-contextual-id-vem-do-token">5.3 - Introduzindo API Contextual: ID vem do Token</a></li><li class="l3"><a href="#s5-4-refatorando-as-apis-para-contextual">5.4 - Refatorando as APIs para Contextual</a></li><li class="l3"><a href="#s5-5-benefício-de-segurança-menos-pontos-de-falha">5.5 - Benefício de Segurança: Menos Pontos de Falha</a></li><li class="l2"><a href="#s6-conclusão">6 - Conclusão</a></li><li class="l2"><a href="#s7-referências">7 - Referências</a></li><li class="l2"><a href="#questoes">Questões do TA</a></li></ol></details>
+  </aside>
+  <main class="doc">
+    <header class="cover" id="topo">
+      <p class="eyebrow">UNIFAAT · 2026.2 · Briefing para produção de conteúdo</p>
+      <h1><span class="cn">05</span> - Pré Compiladores e Typescript</h1>
+      <dl class="ficha">
+        <div><dt>Professor</dt><dd>Luan Tavares Lourenço</dd></div>
+        <div><dt>Disciplina</dt><dd>Frontend</dd></div>
+        <div><dt>Aula</dt><dd>05</dd></div>
+        <div><dt>Opção do TA</dt><dd>Texto</dd></div>
+      </dl>
+    </header>
+<h2 id="s1-introdução"><span class="hn">1</span>Introdução</h2>
+<p>O frontend começou esta disciplina como um arquivo HTML com JavaScript solto — HTML gerado à mão, JS inline, sem nenhuma ferramenta de construção. Ao longo das aulas, caminhou em duas frentes: (1) a estrutura — mudou de HTML puro para componentes, depois para Vite, trazendo Hot Module Replacement; (2) a comunicação — passou a falar com o backend via Axios, a se autenticar via JWT em cookies, e a respeitar CORS.</p>
+<p>Esta aula marca o momento em que essas duas frentes convergem. Na estrutura, o projeto deixa de ser JavaScript puro e abraça TypeScript — não apenas como tipagem, mas como ferramenta essencial para organizar e escalar. Com TypeScript, cada função tem contrato explícito: que tipos recebe, que tipo retorna, quais propriedades um objeto possui. Isso que parecia "detalhe" em projetos pequenos (um desenvolvedor, 50 linhas de código) vira o diferencial em projetos reais: múltiplos desenvolvedores, milhares de linhas, mudanças frequentes. Tipos funcionam como documentação executável — o código é sua própria verdade sobre o que pode e o que não pode acontecer. A partir desta aula, todo código novo será escrito em .ts (TypeScript), compilado automaticamente para .js (JavaScript puro) que o navegador entenda. Estrutura clara: arquivos fonte em uma pasta resources/, compilados pelo Vite para JavaScript puro em uma pasta public/, pronto para o navegador.</p>
+<p>O Vite aqui não é mais apenas um servidor com HMR — é agora um pré compilador profissional. Ele compila TypeScript e aplica otimizações como minificação e bundling. Minificação reduz o tamanho dos arquivos (removendo espaços, renomeando variáveis longas), enquanto bundling agrupa múltiplos arquivos em poucos bundles, reduzindo requisições HTTP. Veremos dois modos do Vite: modo desenvolvimento (watcher contínuo, recompilação a cada salvamento) e modo produção (build pontual, otimização final).</p>
+<p>Na comunicação, consolidamos o JWT guardado em cookies, mas dessa vez usando as informações que já estão no token para eliminar redundância da API — se o backend sabe quem é o usuário pelo JWT, por que o frontend ainda passa o ID na URL? Essa é a API Contextual: o backend lê do token, não do cliente.</p>
+<h2 id="s2-o-navegador-só-entende-javascript-puro"><span class="hn">2</span>O Navegador Só Entende JavaScript Puro</h2>
+<h3 id="s2-1-a-vendor-api-o-que-o-navegador-aceita"><span class="hn">2.1</span>A Vendor API: O que o Navegador Aceita</h3>
+<p>O navegador, qualquer navegador moderno, só entende JavaScript puro — o JavaScript que a especificação ECMAScript define. Tudo que interagimos no frontend (DOM, eventos, requisições, storage) é fornecido pelo navegador através da Vendor API (Application Programming Interface específica do navegador):</p>
+<pre class="code"><code><span class="cm">// O navegador expõe a Vendor API através do objeto window</span>
+window.document                    <span class="cm">// Vendor API: DOM</span>
+window.addEventListener            <span class="cm">// Vendor API: Eventos</span>
+window.fetch                       <span class="cm">// Vendor API: Requisições HTTP</span>
+window.localStorage                <span class="cm">// Vendor API: Armazenamento</span>
+window.console                     <span class="cm">// Vendor API: Logs</span>
+
+<span class="cm">// Tudo isso é JavaScript puro, que o navegador entende nativamente</span>
+document.querySelector(".card");
+const response = await fetch("/api/users");
+localStorage.setItem("tema", "escuro");</code></pre>
+<p>Aqui mora a verdade fundamental: o navegador não compila, não interpreta, não entende nada além de JavaScript puro. Ele não compila TypeScript. Não interpreta nenhum formato que não seja JS. Ele simplesmente recebe um arquivo .js e o executa contra a Vendor API. Se você enviar um arquivo .ts direto, o navegador lança um erro de sintaxe — porque .ts não é JavaScript válido para o navegador. Mesma coisa: o Node (ambiente backend) também só entende JavaScript puro. TypeScript precisa ser compilado para .js antes de rodar, seja no navegador, seja no servidor.</p>
+<h3 id="s2-2-typescript-e-outros-formatos-o-problema"><span class="hn">2.2</span>TypeScript e Outros Formatos: O Problema</h3>
+<p>TypeScript não é JavaScript. Sass não é CSS válido. O navegador não entende nenhum deles. Se você tentar enviar um arquivo .ts para o navegador, ele quebra:</p>
+<pre class="code"><code><span class="cm">// arquivo: calcular.ts — enviado direto para o navegador</span>
+function calcular(valor: number): number {
+  return valor + 10;
+}
+
+<span class="cm">// ✗ SyntaxError: Unexpected token ':' — navegador não entende o ':' after 'valor'</span></code></pre>
+<p>O mesmo acontece com qualquer formato diferente de JS puro. O navegador (e o Node) só falam uma língua: JavaScript puro.</p>
+<h3 id="s2-3-compilação-e-transpilação-conceitos"><span class="hn">2.3</span>Compilação e Transpilação: Conceitos</h3>
+<p>Para resolver isso, dois processos transformam código expressivo em JavaScript puro:</p>
+<p><strong>Transpilação</strong> — traduzir uma versão de linguagem para outra da mesma "geração":</p>
+<ul><li>ES6+ → ES5 (deixar código moderno compatível com navegadores antigos)</li><li>TypeScript → JavaScript (remover tipos, deixar JS puro)</li></ul>
+<p><strong>Compilação</strong> — transformar código de uma linguagem para outra, geralmente mais baixo nível:</p>
+<ul><li>Sass → CSS (variáveis, nesting se tornam CSS puro)</li><li>TypeScript → JavaScript (pode envolver transformações maiores)</li></ul>
+<p>Na prática, os dois termos se misturam. O importante é: código em formato X → JavaScript puro, enviado para o navegador (ou para Node).</p>
+<h3 id="s2-4-javascript-é-dinamicamente-tipado-o-problema-da-redundância"><span class="hn">2.4</span>JavaScript é Dinamicamente Tipado: O Problema da Redundância</h3>
+<p>JavaScript puro é uma linguagem dinamicamente tipada — o tipo de uma variável pode mudar em tempo de execução, e só se descobre erros de tipo quando o código roda. Isso significa que uma função pode receber um string quando deveria receber um number, sem nenhum aviso.</p>
+<pre class="code"><code><span class="cm">// JavaScript puro — válido em tempo de escrita, erro em tempo de execução</span>
+function calcular(valor) {
+  return valor + 10;
+}
+
+console.log(calcular(5));      <span class="cm">// ✓ 15</span>
+console.log(calcular("hello")); <span class="cm">// ✓ "hello10" (concatenação, não soma!)</span>
+
+<span class="cm">// oops — erro em runtime</span>
+const config = {};
+console.log(config.database.name);  <span class="cm">// TypeError: Cannot read property 'name' of undefined</span></code></pre>
+<p>Em projetos pequenos, isso é tolerável. Com duzentas páginas, cem componentes e dez pessoas escrevendo, o contrato mental não escala.</p>
+<h3 id="s2-5-typescript-descobrir-erros-antes-de-enviar-ao-navegador"><span class="hn">2.5</span>TypeScript: Descobrir Erros Antes de Enviar ao Navegador</h3>
+<p>TypeScript é um superset de JavaScript — todo código JS válido é automaticamente TS válido — que adiciona a capacidade de declarar tipos. Um arquivo .ts é transpilado para .js puro antes de chegar ao navegador, e é durante essa transpilação que erros de tipo são descobertos (sem rodar o código):</p>
+<pre class="code"><code><span class="cm">// arquivo: calcular.ts — escrito em TypeScript</span>
+function calcular(valor: number): number {
+  return valor + 10;
+}
+
+console.log(calcular(5));       <span class="cm">// ✓ OK</span>
+console.log(calcular("hello")); <span class="cm">// ✗ Erro em tempo de transpilação: string não é number</span>
+
+↓ (transpilado para)
+
+<span class="cm">// calcular.js — enviado ao navegador (TypeScript removido)</span>
+function calcular(valor) {
+  return valor + 10;
+}
+
+console.log(calcular(5));
+console.log(calcular("hello"));</code></pre>
+<p>Isso permite descobrir erros (e refatorações quebradas) sem enviar código ruim ao navegador. A transpilação é invisível para o desenvolvedor: o Vite faz isso automaticamente enquanto você desenvolve, reportando erros direto no console. A produção só recebe o .js puro e otimizado.</p>
+<h3 id="s2-4-extensão-de-typescript-ts"><span class="hn">2.4</span>Extensão de TypeScript: .ts</h3>
+<p>Arquivos TypeScript usam a extensão .ts. Exemplo: userListApi.ts, calcular.ts, types.ts, App.ts. Contém funções, tipos, lógica — tudo TypeScript.</p>
+<pre class="code"><code><span class="cm">// userListApi.ts — TypeScript puro</span>
+export async function userListApi(): Promise&lt;Usuario[]&gt; {
+  const response = await clientApi.get&lt;Usuario[]&gt;("/users");
+  return response.data;
+}
+
+<span class="cm">// calcular.ts — TypeScript puro</span>
+function calcular(valor: number): number {
+  return valor + 10;
+}</code></pre>
+<p>O Vite reconhece a extensão .ts e a transpila para .js, removendo types e deixando JavaScript puro pronto para o navegador (ou Node).</p>
+<h3 id="s2-5-tipos-básicos-em-typescript-a-importância-de-tipar-para-esca"><span class="hn">2.5</span>Tipos Básicos em TypeScript: A Importância de Tipar para Escalar</h3>
+<p>Quando um projeto é pequeno (um desenvolvedor, 50 linhas), JavaScript solto funciona. Mas quando cresce (10 desenvolvedores, 10 mil linhas, mudanças frequentes), a falta de tipos vira caos: cada pessoa assume um contrato mental diferente, refatorações quebram código que "deveria" funcionar, debugging vira um inferno. TypeScript força explicitação: cada função declara seu contrato — que tipo recebe, que tipo retorna, quais propriedades um objeto tem. Isso não é burocracia: é organização pura. É a diferença entre saber exatamente o que cada pedaço de código faz e adivinhar.</p>
+<p>Os tipos mais comuns cobrem os tipos primitivos do JS:</p>
+<pre class="code"><code><span class="cm">// Tipos primitivos</span>
+let nome: string = "Ana";
+let idade: number = 25;
+let ativo: boolean = true;
+
+<span class="cm">// Arrays</span>
+let tags: string[] = ["frontend", "typescript"];
+let numeros: Array&lt;number&gt; = [1, 2, 3];
+
+<span class="cm">// Union: pode ser string OU number</span>
+let id: string | number = 42;
+id = "uuid-abc123"; <span class="cm">// também OK</span>
+
+<span class="cm">// Type aliases: nomear um tipo complexo</span>
+type Usuario = {
+  id: number;
+  nome: string;
+  email: string;
+};
+
+const user: Usuario = { id: 1, nome: "Ana", email: "ana@example.com" };
+
+<span class="cm">// Enum: constantes com nomes significativos</span>
+enum StatusPedido {
+  Pendente,
+  Confirmado,
+  Enviado,
+  Entregue
+}
+
+let status: StatusPedido = StatusPedido.Confirmado;</code></pre>
+<h2 id="s3-generics-código-reutilizável-type-safe-e-escalável"><span class="hn">3</span>Generics: Código Reutilizável, Type-Safe e Escalável</h2>
+<h3 id="s3-1-o-problema-duplicar-código-para-cada-tipo"><span class="hn">3.1</span>O Problema: Duplicar Código para Cada Tipo</h3>
+<p>Suponha uma função que receba um valor e o retorne:</p>
+<pre class="code"><code><span class="cm">// sem generics, precisa duplicar a função para cada tipo</span>
+function wrapString(valor: string): string {
+  return valor;
+}
+
+function wrapNumber(valor: number): number {
+  return valor;
+}
+
+function wrapBoolean(valor: boolean): boolean {
+  return valor;
+}</code></pre>
+<p>O padrão é óbvio e repetitivo. Generics resolvem exatamente isso: permitir que uma função (ou classe, ou type) funcione com qualquer tipo, mas mantenha segurança de tipos.</p>
+<h3 id="s3-2-introduzindo-generics-com-t"><span class="hn">3.2</span>Introduzindo Generics com &lt;T&gt;</h3>
+<p>O símbolo &lt;T&gt; (T de "Type") é um espaço reservado para um tipo que será definido depois. Quando a função é chamada, o TypeScript infere qual tipo T deve ser:</p>
+<pre class="code"><code><span class="cm">// com generics, uma função funciona para qualquer tipo</span>
+function wrap&lt;T&gt;(valor: T): T {
+  return valor;
+}
+
+<span class="cm">// TypeScript infere T = string</span>
+wrap("hello");      <span class="cm">// retorna: string</span>
+
+<span class="cm">// TypeScript infere T = number</span>
+wrap(42);           <span class="cm">// retorna: number</span>
+
+<span class="cm">// TypeScript infere T = boolean</span>
+wrap(true);         <span class="cm">// retorna: boolean</span>
+
+<span class="cm">// Explícito: especificar &lt;T&gt; manualmente</span>
+wrap&lt;string&gt;("hello");</code></pre>
+<p>A função wrap é idêntica para todos os tipos — o TypeScript apenas ajusta T para cada chamada, oferecendo type-checking completo sem duplicação de código.</p>
+<h3 id="s3-3-generics-com-constraints-limitar-os-tipos-aceitos"><span class="hn">3.3</span>Generics com Constraints: Limitar os Tipos Aceitos</h3>
+<p>Às vezes é preciso garantir que T seja de um certo tipo. Constraints fazem isso:</p>
+<pre class="code"><code><span class="cm">// T deve ser um objeto com propriedade 'id: number'</span>
+function getId&lt;T extends { id: number }&gt;(obj: T): number {
+  return obj.id;
+}
+
+getId({ id: 1, nome: "Ana" });      <span class="cm">// ✓ OK</span>
+getId({ id: 2, email: "hi@ex.com" }); <span class="cm">// ✓ OK</span>
+getId("hello");                      <span class="cm">// ✗ Erro: string não tem propriedade 'id'</span>
+
+<span class="cm">// T deve estender string ou number</span>
+function processar&lt;T extends string | number&gt;(valor: T): T {
+  <span class="cm">// agora você sabe que valor é string ou number</span>
+  return valor;
+}</code></pre>
+<h3 id="s3-4-generics-com-axios-e-api-responses"><span class="hn">3.4</span>Generics com Axios e API Responses</h3>
+<p>Generics brilham ao tipificar respostas de API. Axios retorna um objeto com propriedade data — o tipo de data pode variar (array de usuários, um token, etc). Generics permitem tipar isso:</p>
+<pre class="code"><code><span class="cm">// Type genérico para resposta de API</span>
+type ApiResponse&lt;T&gt; = {
+  data: T;
+  status: number;
+  statusText: string;
+};
+
+<span class="cm">// Funções de API agora usam generics para tipar a resposta</span>
+async function userListApi(): Promise&lt;ApiResponse&lt;Usuario[]&gt;&gt; {
+  const response = await clientApi.get("/users");
+  return response.data;
+}
+
+async function loginApi(email: string, password: string): Promise&lt;ApiResponse&lt;{ token: string }&gt;&gt; {
+  const response = await clientApi.post("/login", { email, password });
+  return response.data;
+}
+
+<span class="cm">// Ou, mais comum, tipificar direto com Axios generics</span>
+async function userListApi(): Promise&lt;Usuario[]&gt; {
+  const response = await clientApi.get&lt;Usuario[]&gt;("/users");
+  return response.data;
+}
+
+<span class="cm">// Se não souber o tipo da resposta, use &lt;any&gt; ou &lt;unknown&gt; (menos type-safe)</span>
+const response = await clientApi.get&lt;any&gt;("/endpoint-dinamico");</code></pre>
+<p>O &lt;T&gt; em clientApi.get&lt;T&gt;() diz ao TypeScript: "a propriedade data dessa resposta será do tipo T".</p>
+<h3 id="s3-5-generics-com-arrays-e-objetos"><span class="hn">3.5</span>Generics com Arrays e Objetos</h3>
+<pre class="code"><code><span class="cm">// Array genérico: lista de qualquer tipo</span>
+type Lista&lt;T&gt; = T[];
+
+const numeros: Lista&lt;number&gt; = [1, 2, 3];
+const strings: Lista&lt;string&gt; = ["a", "b", "c"];
+
+<span class="cm">// Objeto com chaves genéricas</span>
+type Dicionario&lt;T&gt; = {
+  [chave: string]: T;
+};
+
+const config: Dicionario&lt;string&gt; = {
+  tema: "escuro",
+  idioma: "pt-BR"
+};
+
+const ids: Dicionario&lt;number&gt; = {
+  usuario: 42,
+  pedido: 7
+};
+
+<span class="cm">// Função que inverte um array</span>
+function reverter&lt;T&gt;(lista: T[]): T[] {
+  return lista.reverse();
+}
+
+reverter([1, 2, 3]);                 <span class="cm">// [3, 2, 1]</span>
+reverter(["a", "b", "c"]);           <span class="cm">// ["c", "b", "a"]</span>
+reverter([true, false]);             <span class="cm">// [false, true]</span></code></pre>
+<h2 id="s4-pré-compiladores-conceito-e-o-vite-como-entry-point"><span class="hn">4</span>Pré Compiladores: Conceito e O Vite como Entry Point</h2>
+<h3 id="s4-1-o-que-é-um-pré-compilador"><span class="hn">4.1</span>O que é um Pré Compilador</h3>
+<p>Um pré compilador (ou transpilador) é um programa que transforma código escrito em uma linguagem mais expressiva (TypeScript, JSX, Sass) em código que o navegador entenda nativamente (JavaScript puro, CSS puro). Exemplos:</p>
+<ul><li>TypeScript → JavaScript (transpilação: remover tipos)</li><li>JSX → JavaScript (transpilação: &lt;Comp/&gt; → React.createElement())</li><li>Sass → CSS (transpilação: variáveis, nesting em CSS puro)</li><li>CoffeeScript → JavaScript (transpilação: sintaxe CoffeeScript em JS)</li></ul>
+<p>O navegador não entende nenhum desses formatos — ele só entende JavaScript puro e CSS puro. Por isso, antes de enviar o código para produção (ou ao desenvolvedor durante o desenvolvimento), precisa-se transpilá-lo. Um pré compilador automatiza exatamente isso, tornando invisível para o desenvolvedor.</p>
+<h3 id="s4-2-as-duas-serventias-do-vite-hmr-e-pré-compilação"><span class="hn">4.2</span>As Duas Serventias do Vite: HMR e Pré Compilação</h3>
+<p>O Vite tem duas responsabilidades, frequentemente confundidas:</p>
+<p>Primeira serventia — HMR (Hot Module Replacement): Apresentado na aula anterior, permite que alterações em arquivos sejam refletidas no navegador instantaneamente, sem recarregar a página inteira. Isso é conforto durante desenvolvimento.</p>
+<p>Segunda serventia — Pré Compilação: É a verdadeira potência. O Vite transforma TypeScript em JavaScript/CSS puro, de forma automática e invisível. No desenvolvimento, ele compila em memória. Em produção, roda npm run build e gera arquivos finais minificados, otimizados e prontos para deploy.</p>
+<h4 id="s4-2-1-do-node_modules-para-o-navegador-tudo-compilado"><span class="hn">4.2.1</span>Do node_modules para o Navegador: Tudo Compilado</h4>
+<p>Até agora, as libs (Axios, Bootstrap, fontes, etc) eram baixadas da internet e carregadas direto no navegador no arquivo HTML. Agora, com pré compilação:</p>
+<p>Você faz npm install — as libs ficam em node_modules/ (Axios, Bootstrap, fontes, etc)</p>
+<p>Você as importa no seu código TypeScript: import axios from 'axios', import 'bootstrap/css/bootstrap.css'</p>
+<p>O Vite as detecta, compila junto com seu código, e as inclui no bundle final</p>
+<p>O navegador recebe tudo pré-compilado e otimizado em um bundle único</p>
+<p>Exemplo prático:</p>
+<pre class="code"><code><span class="cm">// Antes (direto no HTML)</span>
+&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.css"&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"&gt;&lt;/script&gt;
+
+<span class="cm">// Agora (no TypeScript)</span>
+import axios from 'axios'
+import 'bootstrap/css/bootstrap.css'
+import 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700'
+
+Benefícios:
+- Tudo vem compilado e otimizado pelo Vite, não pelo CDN
+- Versionamento explícito no package.json, não na URL do CDN
+- CSS é pré processado junto com o seu
+- Fontes são incluídas no bundle, não requisições HTTP extras
+- Zero mudanças no navegador: ele recebe tudo como JS/CSS puro
+
+Exemplo prático:
+desenvolvedor escreve: App.tsx (TypeScript + JSX)
+          ↓
+      Vite compila
+          ↓
+navegador recebe: App.js (JavaScript puro)
+          ↓
+ navegador executa contra Vendor API</code></pre>
+<p>A compilação é tão invisível que muitos desenvolvedores não percebem que acontece — é só salvar um .ts, e o navegador já vê atualizado via HMR.</p>
+<h3 id="s4-3-estrutura-de-pastas-resources-public"><span class="hn">4.3</span>Estrutura de Pastas: resources/ → public/</h3>
+<p>A partir desta aula, o projeto frontend tem uma estrutura clara de entrada e saída:</p>
+<p><strong>resources/</strong> — pasta de origem (source), onde ficam todos os arquivos .ts, .tsx, assets e index.html. O Vite procura aqui.</p>
+<p><strong>public/</strong> — pasta de destino, onde o Vite coloca o JavaScript compilado e otimizado. O navegador lê daqui.</p>
+<p>Durante desenvolvimento, o Vite cria um servidor em memória que serve os arquivos compilados instantaneamente. Em produção, roda npm run build e popula de verdade a pasta public/.</p>
+<h3 id="s4-4-minificação-e-bundling"><span class="hn">4.4</span>Minificação e Bundling</h3>
+<p>O Vite aplica duas otimizações importantes em produção:</p>
+<p><strong>Minificação</strong> — remove espaços em branco, comentários, renomeia variáveis longas para nomes curtos (console.log vira c). Exemplo: um arquivo de 50KB vira 15KB minificado.</p>
+<p><strong>Bundling</strong> — agrupa múltiplos arquivos .js em poucos bundles (ex.: main.js, vendor.js). Em vez de 50 requisições HTTP (uma por arquivo), o navegador faz 2-3. Isso reduz latência de rede dramaticamente.</p>
+<p>O Vite faz isso automaticamente em produção — npm run build. Em desenvolvimento, deixa o código legível e não minifica (para debug mais fácil).</p>
+<h3 id="s4-5-comandos-do-vite-watcher-vs-build"><span class="hn">4.5</span>Comandos do Vite: Watcher vs Build</h3>
+<p>O Vite oferece dois modos de compilação:</p>
+<p><strong>npm run dev</strong> — inicia o servidor de desenvolvimento com watcher contínuo. O Vite fica "observando" (watching) a pasta resources/. Toda vez que você salva um arquivo .ts ou .tsx, o Vite:</p>
+<ol><li>Compila aquele arquivo</li><li>Notifica o navegador via WebSocket (HMR)</li><li>O navegador recarrega apenas o módulo alterado (não a página inteira)</li></ol>
+<p>Isso é o "watcher": um processo que não termina, fica escutando mudanças. Útil durante desenvolvimento.</p>
+<p><strong>npm run build</strong> — compilação pontual, única. O Vite lê todos os arquivos em resources/, compila, minifica, bundla, e salva em public/. Depois termina. Útil em produção e em CI/CD.</p>
+<p>Conceito do Watcher: em vez de você rodar manualmente npm run build toda vez que muda um arquivo, o watcher faz isso automaticamente. É como um "observador" que fica de olho. Economia de tempo e menos erros de esquecer de recompilar.</p>
+<h3 id="s4-6-entry-points-e-containerização"><span class="hn">4.6</span>Entry Points e Containerização</h3>
+<p>O Vite, na configuração atual, é um entry point do projeto — ele é um processo separado que sobe na porta 5173 (durante desenvolvimento) ou que faz o build final (em produção). A configuração atual do vite.config.js está estruturada para isso:</p>
+<pre class="code"><code><span class="cm">// vite.config.js</span>
+import { defineConfig } from 'vite'
+import path from 'node:path'
+
+export default defineConfig({
+    root: 'resources',
+    server: {
+        open: (process.env.IS_CONTAINER !== "TRUE"),
+        hmr: true,
+        host: true,
+        port: 5173
+    },
+    resolve: {
+        alias: {
+            '@fa': path.resolve(__dirname, 'node_modules/@fortawesome/fontawesome-free')
+        },
+    },
+    build: {
+        outDir: '../public',
+        emptyOutDir: true,
+        manifest: true,
+        rollupOptions: {
+            input: [
+                "./resources/index.html"
+            ],
+            output: {
+                assetFileNames: 'src/[name].[hash][extname]',
+                entryFileNames: 'src/[name].[hash].js',
+                chunkFileNames: 'src/[name].[hash].js',
+            }
+        }
+    }
+})
+
+Detalhes importantes:
+- root: 'resources' — o Vite procura por index.html e assets a partir de resources/;
+- server.open — se IS_CONTAINER !== "TRUE", abre o navegador; se Docker, não abre;
+- server.hmr: true — ativa Hot Module Replacement;
+- server.host: true — escuta em 0.0.0.0 (importante para Docker);
+- server.port: 5173 — porta padrão;
+- build.outDir: '../public' — output compilado e minificado em public/;
+- build.manifest: true — gera manifest.json para rastrear assets;
+- rollupOptions — controla chunks, adicionando hash para cache-busting.</code></pre>
+<h3 id="s4-7-vite-como-container-no-docker-compose"><span class="hn">4.7</span>Vite como Container no Docker Compose</h3>
+<p>A estrutura de configuração atual já foi preparada para ser containerizada. Um futuro Dockerfile poderia ser:</p>
+<pre class="code"><code>FROM node:18
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV IS_CONTAINER=TRUE
+EXPOSE 5173
+CMD ["npm", "run", "dev"]</code></pre>
+<p>Isso faria o Vite rodar como um container separado no docker-compose.yml, ao lado do backend. Cada entry point (Vite, backend, banco de dados) rodaria em seu próprio container, se comunicando via rede Docker — mantendo separação de responsabilidades e escalabilidade.</p>
+<h3 id="s4-8-configurando-typescript-e-compilação"><span class="hn">4.8</span>Configurando TypeScript e Compilação</h3>
+<p>O arquivo tsconfig.json define como o TypeScript deve compilar:</p>
+<pre class="code"><code><span class="cm">// tsconfig.json</span>
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}</code></pre>
+<p>O Vite já lê esse arquivo automaticamente — não precisa de configuração extra. Quando você salva um .ts, o Vite o compila, verifica tipos, e recarrega o navegador (HMR).</p>
+<h2 id="s5-api-contextual-eliminando-redundância-via-jwt"><span class="hn">5</span>API Contextual: Eliminando Redundância via JWT</h2>
+<h3 id="s5-1-o-padrão-atual-id-na-url"><span class="hn">5.1</span>O Padrão Atual: ID na URL</h3>
+<p>Até agora, as chamadas de API passam o ID do usuário como parâmetro na URL:</p>
+<pre class="code"><code><span class="cm">// deleteApi.js — cliente passa o ID na URL</span>
+export async function userDeleteApi(id) {
+    const { data } = await clientApi.delete(`/users/${id}`);
+    return data;
+}
+
+<span class="cm">// updateApi.js — cliente passa o ID do usuário na URL</span>
+export async function taskUpdateApi(idUser, taskId, updates) {
+    const { data } = await clientApi.put(`/users/${idUser}/tasks/${taskId}`, updates);
+    return data;
+}</code></pre>
+<p>Isso funciona, mas tem uma redundância perigosa: o cliente está passando um ID que já está dentro do JWT, no cookie. O backend já sabe quem é o usuário através do token — por que recebe o ID novamente?</p>
+<h3 id="s5-2-o-problema-confiança-sem-verificação"><span class="hn">5.2</span>O Problema: Confiança sem verificação</h3>
+<p>Se o cliente pode passar qualquer ID na URL, nada impede ele de fazer uma requisição DELETE para /users/42 mesmo se está autenticado como usuário 7. O backend precisa verificar: "esse ID na URL é o mesmo do JWT?" Essa verificação extra é necessária, mas ela revela o real problema: a URL contém informação que já devia estar no token.</p>
+<pre class="code"><code><span class="cm">// backend: recebe DELETE /users/42</span>
+<span class="cm">// backend: extrai userId do JWT (que é 7)</span>
+<span class="cm">// backend: verifica se 42 === 7 → não é, então rejeita</span>
+<span class="cm">// (mas isso só funciona se o backend lembrar de fazer essa verificação em TODA chamada)</span></code></pre>
+<h3 id="s5-3-introduzindo-api-contextual-id-vem-do-token"><span class="hn">5.3</span>Introduzindo API Contextual: ID vem do Token</h3>
+<p>API Contextual significa que o servidor infere contexto do usuário a partir do token JWT, sem o cliente precisar passar esse dado novamente:</p>
+<pre class="code"><code><span class="cm">// antes (com redundância)</span>
+DELETE /users/42  (com JWT id=7)
+→ backend recebe dois "42"s e precisa verificar se correspondem
+
+<span class="cm">// depois (API contextual)</span>
+DELETE /users/me  (com JWT id=7)
+→ backend resolve "/me" como o usuário do token (7)
+
+<span class="cm">// ou até omitir o usuário inteiramente em certos endpoints</span>
+DELETE /profile
+→ backend sabe que é o usuário do token</code></pre>
+<p>Essa mudança simplifica e torna mais segura a API: o contexto é único (o token), e não precisa ser repetido em cada URL.</p>
+<h3 id="s5-4-refatorando-as-apis-para-contextual"><span class="hn">5.4</span>Refatorando as APIs para Contextual</h3>
+<p>userDeleteApi — em vez de passar id, é só DELETE /users/me:</p>
+<pre class="code"><code><span class="cm">// antes</span>
+export async function userDeleteApi(id) {
+    const { data } = await clientApi.delete(`/users/${id}`);
+    return data;
+}
+
+<span class="cm">// depois (contextual)</span>
+export async function userDeleteApi() {
+    const { data } = await clientApi.delete(`/users/me`);
+    return data;
+}
+
+taskUpdateApi — o ID do usuário sai da URL, apenas o taskId fica:
+<span class="cm">// antes: DELETE /users/{idUser}/tasks/{taskId}</span>
+export async function taskUpdateApi(idUser, taskId, updates) {
+    const { data } = await clientApi.put(`/users/${idUser}/tasks/${taskId}`, updates);
+    return data;
+}
+
+<span class="cm">// depois: DELETE /me/tasks/{taskId}</span>
+<span class="cm">// (ou ainda mais simples, /tasks/{taskId}, deixando o backend inferir a autoria)</span>
+export async function taskUpdateApi(taskId, updates) {
+    const { data } = await clientApi.put(`/me/tasks/${taskId}`, updates);
+    return data;
+}
+
+userListApi — se for listar apenas seus próprios usuários (caso admin), a URL muda:
+<span class="cm">// se o endpoint era /users, continua assim para admin</span>
+<span class="cm">// mas se era uma cópia pessoal, muda para /me/users ou similar</span>
+export async function userListApi({ page = 1, limit = 10 } = {}) {
+    const { data } = await clientApi.get("/me", {
+        params: { page, limit }
+    });
+    return data;
+}</code></pre>
+<h3 id="s5-5-benefício-de-segurança-menos-pontos-de-falha"><span class="hn">5.5</span>Benefício de Segurança: Menos Pontos de Falha</h3>
+<p>Concentrar o contexto do usuário no JWT (e não na URL) significa:</p>
+<ul><li>Uma única fonte de verdade: o token diz quem é;</li><li>Menos verificações esquecidas: o backend não precisa verificar se idUser da URL bate com o JWT, porque a URL não tem idUser;</li><li>URLs mais limpas e semânticas: /users/me é mais direto do que /users/7 (que é inútil para o cliente conhecer — ele já sabe quem é).</li></ul>
+<h2 id="s6-conclusão"><span class="hn">6</span>Conclusão</h2>
+<p>Esta aula marcou uma evolução crucial em quatro eixos:</p>
+<ol><li><strong>Vendor API e Transpilação</strong>: O navegador só entende JavaScript puro (e CSS puro). TypeScript, JSX, Sass não são nativos — precisam ser transpilados. Esse é o conceito fundamental que explica por que pré compiladores existem.</li></ol>
+<ol><li><strong>TypeScript + Generics</strong>: TypeScript adiciona tipagem e é transpilado para JS puro. Generics (&lt;T&gt;) permitem escrever código reutilizável e type-safe sem duplicação — visto em ação ao tipar respostas de Axios (clientApi.get&lt;Usuario[]&gt;()), criando APIs type-safe para infinitos tipos.</li></ol>
+<ol><li><strong>Vite: Duas Serventias</strong>: Não é só HMR. A verdadeira potência é a pré compilação invisível — TypeScript, JSX, Sass → JavaScript/CSS puro, automaticamente. No desenvolvimento (HMR) e em produção (build otimizado). Já está estruturado para Docker: entry point separado, porta 5173, server.host: true, IS_CONTAINER para decidir comportamento.</li></ol>
+<ol><li><strong>API Contextual</strong>: Em vez de o cliente passar ID na URL, o backend o infere do JWT. Uma única fonte de verdade (o token), menos pontos de falha, URLs limpas.</li></ol>
+<h2 id="s7-referências"><span class="hn">7</span>Referências</h2>
+<p>Documentação TypeScript: Type Basics, Generics, Constraints.</p>
+<p>TypeScript Handbook: Generics, Working with Type Variables.</p>
+<p>Vite Documentation: Features, Pre-processing, Build Optimization, Server Options.</p>
+<p>Vite + Docker: Containerizing Frontend Build Tools.</p>
+<p>MDN/Auth Best Practices: Stateless Authentication, Token-Based Access.</p>
+<h2 id="questoes"><span class="hn">TA</span>Questões do TA</h2>
+<article class="questao"><h3><span class="qn">Questão 1</span></h3><p>Sobre Generics em TypeScript, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">Generics são tipos que só funcionam com números e strings; para outros tipos é preciso duplicar a função.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt">Generics são uma forma de escrever código reutilizável e type-safe que funciona com qualquer tipo, usando um placeholder &lt;T&gt; que é substituído quando a função é chamada; evita duplicação de código mantendo verificação de tipos.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt">Generics apenas funcionam dentro de classes; funções não podem ser genéricas.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Um generic sem constraints aceita qualquer tipo, mas se você adicionar uma constraint (extends), ele perde a capacidade de ser genérico.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">Generics são compilados para tipos reais apenas no navegador, não durante a compilação do TypeScript.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 2</span></h3><p>Sobre o Vite como pré compilador e entry point, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">O Vite é apenas um servidor com HMR; não compila TypeScript ou outras linguagens.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt">O Vite é um pré compilador completo que transforma TypeScript em JavaScript, compila automaticamente, e pode ser containerizado como um entry point separado no Docker Compose; a configuração atual (root: 'resources', server.host, IS_CONTAINER) já foi preparada para isso.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt">O Vite só funciona com CSS; TypeScript precisa de outro compilador.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Pré compiladores removem a necessidade de um servidor web; o Vite gera arquivos .js que rodam sozinhos sem nenhum processo.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">A pasta resources é opcional; o Vite funcionará sem ela usando raízes padrão.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 3</span></h3><p>Sobre API Contextual e a relação entre JWT e URLs, é correto afirmar que:</p><ol class="alts"><li class="alt ok"><span class="ltr">A</span><span class="txt">API Contextual significa que o servidor infere o contexto do usuário a partir do JWT no cookie, sem o cliente precisar passar esse dado redundantemente na URL; isso elimina redundância e reduz pontos de falha, porque a URL não contém IDs que já estão no token.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">B</span><span class="txt">API Contextual exige que o cliente continue passando o ID do usuário na URL, mesmo que esteja no JWT, para garantir que o backend sempre receba uma confirmação dupla de identidade.</span></li><li class="alt"><span class="ltr">C</span><span class="txt">O uso de JWT em cookies já garante automaticamente segurança contra endpoints chamados com IDs incorretos; não há necessidade de refatorar URLs.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Remover o ID da URL torna a API menos segura, porque o backend não consegue mais validar quem é o usuário sem receber o ID como parâmetro.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">API Contextual é apenas uma convenção de nomenclatura; não afeta a segurança ou funcionamento real da aplicação.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+  </main>
+</div>
+<script src="../../../assets/briefing.js"></script>
+</body>
+</html>

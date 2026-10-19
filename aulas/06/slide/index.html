@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 06 — Revisão Geral</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="../../../assets/slide.css">
+<link rel="stylesheet" href="../../../assets/slide-16x9.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar" aria-label="Miniaturas dos slides">
+  <a class="sidebar-back" href="../../../index.html">← Voltar</a>
+</aside>
+
+<div class="deck" id="deck">
+
+  <section class="slide" data-eyebrow="abertura">
+    <p class="eyebrow">Frontend · Bimestre 02</p>
+    <h1>Revisão Geral</h1>
+    <p class="lede">Aula 06. Sem código novo — amarrando Aulas 01 a 05: Nginx e arquivos estáticos, a árvore DOM e seus seletores, Vite e listeners, window/document, TypeScript e generics.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="mapa">
+    <h2>O Caminho até Aqui</h2>
+    <ul class="points">
+      <li><strong>Aula 01</strong> — arquivos estáticos e Nginx</li>
+      <li><strong>Aula 02</strong> — árvore DOM, seletores, CSS</li>
+      <li><strong>Aula 03</strong> — Vite, build, listeners, forms</li>
+      <li><strong>Aula 04</strong> — window, document, cookies, JWT, CORS</li>
+      <li><strong>Aula 05</strong> — TypeScript, generics, pré-compilação</li>
+    </ul>
+    <p class="payoff">Dois eixos crescendo juntos: a estrutura do frontend e a comunicação com o backend.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 01 · nginx">
+    <h2>Por que Nginx em Docker</h2>
+    <ul class="points">
+      <li>😔 Abrir o arquivo direto — não simula produção</li>
+      <li>😐 Backend só para servir estáticos — caro, desnecessário</li>
+      <li>😀 Nginx em Docker — ambiente de servidor real, sem custo de backend</li>
+    </ul>
+    <p class="payoff"><code>./public</code> local vira <code>/usr/share/nginx/html</code> no container.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 01 · try_files">
+    <h2>try_files: a Cascata de Tentativas</h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">nginx.conf</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">try_files $uri $uri/ =404;</span></div>
+        <div class="term-line"></div>
+        <div class="term-line">1. <span class="hl">$uri</span>    <span class="comment">→ tenta como arquivo</span></div>
+        <div class="term-line">2. <span class="hl">$uri/</span>   <span class="comment">→ tenta como diretório (+ index)</span></div>
+        <div class="term-line">3. <span class="hl">=404</span>    <span class="comment">→ desiste, responde 404</span></div>
+      </div>
+    </div>
+    <p class="payoff">Testa em ordem, usa o primeiro que existir — do mais específico ao mais genérico.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 02 · arvore dom">
+    <h2>A Árvore DOM: Pais, Filhos, Irmãos</h2>
+    <div class="tree">
+&lt;body&gt;                    <span class="comment">pai de header, main, footer</span>
+<br>  ├─ &lt;header&gt;          <span class="comment">filho de body; irmão de main</span>
+<br>  ├─ &lt;main&gt;
+<br>  │   └─ &lt;article&gt;    <span class="comment">descendente de body</span>
+<br>  └─ &lt;footer&gt;          <span class="comment">irmão de header e main</span>
+    </div>
+    <p class="payoff">closest() sobe; children desce um nível — seguindo essa mesma árvore.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 02 · seletores">
+    <h2>Os Cinco Métodos de Seleção</h2>
+    <ul class="points">
+      <li><code>querySelector</code> — 1º elemento (seletor CSS) → <strong>Element | null</strong></li>
+      <li><code>querySelectorAll</code> — todos (seletor CSS) → <strong>NodeList</strong></li>
+      <li><code>getElementById</code> — por id → <strong>Element | null</strong></li>
+      <li><code>getElementsByClassName</code> — por classe → <strong>HTMLCollection</strong></li>
+      <li><code>getElementsByTagName</code> — por tag → <strong>HTMLCollection</strong></li>
+    </ul>
+    <p class="payoff">O retorno reflete a cardinalidade do critério de busca.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 02 · cardinalidade">
+    <h2>id (1 para 1) vs class (n para n)</h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">cardinalidade.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line comment">// id: único no documento</div>
+        <div class="term-line"><span class="cmd">document.getElementById("x")</span> <span class="comment">// Element | null</span></div>
+        <div class="term-line"></div>
+        <div class="term-line comment">// class: n elementos podem compartilhar</div>
+        <div class="term-line"><span class="cmd">document.getElementsByClassName("x")</span> <span class="comment">// HTMLCollection</span></div>
+      </div>
+    </div>
+    <p class="payoff">Por isso busca por id nunca devolve lista — e busca por classe sempre pode.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 02 · exemplos">
+    <h2>Seletores CSS = Seletores do JS</h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">seletores.css</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line">A &gt; B  <span class="comment">/* filho direto */</span></div>
+        <div class="term-line">A + B  <span class="comment">/* irmão imediato */</span></div>
+        <div class="term-line">[type="text"]  <span class="comment">/* seletor de atributo */</span></div>
+        <div class="term-line">:hover  <span class="comment">/* pseudo-classe */</span></div>
+        <div class="term-line"></div>
+        <div class="term-line"><span class="prompt">→</span> <span class="cmd">document.querySelectorAll('[type="text"]')</span></div>
+      </div>
+    </div>
+    <p class="payoff">A mesma sintaxe estiliza no CSS e seleciona no JS.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 03 · build/vite">
+    <h2>Build e Vite: HMR</h2>
+    <p class="body-text"><strong>Build</strong>: transforma código-fonte no que vai para produção. O Vite é uma build tool.</p>
+    <div class="tree">
+Sem HMR: salva → recarrega página inteira → perde estado
+<br><br>
+Com HMR: salva → Vite identifica o módulo → <span class="hl">só ele</span> é substituído
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 03 · target">
+    <h2>target vs currentTarget</h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">event.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">container.addEventListener("click", function (event) {</span></div>
+        <div class="term-line">  event.<span class="hl">target</span>;        <span class="comment">// onde ocorreu (pode ser filho)</span></div>
+        <div class="term-line">  event.<span class="hl">currentTarget</span>; <span class="comment">// onde o listener foi registrado</span></div>
+        <div class="term-line">  event.target.closest(".item");</div>
+        <div class="term-line"><span class="cmd">});</span></div>
+      </div>
+    </div>
+    <p class="payoff">closest() acha o elemento clicável mesmo quando o clique bate num filho.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 03 · prevent/stop">
+    <h2>preventDefault() vs stopPropagation()</h2>
+    <ul class="points">
+      <li><code>preventDefault()</code> — cancela o comportamento padrão (link navegar, form recarregar)</li>
+      <li><code>stopPropagation()</code> — impede a propagação pela árvore (bubbling)</li>
+    </ul>
+    <p class="payoff">Um cancela ação padrão; o outro cancela propagação. Não são a mesma coisa.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 03 · forms">
+    <h2>Forms e o Evento submit</h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">form.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">formulario.addEventListener("submit", function (event) {</span></div>
+        <div class="term-line">  event.preventDefault(); <span class="comment">// evita reload</span></div>
+        <div class="term-line">  const nome = formulario.nome.value;</div>
+        <div class="term-line"><span class="cmd">});</span></div>
+      </div>
+    </div>
+    <p class="payoff">Listener sempre no &lt;form&gt;, nunca só no botão de envio.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 04 · window/document">
+    <h2>window acima de document</h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">console.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="prompt">→</span> <span class="cmd">window.document === document</span></div>
+        <div class="term-line out hl">true</div>
+        <div class="term-line comment">// document é a árvore DOM; window é o ambiente inteiro</div>
+        <div class="term-line"><span class="cmd">window.localStorage, window.fetch, window.location</span></div>
+      </div>
+    </div>
+    <p class="payoff">document é propriedade de window — não um objeto à parte.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 04 · devtools/cookies">
+    <h2>DevTools, Cookies, JWT, CORS</h2>
+    <ul class="points">
+      <li><strong>DevTools</strong> — Elements (DOM), Console (JS ao vivo), Network (cascata)</li>
+      <li><strong>Cookies</strong> — Max-Age, HttpOnly, Secure</li>
+      <li><strong>JWT</strong> — header.payload.signature; secret só no backend</li>
+      <li><strong>CORS</strong> — Access-Control-Allow-Origin libera outra origem</li>
+    </ul>
+  </section>
+
+  <section class="slide" data-eyebrow="aula 05 · typescript">
+    <h2>TypeScript e Generics</h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">generics.ts</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line comment">// navegador só entende JS puro — TS precisa ser transpilado</div>
+        <div class="term-line"><span class="cmd">function wrap&lt;T&gt;(v: T): T { return v; }</span></div>
+        <div class="term-line"><span class="prompt">→</span> <span class="cmd">clientApi.get&lt;Usuario[]&gt;("/users")</span></div>
+      </div>
+    </div>
+    <p class="payoff">Uma função, infinitos tipos — Vite pré-compila resources/ → public/.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="resumo">
+    <h2>Resumo da Revisão</h2>
+    <ul class="points">
+      <li><strong>01</strong> — Nginx + try_files (arquivo → diretório → 404)</li>
+      <li><strong>02</strong> — árvore DOM, 5 seletores, cardinalidade id/class</li>
+      <li><strong>03</strong> — build, HMR, target/currentTarget, preventDefault/stopPropagation</li>
+      <li><strong>04</strong> — document é propriedade de window; DevTools, cookies, JWT, CORS</li>
+      <li><strong>05</strong> — TypeScript, generics &lt;T&gt;, pré-compilação</li>
+    </ul>
+  </section>
+
+  <section class="slide" data-eyebrow="tf">
+    <h2>TF Aula 06 — Revisão Geral</h2>
+    <p class="lede">7 questões dissertativas, conceituais, sem escrita de código — uma para cada ponto enfatizado hoje.</p>
+    <a class="link-card" href="https://docs.google.com/forms/d/e/1FAIpQLSdX_KVPNOB7EXGimv9pF8N2Q99ft_7oulpYz5XcNDYDZS7JJw/viewform?usp=publish-editor" target="_blank" rel="noopener">https://docs.google.com/forms/d/e/1FAIpQLSdX_KVPNOB7EXGimv9pF8N2Q99ft_7oulpYz5XcNDYDZS7JJw/viewform?usp=publish-editor</a>
+    <p class="payoff">Detalhes completos em TF06.md.</p>
+  </section>
+
+</div>
+
+<nav class="hud">
+  <button id="prevBtn" aria-label="Slide anterior">‹</button>
+  <div class="hud-mid">
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="hud-meta">
+      <span><span id="counterCurrent">01</span> / <span id="counterTotal">17</span> — <span id="eyebrowLabel">abertura</span></span>
+      <span class="hint">use ← → ou espaço para navegar · T alterna o tema</span>
+    </div>
+  </div>
+  <button id="nextBtn" aria-label="Próximo slide">›</button>
+</nav>
+<script src="../../../assets/slide.js"></script>
+<script src="../../../assets/slide-16x9.js"></script>
+</body>
+</html>

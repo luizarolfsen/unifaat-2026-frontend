@@ -1,0 +1,52 @@
+/* Palco 16:9 (opt-in): o miolo do slide vive num palco fixo de 1280x720, o mesmo das
+   miniaturas, e o palco inteiro é escalado para caber na tela/projetor (slide-16x9.js
+   define --escala). A proporção da janela não muda; só o miolo passa a caber nela.
+   Só vale na tela: a impressão (PDF) continua com o CSS compacto de slide.css. */
+@media screen{
+  .deck{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px 24px 96px;
+    box-sizing: border-box;
+  }
+  .deck > .slide{
+    flex: none;
+    width: 1280px;
+    height: 720px;
+    min-height: 0;
+    padding: 40px 72px;
+    box-sizing: border-box;
+    overflow: hidden;
+    zoom: var(--escala, 1);
+    background: var(--bg);
+    box-shadow: 0 0 0 1px var(--rule), 0 6px 24px var(--shadow);
+    border-radius: 6px;
+  }
+  .deck > .slide[hidden]{ display: none; }
+
+  /* FE: slides de leitura (resumo da prova, <body class="prova">) têm mais texto que o
+     palco comporta: mantêm o palco 16:9 com borda, mas rolam por dentro em vez de cortar */
+  body.prova .deck > .slide{ overflow-y: auto; justify-content: flex-start; }
+
+  /* tipografia pensada para o palco 1280x720: a mesma escala compacta do PDF, um pouco
+     maior. O palco é escalado depois, então no projetor a letra cresce junto. */
+  .deck > .slide{ gap: 12px; }
+  .deck > .slide h1{ font-size: 4rem; }
+  .deck > .slide h2{ font-size: 2.5rem; line-height: 1.15; }
+  .deck > .slide .lede,
+  .deck > .slide p.body-text{ font-size: 1.35rem; line-height: 1.4; max-width: none; }
+  .deck > .slide ul.points{ gap: 8px; }
+  .deck > .slide ul.points li{ font-size: 1.35rem; line-height: 1.35; }
+  .deck > .slide .tree{ font-size: 1.25rem; line-height: 1.45; padding: 12px 16px; }
+  .deck > .slide .term-body{ font-size: 1.12rem; line-height: 1.4; padding: 12px 16px 14px; }
+  .deck > .slide .term-body .comment{ font-size: .9em; font-style: italic; }
+  .deck > .slide .callout{ padding: 10px 14px; gap: 8px; }
+  .deck > .slide .callout p{ font-size: 1.25rem; line-height: 1.4; }
+  .deck > .slide .payoff{ font-size: 1.25rem; line-height: 1.4; padding-top: 10px; }
+  .deck > .slide .data-table{ font-size: 1.12rem; }
+  .deck > .slide .data-table th,
+  .deck > .slide .data-table td{ padding: 6px 12px; }
+  .deck > .slide .two-col{ gap: 16px; }
+}

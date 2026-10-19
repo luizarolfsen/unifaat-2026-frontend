@@ -4,192 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aula 04 - Navegadores Web e API</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #f5f7f3;
-            --bg-raised: #e7ebe4;
-            --bg-chrome: #12211c;
-            --ink: #1b231e;
-            --muted: #545f57;
-            --muted-2: #808c83;
-            --accent: #935a00;
-            --accent-ink: #fff6e8;
-            --accent-2: #0d7a5f;
-            --rule: #d7ddd2;
-            --shadow: rgba(30,40,32,.14);
-            --font-body: 'IBM Plex Sans', system-ui, sans-serif;
-            --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--ink);
-            font-family: var(--font-body);
-            margin: 0;
-            min-height: 100vh;
-            padding: 2rem;
-        }
-
-        .container {
-            max-width: 1220px;
-            margin: 0 auto;
-        }
-
-        .back-link {
-            display: inline-block;
-            font-family: var(--font-mono);
-            color: var(--accent-2);
-            text-decoration: none;
-            font-weight: 500;
-            margin-bottom: 1rem;
-            transition: color 0.2s;
-            font-size: 0.9rem;
-            letter-spacing: 0.05em;
-        }
-
-        .back-link:hover {
-            color: var(--accent);
-        }
-
-        h1 {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            font-size: clamp(2rem, 4vw, 3.5rem);
-            line-height: 1.05;
-            letter-spacing: -0.01em;
-            margin: 0 0 0.5rem;
-        }
-
-        .subtitle {
-            font-size: 1rem;
-            color: var(--muted);
-            margin: 0 0 2rem;
-        }
-
-        .section {
-            margin: 3rem 0;
-        }
-
-        .section-title {
-            font-family: var(--font-mono);
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin: 0 0 1.5rem;
-            color: var(--ink);
-        }
-
-        .topics-box {
-            background: var(--bg-raised);
-            border: 1px solid var(--rule);
-            border-left: 4px solid var(--accent-2);
-            padding: 1.5rem;
-            border-radius: 4px;
-            margin-bottom: 2rem;
-        }
-
-        .topics-box h3 {
-            margin: 0 0 1rem;
-            font-family: var(--font-mono);
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--ink);
-        }
-
-        .topics-box ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .topics-box li {
-            color: var(--muted);
-            margin-bottom: 0.8rem;
-            padding-left: 1.5rem;
-            position: relative;
-            font-size: 0.95rem;
-        }
-
-        .topics-box li:last-child {
-            margin-bottom: 0;
-        }
-
-        .topics-box li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: var(--accent-2);
-            font-weight: bold;
-            font-family: var(--font-mono);
-        }
-
-        .materials-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .material-link {
-            background: var(--bg-raised);
-            border: 1px solid var(--rule);
-            border-radius: 4px;
-            padding: 1.5rem;
-            text-decoration: none;
-            color: var(--ink);
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 0.8rem;
-            cursor: pointer;
-        }
-
-        .material-link:hover {
-            background: var(--bg-chrome);
-            color: var(--accent-ink);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px var(--shadow);
-        }
-
-        .material-icon {
-            font-size: 2.5rem;
-        }
-
-        .material-name {
-            font-family: var(--font-mono);
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .material-desc {
-            font-size: 0.85rem;
-            color: var(--muted);
-        }
-
-        .material-link:hover .material-desc {
-            color: var(--muted-2);
-        }
-
-        .footer {
-            text-align: center;
-            color: var(--muted-2);
-            font-size: 0.9rem;
-            border-top: 1px solid var(--rule);
-            padding-top: 2rem;
-            margin-top: 3rem;
-        }
-    </style>
+    <link rel="stylesheet" href="../../assets/timeline.css">
+    <script src="../../assets/tema.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <a href="../" class="back-link">← Voltar</a>
+        <a href="../../index.html" class="back-link">← Voltar</a>
 
         <h1>Aula 04</h1>
         <p class="subtitle">Navegadores Web e API</p>
@@ -211,10 +32,10 @@
                     <div class="material-name">Slides</div>
                     <div class="material-desc">Apresentação</div>
                 </a>
-                <a href="./briefing.md" class="material-link">
+                <a href="./briefing/" class="material-link">
                     <div class="material-icon"><i class="fa-solid fa-pen-to-square"></i></div>
                     <div class="material-name">Briefing</div>
-                    <div class="material-desc">Resumo em Markdown</div>
+                    <div class="material-desc">Texto da aula e questões do TA</div>
                 </a>
                 <a href="./raio-x/index.html" class="material-link">
                     <div class="material-icon"><i class="fa-solid fa-x-ray"></i></div>

@@ -17,7 +17,7 @@ Aula:
 
 Título da aula: 
 
-TypeScript, Generics e API Contextual
+Pré Compiladores e Typescript
 
 
 Opção do TA:  Vídeo ☐Texto ☒

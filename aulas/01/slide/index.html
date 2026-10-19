@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 01 — Servidor de Arquivos Estáticos e DOM</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="../../../assets/slide.css">
+<link rel="stylesheet" href="../../../assets/slide-16x9.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar" aria-label="Miniaturas dos slides">
+  <a class="sidebar-back" href="../../../index.html">← Voltar</a>
+</aside>
+
+<div class="deck" id="deck">
+
+  <section class="slide" data-eyebrow="abertura">
+    <div class="cover-top">
+      <span class="cover-uni">Unifaat</span>
+      <span class="cover-sem">2026.2</span>
+    </div>
+    <h1><span class="cover-num">01</span> - Servidor de Arquivos Estáticos e DOM</h1>
+    <p class="cover-prof">Prof. Luan Lourenço</p>
+  </section>
+
+  <section class="slide" data-eyebrow="avisos · como a disciplina funciona">
+    <h2>Avisos <span class="accent">da disciplina</span></h2>
+    <ul class="points">
+      <li><strong>Não é um curso de HTML e CSS</strong> — é frontend como peça de um sistema maior</li>
+      <li>Continuidade direta de <strong>Desenvolvimento Web</strong> (o backend do semestre passado)</li>
+      <li>Vai ser mais <strong>prático</strong> que Desenvolvimento Web</li>
+      <li><strong>1 prova teórica</strong> e <strong>1 prova prática</strong></li>
+      <li>Carga horária reduzida por causa dos feriados</li>
+    </ul>
+  </section>
+
+  <section class="slide" data-eyebrow="avisos · combinados">
+    <h2>Combinados <span class="accent">de sala</span></h2>
+    <ul class="points">
+      <li><strong>Meta-aprendizagem:</strong> aprendendo a aprender</li>
+      <li>Usem IA, mas com uma <strong>base sólida</strong> por baixo</li>
+      <li>Professor disponível fora do horário de aula (chama no zap)</li>
+      <li>Conversa paralela, por favor, fora da sala</li>
+    </ul>
+    <p class="payoff">Bora lá!</p>
+  </section>
+
+  <section class="slide" data-eyebrow="repositório">
+    <h2>O repositório <span class="accent">do bimestre</span></h2>
+    <p class="lede">Todo o código das aulas do bimestre mora num único repositório no GitHub.</p>
+    <p class="body-text"><a href="https://github.com/luan-tavares/unifaat-frontend-bimestre-01" target="_blank" rel="noopener noreferrer"><code>github.com/luan-tavares/unifaat-frontend-bimestre-01</code></a></p>
+    <p class="payoff">É nele que o projeto compartilhado (backend + frontend) vai evoluindo aula a aula.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="o que é frontend">
+    <h2>O que é <span class="accent">Frontend?</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># processamento no client</span><br>
+        Tudo que gera a GUI — montar tela,<br>
+        reagir a cliques, atualizar o que o<br>
+        usuário vê — acontece no <strong>navegador</strong>,<br>
+        não no servidor.
+      </div>
+      <div class="tree">
+        <span class="dim"># não existe sozinho</span><br>
+        Depende do <strong>backend</strong> dentro da<br>
+        arquitetura client/server.<br>
+        Só existe porque antes houve uma<br>
+        requisição, uma resposta e um servidor.
+      </div>
+    </div>
+    <p class="payoff">O objetivo do curso: trabalhar com projetos reais, entendendo o frontend como peça de um sistema maior.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="conteúdo dinâmico vs. estático">
+    <h2>Conteúdo <span class="accent">dinâmico</span> vs. <span class="accent">estático</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># dinâmico</span><br>
+        Gerado <strong>sob demanda</strong>, na requisição.<br>
+        Não existe como arquivo pronto.<br>
+        <br>
+        • processado pelo backend<br>
+        • dados variam a cada requisição<br>
+        • HTML, JSON, CSS gerados na hora
+      </div>
+      <div class="tree">
+        <span class="dim"># estático</span><br>
+        Já existe <strong>persistido</strong> no servidor,<br>
+        esperando ser requisitado.<br>
+        <br>
+        • imagens, fontes, vídeos<br>
+        • HTML, CSS, JS servidos prontos<br>
+        • apenas copiado para o client
+      </div>
+    </div>
+    <p class="payoff">Dinâmico se calcula a cada pedido. Estático só se entrega.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="por que nginx">
+    <h2>Por que não servir estático <span class="accent">pelo backend?</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># nginx — baixo overhead</span><br>
+        requisição → sistema de arquivos<br>
+        caminho direto e eficiente<br>
+        sem intermediários
+      </div>
+      <div class="tree">
+        <span class="dim"># backend — alto overhead</span><br>
+        rota → middlewares → controller<br>
+        → leitura de disco<br>
+        linguagem interpretada, garbage collector<br>
+        e event loop no caminho
+      </div>
+    </div>
+    <p class="body-text">Passar pelo ciclo do Node só pra entregar um arquivo é overhead desnecessário: de <strong>1 a 2 ordens de grandeza</strong> de diferença em throughput.</p>
+    <p class="payoff">O Nginx resolve a requisição direto contra o sistema de arquivos.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="nginx · proxy reverso">
+    <h2>Nginx como <span class="accent">proxy reverso</span></h2>
+    <p class="lede">O Nginx decide com base no <strong>método</strong> e no <strong>path</strong> da requisição HTTP:</p>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># arquivo estático</span><br>
+        resolve direto —<br>
+        sem passar pelo backend
+      </div>
+      <div class="tree">
+        <span class="dim"># conteúdo dinâmico</span><br>
+        repassa a chamada<br>
+        pro backend processar
+      </div>
+    </div>
+    <p class="payoff">Um único ponto de entrada, dois destinos possíveis.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="nginx · bloco server">
+    <h2>O bloco <span class="accent">server</span> no Nginx</h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">default.conf</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">server {</span></div>
+        <div class="term-line"><span class="cmd">  listen 80;</span></div>
+        <div class="term-line"><span class="cmd">  root /var/www;</span></div>
+        <div class="term-line"><span class="cmd">  index index.html;</span></div>
+        <div class="term-line"><span class="cmd">  location / {</span></div>
+        <div class="term-line"><span class="cmd">    autoindex on;</span></div>
+        <div class="term-line"><span class="cmd">    try_files $uri $uri/ =404;</span></div>
+        <div class="term-line"><span class="cmd">  }</span></div>
+        <div class="term-line"><span class="cmd">  error_page 404 /404.html;</span></div>
+        <div class="term-line"><span class="cmd">}</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="nginx · especificidade">
+    <h2>Match por <span class="accent">especificidade</span></h2>
+    <p class="lede">O Nginx escolhe o <strong>prefixo mais longo</strong> que casa com o path.</p>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">default.conf</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">location / {</span></div>
+        <div class="term-line"><span class="cmd">  try_files $uri $uri/ =404;   # arquivo → diretório → 404</span></div>
+        <div class="term-line"><span class="cmd">}</span></div>
+        <div class="term-line"><span class="cmd">location /imagens/ {</span></div>
+        <div class="term-line"><span class="cmd">  try_files $uri =404;         # só arquivo → 404 (mais específico)</span></div>
+        <div class="term-line"><span class="cmd">}</span></div>
+      </div>
+    </div>
+    <p class="payoff">Vale a especificidade, não a ordem de escrita.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="html semântico">
+    <h2>HTML <span class="accent">semântico</span></h2>
+    <p class="lede">Só de ler o HTML dá pra entender o que cada parte representa — e navegador, buscador e leitor de tela também entendem.</p>
+    <div class="two-col">
+      <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">so-divs.html</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">&lt;div class="header"&gt;</span></div>
+        <div class="term-line"><span class="cmd">  &lt;div class="menu"&gt;…&lt;/div&gt;</span></div>
+        <div class="term-line"><span class="cmd">&lt;/div&gt;</span></div>
+        <div class="term-line"><span class="cmd">&lt;div class="content"&gt;…&lt;/div&gt;</span></div>
+        <div class="term-line"><span class="cmd">&lt;div class="footer"&gt;…&lt;/div&gt;</span></div>
+      </div>
+    </div>
+      <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">semantico.html</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">&lt;header&gt;</span></div>
+        <div class="term-line"><span class="cmd">  &lt;nav&gt;…&lt;/nav&gt;</span></div>
+        <div class="term-line"><span class="cmd">&lt;/header&gt;</span></div>
+        <div class="term-line"><span class="cmd">&lt;main&gt;</span></div>
+        <div class="term-line"><span class="cmd">  &lt;article&gt;…&lt;/article&gt;</span></div>
+        <div class="term-line"><span class="cmd">&lt;/main&gt;</span></div>
+        <div class="term-line"><span class="cmd">&lt;footer&gt;…&lt;/footer&gt;</span></div>
+      </div>
+    </div>
+    </div>
+    <p class="payoff"><code>header</code>, <code>nav</code>, <code>main</code>, <code>section</code>, <code>article</code>, <code>aside</code>, <code>footer</code>: estrutura com significado.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="o dom">
+    <h2>O <span class="accent">DOM</span></h2>
+    <p class="lede"><strong>D</strong>ocument <strong>O</strong>bject <strong>M</strong>odel. HTML, CSS e JS trafegam pela rede como <strong>strings</strong> — texto puro.</p>
+    <p class="body-text">O navegador precisa transformar esse texto em algo que dê pra <strong>manipular</strong>.</p>
+    <p class="payoff">Texto não se manipula. Objeto se manipula.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="do dom · string → objeto">
+    <h2>De string <span class="accent">para objeto</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># 1 · JSON chega como string</span><br>
+        <code>JSON.parse()</code> →<br>
+        objeto manipulável
+      </div>
+      <div class="tree">
+        <span class="dim"># 2 · HTML chega como string</span><br>
+        o navegador faz o <strong>parsing</strong> →<br>
+        gera o DOM
+      </div>
+    </div>
+    <p class="body-text">Fonte (string) → interpretação (parsing) → resultado em memória → manipulação via JS. O DOM vive na <strong>memória do navegador</strong> (o client).</p>
+    <p class="payoff">A mesma lógica do JSON, aplicada ao HTML.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="dom · árvore">
+    <h2>A estrutura <span class="accent">em árvore</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">dom-tree</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">html            ← nó raiz</span></div>
+        <div class="term-line"><span class="cmd">├── head</span></div>
+        <div class="term-line"><span class="cmd">│   └── title</span></div>
+        <div class="term-line"><span class="cmd">└── body</span></div>
+        <div class="term-line"><span class="cmd">    ├── h1          ┐</span></div>
+        <div class="term-line"><span class="cmd">    ├── p           ├ irmãos (mesmo pai: body)</span></div>
+        <div class="term-line"><span class="cmd">    └── button      ┘</span></div>
+      </div>
+    </div>
+    <p class="body-text">Cada tag HTML vira um <code>HTMLElement</code> — um nó da árvore, com <strong>pai</strong>, <strong>filhos</strong> e <strong>irmãos</strong>.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="vendor api">
+    <h2>JS de frontend: <span class="accent">Vendor API</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># node.js (backend)</span><br>
+        sem acesso ao DOM<br>
+        sem <code>document</code>, sem <code>window</code><br>
+        APIs de sistema de arquivos e rede
+      </div>
+      <div class="tree">
+        <span class="dim"># navegador (frontend)</span><br>
+        API própria pra manipular o DOM<br>
+        JS orientado a eventos<br>
+        ponto de entrada: <code>document</code>
+      </div>
+    </div>
+    <p class="payoff">O objeto <code>document</code> é a porta de entrada pra toda manipulação do DOM via JavaScript.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="dom · criando e inserindo">
+    <h2>Criando e inserindo <span class="accent">elementos</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">console.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line comment">// cria o elemento — ainda fora da árvore (retorna HTMLElement)</div>
+        <div class="term-line"><span class="cmd">const el = document.createElement("p");</span></div>
+        <div class="term-line comment">// insere no final dos filhos (retorna undefined)</div>
+        <div class="term-line"><span class="cmd">document.body.append(el);</span></div>
+        <div class="term-line comment">// insere no início dos filhos (retorna undefined)</div>
+        <div class="term-line"><span class="cmd">document.body.prepend(el);</span></div>
+        <div class="term-line comment">// adiciona ou atualiza um atributo (retorna undefined)</div>
+        <div class="term-line"><span class="cmd">el.setAttribute("id", "x");</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="dom · selecionando">
+    <h2>Selecionando <span class="accent">elementos</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">console.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line comment">// ID único → Element | null</div>
+        <div class="term-line"><span class="cmd">document.getElementById("login");</span></div>
+        <div class="term-line comment">// seletor CSS, o primeiro → Element | null</div>
+        <div class="term-line"><span class="cmd">document.querySelector("h1");</span></div>
+        <div class="term-line comment">// seletor CSS, todos → NodeList</div>
+        <div class="term-line"><span class="cmd">document.querySelectorAll("li");</span></div>
+        <div class="term-line comment">// classe CSS, todos → HTMLCollection</div>
+        <div class="term-line"><span class="cmd">document.getElementsByClassName("btn");</span></div>
+        <div class="term-line comment">// tag HTML, todos → HTMLCollection</div>
+        <div class="term-line"><span class="cmd">document.getElementsByTagName("p");</span></div>
+      </div>
+    </div>
+    <div class="callout">
+      <span class="mark">!</span>
+      <p><code>HTMLCollection</code> e <code>NodeList</code> são <strong>array-like</strong> — não são arrays puros de JS.</p>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="id e class">
+    <h2>Atributos <span class="accent">id</span> e <span class="accent">class</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># id — único no documento</span><br>
+        • no máximo um id por elemento<br>
+        • nenhum outro elemento repete<br>
+        • usado com <code>getElementById</code>
+      </div>
+      <div class="tree">
+        <span class="dim"># class — reutilizável</span><br>
+        • pode se repetir em vários elementos<br>
+        • um elemento pode ter várias<br>
+        • base pra aplicar estilo com CSS
+      </div>
+    </div>
+    <p class="payoff">Na próxima aula, a diferença entre os dois vira o assunto central.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="fim da aula 01">
+    <h2>Servidor, DOM e Vendor API.</h2>
+    <p class="lede">Próximas aulas: <strong>CSS e classes</strong> (estilizar via <code>class</code>), o <strong>objeto <code>window</code></strong> (aula de navegadores) e <strong>views dinâmicas</strong> (conteúdo gerado pelo backend a cada requisição).</p>
+  </section>
+
+  <section class="slide" data-eyebrow="tf 01 · entrega">
+    <span class="kicker-badge">tarefa</span>
+    <h2>TF 01: <span class="accent">Servidor de Arquivos Estáticos e DOM</span></h2>
+    <p class="body-text">Entrega pelo formulário abaixo —<br><a href="https://docs.google.com/forms/d/e/1FAIpQLScaZga2FaqkJQrMD6Ohx1a1Wrz-8cScR8_F0ubu4dE2eaTnPw/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer"><code>docs.google.com/forms/d/e/1FAIpQLScaZga2FaqkJQrMD6Ohx1a1Wrz-8cScR8_F0ubu4dE2eaTnPw/viewform</code></a></p>
+  </section>
+
+</div>
+
+<nav class="hud">
+  <button id="prevBtn" aria-label="Slide anterior">‹</button>
+  <div class="hud-mid">
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="hud-meta">
+      <span><span id="counterCurrent">01</span> / <span id="counterTotal">20</span> — <span id="eyebrowLabel">abertura</span></span>
+      <span class="hint">use ← → ou espaço para navegar · T alterna o tema</span>
+    </div>
+  </div>
+  <button id="nextBtn" aria-label="Próximo slide">›</button>
+</nav>
+<script src="../../../assets/slide.js"></script>
+<script src="../../../assets/slide-16x9.js"></script>
+</body>
+</html>

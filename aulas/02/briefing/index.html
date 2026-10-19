@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Briefing · Aula 02 — CSS, Seletores e JS Reativo</title>
+<link rel="stylesheet" href="../../../assets/briefing.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <a class="back" href="../../../index.html">← Voltar</a>
+    <details class="toc" open><summary>Nesta página</summary><ol><li class="l1"><a href="#topo">02 - CSS, Seletores e JS Reativo</a></li><li class="l2"><a href="#s1-introdução">1 - Introdução</a></li><li class="l2"><a href="#s2-o-dom-e-a-vendor-api">2 - O DOM e a Vendor API</a></li><li class="l3"><a href="#s2-1-cardinalidade-de-class-e-id">2.1 - Cardinalidade de class e id</a></li><li class="l3"><a href="#s2-2-htmlelement-style-e-navegação-na-árvore">2.2 - HTMLElement, style e navegação na árvore</a></li><li class="l2"><a href="#s3-css">3 - CSS</a></li><li class="l3"><a href="#s3-1-display-block-inline-e-inline-block">3.1 - Display: block, inline e inline-block</a></li><li class="l3"><a href="#s3-2-responsividade-e-media-queries">3.2 - Responsividade e media queries</a></li><li class="l3"><a href="#s3-3-seletores-avançados">3.3 - Seletores avançados</a></li><li class="l2"><a href="#s4-js-reativo">4 - JS Reativo</a></li><li class="l3"><a href="#s4-1-addeventlistener-e-o-objeto-event">4.1 - addEventListener e o objeto event</a></li><li class="l3"><a href="#s4-2-typemodule">4.2 - type=&quot;module&quot;</a></li><li class="l2"><a href="#s5-css-como-commodity">5 - CSS como commodity</a></li><li class="l2"><a href="#s6-conclusão">6 - Conclusão</a></li><li class="l2"><a href="#s7-referências">7 - Referências</a></li><li class="l2"><a href="#questoes">Questões do TA</a></li></ol></details>
+  </aside>
+  <main class="doc">
+    <header class="cover" id="topo">
+      <p class="eyebrow">UNIFAAT · 2026.2 · Briefing para produção de conteúdo</p>
+      <h1><span class="cn">02</span> - CSS, Seletores e JS Reativo</h1>
+      <dl class="ficha">
+        <div><dt>Professor</dt><dd>Luan Tavares Lourenço</dd></div>
+        <div><dt>Disciplina</dt><dd>Frontend</dd></div>
+        <div><dt>Aula</dt><dd>02</dd></div>
+        <div><dt>Opção do TA</dt><dd>Texto</dd></div>
+      </dl>
+    </header>
+<h2 id="s1-introdução"><span class="hn">1</span>Introdução</h2>
+<p>A Aula 1 estabeleceu o DOM como uma árvore de nós, construída a partir do parsing de HTML, CSS e JS enquanto texto, e apresentou a Vendor API do JS como a ferramenta de criação, inserção e seleção desses nós. A Aula 2 dá continuidade direta a essa linha: a Vendor API ganha profundidade — querySelector e querySelectorAll deixam de ser só sintaxe e passam a ser entendidos pela cardinalidade de class e id. É esse mesmo par de seletores, . e #, que abre a porta para o CSS: os alunos descobrem que a sintaxe que já usam no JS para selecionar elementos é a mesma sintaxe que o CSS usa para estilizar. A partir daí, CSS entra na aula não como um bloco de conteúdo isolado, mas como um segundo consumidor da mesma linguagem de seleção. A aula fecha com o JS reativo — o JS orientado a eventos, que é o verdadeiro traço distintivo do frontend — e com uma reflexão de mercado: CSS puro, hoje, é commodity, resolvido majoritariamente por frameworks prontos.</p>
+<h2 id="s2-o-dom-e-a-vendor-api"><span class="hn">2</span>O DOM e a Vendor API</h2>
+<p>querySelector retorna o primeiro elemento que casa com o seletor informado, ou null quando nada é encontrado; querySelectorAll retorna uma NodeList com todos os elementos que casam. O ponto a reforçar não é a sintaxe em si, já vista na Aula 1, mas o motivo de ela aceitar seletores CSS: é a mesma linguagem de seleção usada em dois contextos diferentes, estilizar e manipular.</p>
+<p>Dois conceitos merecem definição explícita antes de avançar. HTMLElement é o tipo de objeto que representa um nó da árvore do DOM depois que a tag HTML foi parseada — é ele que carrega propriedades como id, class e, como será visto adiante, style. NodeList é o tipo de coleção retornado por métodos que buscam múltiplos elementos, como querySelectorAll — parece um array (tem índice, tem length), mas não é um array de JS puro, e por isso alguns métodos de array não estão disponíveis diretamente nela.</p>
+<h3 id="s2-1-cardinalidade-de-class-e-id"><span class="hn">2.1</span>Cardinalidade de class e id</h3>
+<p>id e class merecem ser ensinados pela relação que estabelecem com o elemento, não só pela sintaxe. O id é 1 para 1: um elemento tem no máximo um id, e aquele id não se repete em nenhum outro elemento do documento — relação exclusiva. A class é n para n: um elemento pode carregar várias classes, e uma mesma classe pode estar presente em quantos elementos forem necessários — relação muitos-para-muitos. Essa diferença de cardinalidade é o que explica, na prática, por que busca por id sempre devolve um elemento único e busca por classe naturalmente devolve coleções.</p>
+<h3 id="s2-2-htmlelement-style-e-navegação-na-árvore"><span class="hn">2.2</span>HTMLElement, style e navegação na árvore</h3>
+<p>Depois de id e class (com name reservado para a aula de Forms), a propriedade que completa o HTMLElement nesta aula é style. No HTML, o atributo style recebe uma string com declarações CSS separadas por ponto e vírgula, escritas do jeito normal, com hífen. No JS, esse mesmo atributo é acessado como um objeto — elemento.style — e cada propriedade CSS perde o hífen e ganha camelCase:</p>
+<ul><li>background-color: backgroundColor</li><li>font-size: fontSize</li><li>line-height: lineHeight</li></ul>
+<pre class="code"><code><span class="cm">// elemento.style dá acesso às propriedades CSS via objeto</span>
+<span class="cm">// cada propriedade em kebab-case no CSS vira camelCase no JS</span>
+<span class="cm">// Não retorna valor (undefined)</span>
+<span class="cm">// equivalente a background-color no CSS</span>
+destaque.style.backgroundColor = "#f0f0f0";
+<span class="cm">// equivalente a font-size no CSS</span>
+destaque.style.fontSize = "18px";
+<span class="cm">// equivalente a line-height no CSS</span>
+destaque.style.lineHeight = "1.5";          </code></pre>
+<p>A propriedade style, por ser do próprio elemento, não exige HTML novo, e conecta diretamente com o CSS que vem a seguir na aula. A navegação na árvore, que na Aula 1 ficou restrita a append/prepend, ganha os métodos que sobem e atravessam a hierarquia de irmãos e pais.</p>
+<pre class="code"><code><span class="cm">// querySelector busca o primeiro elemento que casa com o seletor</span>
+<span class="cm">// Retorna: Element ou null</span>
+const destaque = document.querySelector(".destaque");
+<span class="cm">// querySelectorAll busca todos os elementos que casam com o seletor</span>
+<span class="cm">// Retorna: NodeList</span>
+const todosDestaques = document.querySelectorAll(".destaque");
+<span class="cm">// children retorna os filhos diretos do elemento (ignora nós de texto)</span>
+<span class="cm">// Retorna: HTMLCollection</span>
+const filhos = destaque.children;
+<span class="cm">// firstElementChild / lastElementChild retornam o primeiro e o último filho</span>
+<span class="cm">// Retorna: Element ou null</span>
+const primeiroFilho = destaque.firstElementChild;
+const ultimoFilho = destaque.lastElementChild;
+<span class="cm">// parentElement retorna o elemento pai</span>
+<span class="cm">// Retorna: Element ou null</span>
+const pai = destaque.parentElement;
+<span class="cm">// closest sobe a árvore até achar um ancestral que casa com o seletor</span>
+<span class="cm">// Retorna: Element ou null</span>
+const container = destaque.closest(".container");</code></pre>
+<p>Vale ainda situar essa API dentro da hierarquia de objetos do próprio navegador: Node é a classe base de qualquer nó (elemento, texto, comentário, o próprio documento); Element herda de Node e representa nós de tags HTML ou SVG; HTMLElement herda de Element e é a especialização para elementos HTML, trazendo classList, style, innerHTML e outras propriedades específicas. Entender essa cadeia ajuda o aluno a perceber por que nem todo método de manipulação está disponível em todo nó da árvore.</p>
+<h2 id="s3-css"><span class="hn">3</span>CSS</h2>
+<p>CSS, assim como HTML e JS, é texto — uma string com sintaxe própria de seletor (o que estilizar) e propriedade/valor (como estilizar). O objetivo aqui não é esgotar propriedades, mas situar o CSS como mais um consumidor dos seletores .classe e #id já apresentados no JS.</p>
+<h3 id="s3-1-display-block-inline-e-inline-block"><span class="hn">3.1</span>Display: block, inline e inline-block</h3>
+<p>display é a propriedade que decide como o elemento se comporta no fluxo da página. O modo block ocupa toda a largura disponível e quebra linha automaticamente — é o comportamento padrão de div e p. O modo inline ocupa só o espaço do próprio conteúdo, sem quebrar linha, e não aceita width/height nem margens verticais — é o caso de span e a. inline-block é o meio-termo entre os dois: não quebra linha como o inline, mas aceita dimensões e espaçamentos como o block. flex transforma o elemento em um container que organiza seus filhos com muito mais controle de alinhamento, mas fica de fora dos exemplos práticos desta aula — quem quiser se aprofundar tem o Flexbox Froggy indicado nas referências.</p>
+<pre class="code"><code>/* display define como o elemento se comporta no fluxo da página */
+.caixa {
+  display: inline-block;
+  width: 200px;
+  padding: 8px;
+}</code></pre>
+<h3 id="s3-2-responsividade-e-media-queries"><span class="hn">3.2</span>Responsividade e media queries</h3>
+<p>Com a diversidade de dispositivos atuais, uma página precisa se adaptar a diferentes tamanhos de tela, e é isso que a responsividade resolve. O ponto de partida é o viewport, a área visível do navegador, configurado via meta tag:</p>
+<p>HTML</p>
+<pre class="code"><code>&lt;!-- define a área visível em dispositivos móveis --&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code></pre>
+<p>Media queries aplicam regras de CSS condicionadas ao tamanho da tela:</p>
+<p>CSS</p>
+<pre class="code"><code>/* aplica o estilo somente quando a tela tiver até 768px de largura */
+@media (max-width: 768px) {
+  body { background-color: lightblue; }
+}</code></pre>
+<p>Vale citar a abordagem mobile first: escrever primeiro os estilos para telas pequenas e, progressivamente, adicionar regras para telas maiores com min-width — prática que garante que o site funcione bem no celular antes de se expandir para telas maiores.</p>
+<h3 id="s3-3-seletores-avançados"><span class="hn">3.3</span>Seletores avançados</h3>
+<p>Além de tag, classe e id, o CSS tem seletores de hierarquia que expressam relação entre elementos, seletores de atributo que testam o valor de um atributo, e pseudo-classes que capturam estados específicos do elemento.</p>
+<p>CSS</p>
+<pre class="code"><code>/* seletores de hierarquia: expressam relação entre elementos */
+*      {}   /* TODOS */
+A B    {}  /* descendente: qualquer filho em qualquer nível de A */
+A &gt; B  {}  /* filho direto: B precisa ser filho imediato de A */
+A + B  {}  /* irmão imediato: B vem logo depois de A, mesmo pai */
+A ~ B  {}  /* irmãos subsequentes: B vem depois de A, mesmo pai */
+section &gt; ul li a {} /* link dentro de item de lista, filho direto de uma lista dentro de uma seção */
+/* seletores de atributo: testam o valor de um atributo do elemento */
+[disabled] {}        /* possui o atributo disabled */
+[type="text"] {}      /* atributo com valor exatamente igual a "text" */
+[href^="https"] {}    /* valor do atributo começa com "https" */
+[src$=".png"] { }      /* valor do atributo termina com ".png" */
+[class*="alert"] { }   /* valor do atributo contém "alert" em qualquer posição */
+/* pseudo-classes: selecionam elementos em estados específicos */
+:first-child { }   /* elemento que é o primeiro filho do seu pai */
+:last-child { }    /* elemento que é o último filho do seu pai */
+:nth-child(n) { }  /* elemento na posição n entre os filhos do pai */
+:hover { }         /* elemento enquanto o mouse está sobre ele */
+:focus { }         /* elemento enquanto está em foco (ex.: input selecionado) */
+O ponto que fecha essa seção é que todos esses seletores — hierarquia, atributo, pseudo-classe — funcionam igualmente dentro da Vendor API do JS, na mesma sintaxe:
+<span class="cm">// os mesmos seletores usados em CSS funcionam em querySelector/querySelectorAll</span>
+<span class="cm">// Retorna: Element ou null</span>
+const primeiroLink = document.querySelector("section &gt; ul li a");
+<span class="cm">// Retorna: NodeList</span>
+const inputsTexto = document.querySelectorAll('[type="text"]');
+<span class="cm">// Retorna: NodeList</span>
+const primeirosFilhos = document.querySelectorAll(".lista :first-child");</code></pre>
+<h2 id="s4-js-reativo"><span class="hn">4</span>JS Reativo</h2>
+<p>O JS de frontend não é só a Vendor API de manipular class e id — ele é, na sua essência, orientado a eventos. É esse traço, e não a manipulação de DOM em si, que separa o JS original do JS de backend visto na Aula 1.</p>
+<h3 id="s4-1-addeventlistener-e-o-objeto-event"><span class="hn">4.1</span>addEventListener e o objeto event</h3>
+<p>O núcleo prático da aula é registrar um listener e entender o parâmetro event que ele recebe. event.target é o elemento onde o evento efetivamente ocorreu, que pode ser um filho interno; event.currentTarget é o elemento no qual o listener foi registrado. É esse contraste que justifica, na prática, usar closest() dentro de um handler para achar o elemento "clicável" mesmo quando o clique bate num filho. Junto com esse par, vale apresentar event.stopPropagation(): eventos se propagam pela árvore (o clique num filho também "borbulha" para os pais que tenham listener no mesmo evento), e stopPropagation() interrompe essa propagação, impedindo que listeners de elementos ancestrais sejam disparados pelo mesmo evento.</p>
+<pre class="code"><code><span class="cm">// addEventListener registra uma função callback para reagir a um evento</span>
+<span class="cm">// Não retorna valor (undefined)</span>
+container.addEventListener("click", function (event) {
+  <span class="cm">// target: o elemento onde o clique de fato ocorreu (pode ser um filho)</span>
+  console.log("target:", event.target);
+  <span class="cm">// currentTarget: o elemento no qual o listener foi registrado</span>
+  console.log("currentTarget:", event.currentTarget);
+  <span class="cm">// closest sobe a árvore a partir do target até achar o elemento clicável</span>
+  const item = event.target.closest(".item");
+  <span class="cm">// stopPropagation impede que o evento continue subindo para os pais</span>
+  <span class="cm">// Não retorna valor (undefined)</span>
+  event.stopPropagation();
+});</code></pre>
+<p>É nesse ponto que o conceito de callback se torna concreto: o listener é uma função passada como argumento, que o navegador chama sozinho quando o evento acontece. Vale reforçar esse contraste com o JS de backend, que não tem esse modelo orientado a evento de interface.</p>
+<h3 id="s4-2-typemodule"><span class="hn">4.2</span>type="module"</h3>
+<p>Conforme os scripts de frontend crescem, a tendência é separá-los em múltiplos arquivos, e &lt;script type="module" src="..."&gt; é o que habilita isso de forma organizada, trazendo import/export nativos do navegador. Não é o momento de aprofundar em import/export, só de justificar por que o hábito de um único script inline vai deixar de ser suficiente.</p>
+<pre class="code"><code>&lt;!-- type="module" habilita import/export nativos entre arquivos JS --&gt;
+&lt;script type="module" src="./app.js"&gt;&lt;/script&gt;</code></pre>
+<h2 id="s5-css-como-commodity"><span class="hn">5</span>CSS como commodity</h2>
+<p>Depois de ver seletores, propriedades e a lógica de estilização manual, cabe uma virada de perspectiva sobre como CSS é tratado no mercado. Escrever CSS puro para cada projeto, do zero, é cada vez mais raro em produção. A indústria tende a resolver estilização com frameworks prontos — Bootstrap e Tailwind são os exemplos mais usados — que entregam classes já estilizadas para os problemas mais comuns de layout e componente, como espaçamento, grid e alinhamento. Isso não torna o CSS manual inútil: pelo contrário, é justamente o entendimento de seletor, propriedade e display construído nesta aula que permite entender o que essas classes prontas fazem por debaixo, em vez de usá-las como caixa-preta. CSS, nesse sentido, se comporta como uma commodity: a base é a mesma em todo lugar, e o valor está em quem sabe compor bem as ferramentas construídas sobre ela.</p>
+<h2 id="s6-conclusão"><span class="hn">6</span>Conclusão</h2>
+<p>A Vendor API do DOM ganhou profundidade nesta aula: os seletores . e # passaram a ser entendidos pela cardinalidade de classe e id, o HTMLElement somou a propriedade style à lista que já tinha id e class, com a conversão de kebab-case para camelCase como ponte entre CSS e JS, e a navegação na árvore se estendeu para filhos, pais e ancestrais. O CSS entrou como um segundo consumidor dessa mesma linguagem de seletores, com display e inline-block como propriedade central, responsividade e media queries como resposta à diversidade de dispositivos, e seletores avançados de hierarquia, atributo e estado como complemento. O JS reativo trouxe o paradigma de eventos como diferencial real do frontend, com target, currentTarget e stopPropagation explicando o que é callback e propagação na prática, e type="module" preparou estruturalmente a turma para os scripts mais longos que virão. CSS como commodity fecha a aula com o gancho de mercado para os frameworks que aparecerão mais adiante no curso.</p>
+<h2 id="s7-referências"><span class="hn">7</span>Referências</h2>
+<p>Flexbox Froggy — material de auto-estudo de display: flex.</p>
+<p>MDN — EventTarget.addEventListener(), Event.target, Event.currentTarget, Event.stopPropagation().</p>
+<p>MDN — HTMLElement.style, Element.children, Element.closest().</p>
+<p>MDN — JavaScript modules (&lt;script type="module"&gt;).</p>
+<p>MDN — Media Queries e responsividade.</p>
+<h2 id="questoes"><span class="hn">TA</span>Questões do TA</h2>
+<article class="questao"><h3><span class="qn">Questão 1</span></h3><p>Sobre a relação entre os seletores usados em CSS (.classe, #id) e os métodos querySelector/querySelectorAll do JavaScript, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">São linguagens de seleção completamente diferentes, e a semelhança na sintaxe entre .classe no CSS e .classe no querySelector é apenas coincidência.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt">O CSS e o JS reutilizam a mesma linguagem de seletores, o que permite que uma expressão como section &gt; ul li a funcione igualmente para estilizar no CSS e para buscar elementos com querySelector.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt">querySelector aceita apenas seletores de tag e classe, enquanto seletores de id só podem ser usados diretamente em CSS.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">querySelectorAll exige uma sintaxe própria de seleção, distinta da usada em folhas de estilo CSS, para evitar ambiguidade entre os dois contextos.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">Seletores avançados, como os de atributo ([type="text"]) e pseudo-classes (:hover), existem apenas no CSS e não podem ser usados como argumento em querySelector ou querySelectorAll.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 2</span></h3><p>Sobre a cardinalidade dos atributos id e class em um documento HTML, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">Tanto id quanto class podem se repetir livremente em quantos elementos forem necessários, sem nenhuma restrição de unicidade.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt">O id estabelece uma relação de 1 para 1 com o elemento, não devendo se repetir em nenhum outro elemento do documento, enquanto a class estabelece uma relação de n para n, podendo estar presente em vários elementos e um elemento podendo ter várias classes.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt">O id estabelece uma relação de n para n, já que pode ser reaproveitado em diversos elementos, enquanto a class é sempre única por elemento.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Um elemento pode ter no máximo um id e no máximo uma class, o que torna ambos os atributos equivalentes em termos de cardinalidade.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">A class é 1 para 1 porque cada classe só pode ser aplicada a um único elemento por vez, enquanto o id é n para n por poder ser reaproveitado.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 3</span></h3><p>Sobre o comportamento de event.target e event.currentTarget dentro de um listener registrado com addEventListener, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">event.target e event.currentTarget são sempre o mesmo elemento, já que ambos se referem ao elemento em que o evento foi registrado.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">event.target é o elemento onde o listener foi registrado, enquanto event.currentTarget é o elemento onde o evento efetivamente ocorreu, podendo ser um filho.</span></li><li class="alt ok"><span class="ltr">C</span><span class="txt">event.currentTarget é o elemento onde o listener foi registrado, enquanto event.target é o elemento onde o evento efetivamente ocorreu — podendo ser um filho interno, o que justifica o uso de closest() para localizar o elemento de interesse a partir dele.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">D</span><span class="txt">event.target só existe em eventos de teclado, enquanto event.currentTarget só existe em eventos de clique.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">stopPropagation() altera o valor de event.target, fazendo com que ele passe a apontar para o elemento no qual o listener foi registrado.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+  </main>
+</div>
+<script src="../../../assets/briefing.js"></script>
+</body>
+</html>

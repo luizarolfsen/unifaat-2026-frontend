@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conteúdo da Prova 1 — Frontend 2026.2</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="../../assets/slide.css">
+<link rel="stylesheet" href="../../assets/slide-16x9.css">
+<script src="../../assets/tema.js"></script>
+</head>
+<body class="prova">
+
+<aside class="sidebar" id="sidebar" aria-label="Miniaturas dos slides">
+  <a class="sidebar-back" href="../../index.html">← Voltar</a>
+</aside>
+
+<div class="deck" id="deck">
+
+  <section class="slide" data-eyebrow="abertura">
+    <div class="cover-top">
+      <span class="cover-uni">Unifaat</span>
+      <span class="cover-sem">2026.2</span>
+    </div>
+    <h1>Conteúdo da Prova 1 — Frontend</h1>
+    <p class="lede" style="font-size:2.2rem">Aulas 01 a 06, com ênfase em <strong>TypeScript: tipagem de primitivos, objetos, funções e generics</strong>.</p>
+    <p class="cover-prof">Prof. Luan Lourenço</p>
+  </section>
+
+  <section class="slide" data-eyebrow="mapa de estudo">
+<p class="eyebrow">mapa de estudo</p><h2>Mapa de estudo</h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Tema</th>
+<th>Aula</th>
+<th>Onde treinar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>try_files</code> e Nginx</td>
+<td>01</td>
+<td>Parte 1</td>
+</tr>
+<tr>
+<td>Árvore DOM, <code>closest</code>, <code>children</code>, seletores</td>
+<td>01 e 02</td>
+<td>Parte 2</td>
+</tr>
+<tr>
+<td><code>target</code>, <code>currentTarget</code>, delegação, <code>preventDefault</code>, <code>stopPropagation</code></td>
+<td>02 e 03</td>
+<td>Parte 3</td>
+</tr>
+<tr>
+<td><code>window</code> e <code>document</code></td>
+<td>04</td>
+<td>Parte 4</td>
+</tr>
+<tr>
+<td>Pré-compilador / Vite</td>
+<td>03 e 05</td>
+<td>Parte 5</td>
+</tr>
+<tr>
+<td><strong>TypeScript: primitivos, objetos, funções e generics</strong></td>
+<td><strong>05</strong></td>
+<td><strong>Parte 6</strong></td>
+</tr>
+</tbody>
+</table></div>
+  </section>
+
+  <section class="slide" data-eyebrow="1. nginx e try_files (aula 01)">
+<p class="eyebrow">1. nginx e try_files (aula 01)</p><h2>1. Nginx e <code>try_files</code> (Aula 01)</h2>
+<p>O Nginx serve <strong>arquivos estáticos</strong> direto do sistema de arquivos, sem passar pelo backend (sem rota, sem middleware, sem controller). É mais rápido e é o que se usa em produção.</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">default.conf</span></div><div class="term-body"><div class="term-line">server {
+    listen 80;
+    root /var/www;
+    index index.html;
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+</div></div></div>
+<p><code>try_files</code> recebe uma <strong>lista de tentativas, avaliada em ordem, da esquerda para a direita</strong>. A primeira que der certo vence e as outras nem são olhadas:</p>
+<ol>
+<li><code>$uri</code> → o caminho pedido existe como <strong>arquivo</strong>? Serve.</li>
+<li><code>$uri/</code> → (com a barra no final) existe como <strong>diretório</strong>? Serve o <code>index</code> dele.</li>
+<li><code>=404</code> → último recurso: nada deu certo, responde <strong>404</strong>. O <code>=404</code> <strong>não é</strong> um arquivo nem uma tentativa de busca: é a resposta final.</li>
+</ol>
+<p>Exemplo: pedido <code>GET /blog</code>.</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">anotação</span></div><div class="term-body"><div class="term-line">1) existe o arquivo &quot;blog&quot;?        não
+2) existe o diretório &quot;blog/&quot;?     sim → serve blog/index.html
+</div></div></div>
+<p>Sem o <code>$uri/</code>, o Nginx só saberia procurar arquivos exatos: <code>/blog</code> daria 404, mesmo existindo <code>blog/index.html</code>. Até a raiz (<code>/</code>) quebraria.</p>
+<p><strong>Prioridade entre <code>location</code></strong>: o Nginx não lê de cima para baixo. Ele escolhe o <strong>prefixo mais longo</strong> que casa com o caminho. <code>/imagens/foto.png</code> cai em <code>location /imagens/</code> mesmo que <code>location /</code> esteja escrito antes.</p>
+<p><strong>Por que Nginx + Docker</strong> (e não abrir o HTML com dois cliques, nem criar um backend só para servir arquivo)? Porque cria um <strong>ambiente de servidor real</strong>, igual à produção, sem backend desnecessário.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="2. dom, seletores e navegação na árvore (aulas 0">
+<p class="eyebrow">2. dom, seletores e navegação na árvore (aulas 0</p><h2>2. DOM, seletores e navegação na árvore (Aulas 01 e 02)</h2>
+<p>O HTML chega ao navegador como <strong>texto</strong>. O navegador faz o <em>parsing</em> e monta o <strong>DOM</strong>: uma árvore de objetos em memória. Cada tag vira um nó com <strong>pai</strong>, <strong>filhos</strong> e <strong>irmãos</strong>. É a mesma ideia de <code>JSON.parse</code>: texto que vira objeto manipulável.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="2. dom, seletores e navegação na árvore (aulas 0">
+<p class="eyebrow">2. dom, seletores e navegação na árvore (aulas 0</p><h3>2.1 Navegando na árvore</h3>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.html</span></div><div class="term-body"><div class="term-line">&lt;section id=&quot;loja&quot;&gt;
+  &lt;h2&gt;Ofertas&lt;/h2&gt;
+  &lt;ul class=&quot;lista&quot;&gt;
+    &lt;li class=&quot;item destaque&quot;&gt;Caneta&lt;/li&gt;
+    &lt;li class=&quot;item&quot;&gt;Caderno&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/section&gt;
+</div></div></div>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.js</span></div><div class="term-body"><div class="term-line">const li = document.querySelector(&quot;.item&quot;);
+
+li.parentElement;                 // &lt;ul class=&quot;lista&quot;&gt;  (só o pai DIRETO)
+li.closest(&quot;.lista&quot;);             // &lt;ul class=&quot;lista&quot;&gt;  (sobe procurando)
+li.closest(&quot;section&quot;);            // &lt;section id=&quot;loja&quot;&gt; (sobe vários níveis)
+li.closest(&quot;.item&quot;);              // o PRÓPRIO li (começa por ele mesmo!)
+li.closest(&quot;h2&quot;);                 // null (h2 é irmão do ul, não ancestral)
+li.nextElementSibling;            // o próximo &lt;li&gt;
+document.querySelector(&quot;.lista&quot;).children;      // 2 elementos &lt;li&gt;
+document.querySelector(&quot;.lista&quot;).childNodes;    // 5 nós (2 li + 3 textos de quebra de linha)
+</div></div></div>
+<p>O que decorar:</p>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Faz o quê</th>
+<th>Retorna</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>parentElement</code></td>
+<td>sobe <strong>um</strong> nível</td>
+<td><code>Element</code> ou <code>null</code></td>
+</tr>
+<tr>
+<td><code>closest(seletor)</code></td>
+<td>começa <strong>no próprio elemento</strong> e sobe por <strong>ancestrais</strong> até casar</td>
+<td><code>Element</code> ou <code>null</code></td>
+</tr>
+<tr>
+<td><code>children</code></td>
+<td>filhos que são <strong>elementos</strong></td>
+<td><code>HTMLCollection</code></td>
+</tr>
+<tr>
+<td><code>childNodes</code></td>
+<td><strong>todos</strong> os nós filhos, inclusive texto (espaços e quebras de linha)</td>
+<td><code>NodeList</code></td>
+</tr>
+<tr>
+<td><code>firstElementChild</code> / <code>lastElementChild</code></td>
+<td>primeiro/último filho elemento</td>
+<td><code>Element</code> ou <code>null</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Pegadinhas clássicas</strong>
+- <code>closest()</code> <strong>só sobe</strong> (próprio elemento + ancestrais). Nunca procura irmãos nem filhos.
+- <code>parentElement</code> não é "o ancestral mais externo": é só o pai imediato.
+- <code>children</code> <strong>não conta</strong> a quebra de linha entre as tags; <code>childNodes</code> conta.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="2. dom, seletores e navegação na árvore (aulas 0">
+<p class="eyebrow">2. dom, seletores e navegação na árvore (aulas 0</p><h3>2.2 Selecionando</h3>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Método</th>
+<th>Retorna</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getElementById("x")</code></td>
+<td><code>Element</code> ou <code>null</code></td>
+</tr>
+<tr>
+<td><code>querySelector(seletor)</code></td>
+<td><strong>o primeiro</strong> que casa: <code>Element</code> ou <code>null</code></td>
+</tr>
+<tr>
+<td><code>querySelectorAll(seletor)</code></td>
+<td><strong>todos</strong> que casam: <code>NodeList</code></td>
+</tr>
+<tr>
+<td><code>getElementsByClassName</code> / <code>getElementsByTagName</code></td>
+<td><code>HTMLCollection</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>id</code> é <strong>1 para 1</strong> (um por elemento, nunca repete no documento). <code>class</code> é <strong>n para n</strong> (um elemento pode ter várias, e uma classe pode estar em vários elementos). Por isso id devolve um elemento e class devolve coleção.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="2. dom, seletores e navegação na árvore (aulas 0">
+<p class="eyebrow">2. dom, seletores e navegação na árvore (aulas 0</p><h3>2.3 Seletores (valem no CSS <strong>e</strong> no <code>querySelector</code>)</h3>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Seletor</th>
+<th>Significa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>A B</code></td>
+<td><strong>descendente</strong>: B em qualquer nível dentro de A</td>
+</tr>
+<tr>
+<td><code>A &gt; B</code></td>
+<td><strong>filho direto</strong>: B é filho imediato de A</td>
+</tr>
+<tr>
+<td><code>A + B</code></td>
+<td><strong>irmão adjacente</strong>: B vem logo depois de A, mesmo pai</td>
+</tr>
+<tr>
+<td><code>A ~ B</code></td>
+<td><strong>irmãos seguintes</strong>: todo B depois de A, mesmo pai</td>
+</tr>
+<tr>
+<td><code>.a.b</code> (sem espaço)</td>
+<td><strong>o mesmo elemento</strong> tem as classes <code>a</code> <strong>e</strong> <code>b</code></td>
+</tr>
+<tr>
+<td><code>.a .b</code> (com espaço)</td>
+<td><code>.b</code> <strong>dentro</strong> de <code>.a</code></td>
+</tr>
+<tr>
+<td><code>[type="text"]</code>, <code>[href^="https"]</code>, <code>[src$=".png"]</code>, <code>[class*="alert"]</code></td>
+<td>atributo igual / começa com / termina com / contém</td>
+</tr>
+<tr>
+<td><code>:first-child</code>, <code>:last-child</code>, <code>:nth-child(n)</code>, <code>:hover</code>, <code>:focus</code></td>
+<td>estados e posições</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Como montar um seletor difícil: traduza frase por frase.</strong></p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.html</span></div><div class="term-body"><div class="term-line">&lt;form class=&quot;login&quot;&gt;
+  &lt;label class=&quot;campo&quot;&gt;E-mail&lt;/label&gt;
+  &lt;input type=&quot;email&quot;&gt;
+  &lt;input type=&quot;password&quot;&gt;
+&lt;/form&gt;
+</div></div></div>
+<p>"O <code>input</code> que vem <strong>imediatamente depois</strong> de um <code>label.campo</code> que é <strong>filho direto</strong> do <code>form.login</code>":</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">anotação</span></div><div class="term-body"><div class="term-line">form.login &gt; label.campo + input
+ └ 1) filho direto ┘      └ 2) irmão adjacente
+</div></div></div>
+<p>Dicas: <code>.x.y</code> = mesma tag com as duas classes; <code>+</code> só pega <strong>um</strong> irmão (o próximo); <code>~</code> pega <strong>todos</strong> os seguintes; um espaço aceita qualquer profundidade, <code>&gt;</code> exige filho direto.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="3. eventos (aulas 02 e 03)">
+<p class="eyebrow">3. eventos (aulas 02 e 03)</p><h3>3.1 <code>target</code> e <code>currentTarget</code></h3>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.js</span></div><div class="term-body"><div class="term-line">lista.addEventListener(&quot;click&quot;, (event) =&gt; {
+  event.target;         // ONDE o clique realmente aconteceu (pode ser um filho)
+  event.currentTarget;  // ONDE o listener está registrado (aqui: sempre `lista`)
+});
+</div></div></div>
+<p>Clicou num <code>&lt;button&gt;</code> dentro de um <code>&lt;li&gt;</code> dentro de <code>lista</code>? <code>target</code> é o <code>button</code>; <code>currentTarget</code> é <code>lista</code>. Se o clique pode cair num filho interno (ícone, texto), use <code>event.target.closest("li")</code> para achar o elemento que interessa.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="3. eventos (aulas 02 e 03)">
+<p class="eyebrow">3. eventos (aulas 02 e 03)</p><h3>3.2 Propagação e delegação</h3>
+<p>Todo evento percorre até três fases:</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">anotação</span></div><div class="term-body"><div class="term-line">① capturing  ↓  window → html → body → ... → pai do alvo
+② target        o elemento onde aconteceu
+③ bubbling   ↑  alvo → pai → ... → body → html → window
+</div></div></div>
+<p><code>addEventListener</code> escuta, por padrão, a fase de <strong>bubbling</strong>. Para escutar na de capturing: <code>{ capture: true }</code> como terceiro argumento.</p>
+<p>Como o evento <strong>borbulha</strong>, dá pra registrar <strong>um único listener no pai</strong> e tratar os filhos pelo <code>target</code>: é a <strong>delegação de eventos</strong>. Vantagens: menos listeners (menos memória), e funciona também para itens <strong>criados depois</strong>, sem registrar nada de novo.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="3. eventos (aulas 02 e 03)">
+<p class="eyebrow">3. eventos (aulas 02 e 03)</p><h3>3.3 <code>preventDefault()</code> x <code>stopPropagation()</code>: problemas diferentes</h3>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Cancela</th>
+<th>Exemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event.preventDefault()</code></td>
+<td>o <strong>comportamento padrão</strong> do navegador (link navega, formulário recarrega a página)</td>
+<td><code>&lt;a href="#"&gt;</code> não pula pro topo</td>
+</tr>
+<tr>
+<td><code>event.stopPropagation()</code></td>
+<td>a <strong>propagação</strong> (listeners dos ancestrais não disparam)</td>
+<td>clique no filho não ativa o listener do pai</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Um não substitui o outro</strong>, e nenhum faz o trabalho do outro. <code>preventDefault</code> <strong>não</strong> impede a propagação; <code>stopPropagation</code> <strong>não</strong> impede a navegação.</p>
+<p>Quando usar os dois juntos:</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.html</span></div><div class="term-body"><div class="term-line">&lt;div class=&quot;dropdown&quot;&gt;
+  &lt;a href=&quot;#&quot; class=&quot;toggle&quot;&gt;Menu ▾&lt;/a&gt;
+  &lt;ul class=&quot;opcoes&quot;&gt;...&lt;/ul&gt;
+&lt;/div&gt;
+</div></div></div>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.js</span></div><div class="term-body"><div class="term-line">// listener global: clicou fora? fecha todos os menus
+document.addEventListener(&quot;click&quot;, () =&gt; fecharMenus());
+
+document.querySelector(&quot;.toggle&quot;).addEventListener(&quot;click&quot;, (event) =&gt; {
+  event.preventDefault();   // o href=&quot;#&quot; não rola a página pro topo
+  event.stopPropagation();  // o clique não sobe até o document, que fecharia o menu
+  abrirMenu();
+});
+</div></div></div>
+<p><strong>Formulários</strong>: o listener de <code>submit</code> vai no <code>&lt;form&gt;</code> (não no botão), e <code>preventDefault()</code> evita o recarregamento da página. Atributos: <code>disabled</code> e <code>readonly</code> não editam, mas só o <code>readonly</code> é enviado no submit; <code>required</code> exige preenchimento; <code>name</code> identifica o campo.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="4. window e document (aula 04)">
+<p class="eyebrow">4. window e document (aula 04)</p><h2>4. <code>window</code> e <code>document</code> (Aula 04)</h2>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">anotação</span></div><div class="term-body"><div class="term-line">window   ← o OBJETO GLOBAL do navegador (a janela/aba)
+ ├─ document         (o DOM)
+ ├─ localStorage / sessionStorage
+ ├─ fetch
+ ├─ location, history, console
+ └─ eventos como resize e scroll
+</div></div></div>
+<ul>
+<li><code>document</code> é <strong>propriedade</strong> de <code>window</code> (e não o contrário): <code>window.document === document</code> é <code>true</code>.</li>
+<li><code>localStorage</code>, <code>fetch</code> e os eventos <code>resize</code>/<code>scroll</code> <strong>vivem em <code>window</code></strong>, não em <code>document</code>.</li>
+<li>Escrever <code>document.querySelector()</code> em vez de <code>window.document.querySelector()</code> funciona porque tudo que está no objeto global pode ser usado <strong>sem o prefixo</strong> <code>window.</code>. <code>document</code> continua sendo parte de <code>window</code>.</li>
+<li><code>window</code> e <code>document</code> existem <strong>no navegador</strong>. No Node (backend) não existem.</li>
+</ul>
+<p>Cookies e JWT (também da Aula 04): <code>HttpOnly</code> impede o JS de ler o cookie; <code>Secure</code> só envia por HTTPS; <code>Max-Age</code> define a validade em segundos. O JWT tem <code>header.payload.signature</code>: o payload é só Base64 (<strong>qualquer um lê</strong>), e o <strong>secret</strong> que assina fica <strong>só no backend</strong> (variável de ambiente), nunca no frontend.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="5. pré-compiladores e vite (aulas 03 e 05)">
+<p class="eyebrow">5. pré-compiladores e vite (aulas 03 e 05)</p><h2>5. Pré-compiladores e Vite (Aulas 03 e 05)</h2>
+<p>O navegador só entende <strong>JavaScript e CSS puros</strong>. TypeScript, JSX (React) e Sass precisam ser <strong>convertidos</strong> antes. Um pré-compilador faz isso automaticamente. O Vite tem duas serventias: <strong>HMR</strong> (no dia a dia) e <strong>pré-compilação</strong> (a mais importante).</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">anotação</span></div><div class="term-body"><div class="term-line">resources/ (você escreve .ts) → Vite compila → public/ (JS puro, que o navegador lê)
+npm run dev    → servidor com watcher, compila em memória, não termina
+npm run build  → compilação pontual: minifica, agrupa e grava em public/
+</div></div></div>
+  </section>
+
+  <section class="slide" data-eyebrow="5. pré-compiladores e vite (aulas 03 e 05)">
+<p class="eyebrow">5. pré-compiladores e vite (aulas 03 e 05)</p><h3>Benefícios práticos (saiba listar pelo menos 4, <strong>cada um com explicação</strong>)</h3>
+<ol>
+<li><strong>Usar o que o navegador não entende.</strong> Escreve TypeScript/JSX, o pré-compilador converte para JavaScript comum.</li>
+<li><strong>Arquivos menores (minificação).</strong> Remove espaços e comentários e encurta nomes de variáveis: menos bytes na rede, página carrega mais rápido.</li>
+<li><strong>Organização e escalabilidade.</strong> O código pode ficar em vários módulos/arquivos pequenos, e o build junta tudo.</li>
+<li><strong>Bundle (unificação de módulos).</strong> Muitos arquivos viram poucos: em vez de dezenas de requisições HTTP, o navegador faz 2 ou 3.</li>
+<li><strong>Controle de cache (hash no nome do arquivo).</strong> <code>app.3f9a1c.js</code>: se o conteúdo muda, o nome muda e o navegador baixa a versão nova; se não mudou, reaproveita o cache.</li>
+<li><strong>HMR (Hot Module Reload).</strong> Salvou o arquivo, o navegador atualiza só aquele módulo, sem recarregar a página nem perder o estado. Mais produtividade.</li>
+</ol>
+  </section>
+
+  <section class="slide" data-eyebrow="6. typescript">
+<p class="eyebrow">6. typescript</p><h3>6.1 A ideia</h3>
+<p><strong>TypeScript é fundamental no frontend de hoje.</strong> Projetos reais têm vários desenvolvedores, milhares de linhas e mudanças constantes; os tipos funcionam como documentação executável do que cada pedaço de código aceita e devolve. A partir da Aula 05, todo código novo do projeto é escrito em <code>.ts</code>.</p>
+<p>JavaScript é <strong>dinamicamente tipado</strong>: nada impede de passar uma <code>string</code> onde se esperava um <code>number</code>, e o erro só aparece com o código rodando. TypeScript acrescenta <strong>tipos</strong>: o erro aparece <strong>ao escrever/compilar</strong>, antes de chegar ao navegador. Os tipos são <strong>removidos</strong> na compilação: o navegador recebe JS puro. Tipar é escrever o <strong>contrato</strong> de cada pedaço de código: o que entra, o que sai, que formato tem cada objeto.</p>
+<p>A sintaxe é sempre <strong><code>nome: Tipo</code></strong> (dois-pontos depois do nome).</p>
+  </section>
+
+  <section class="slide" data-eyebrow="6. typescript">
+<p class="eyebrow">6. typescript</p><h3>6.2 Tipos primitivos</h3>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">let nome: string = &quot;Ana&quot;;
+let idade: number = 25;        // inteiro e decimal são o mesmo tipo: number
+let ativo: boolean = true;
+let nada: null = null;
+let indefinido: undefined = undefined;
+</div></div></div>
+<ul>
+<li>Os tipos são escritos em <strong>minúsculas</strong>: <code>string</code>, <code>number</code>, <code>boolean</code>. (<code>String</code>, <code>Number</code> com maiúscula são outra coisa.)</li>
+<li><strong>Inferência</strong>: se você já atribui um valor, o TypeScript descobre o tipo sozinho (<code>let x = 5</code> já é <code>number</code>). Mas <strong>parâmetros de função</strong> precisam de tipo explícito.</li>
+<li><strong>Union</strong> (<code>|</code>): "um tipo <strong>ou</strong> outro".</li>
+</ul>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">let id: string | number = 42;
+id = &quot;uuid-abc123&quot;;            // também vale
+
+type Papel = &quot;admin&quot; | &quot;aluno&quot;; // união de valores exatos
+</div></div></div>
+<ul>
+<li><code>any</code> desliga a checagem (evite). <code>unknown</code> é "não sei o tipo ainda" e te obriga a checar antes de usar.</li>
+</ul>
+  </section>
+
+  <section class="slide" data-eyebrow="6. typescript">
+<p class="eyebrow">6. typescript</p><h3>6.3 Arrays</h3>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">const tags: string[] = [&quot;frontend&quot;, &quot;typescript&quot;];
+const notas: number[] = [7.5, 9, 10];
+const outras: Array&lt;number&gt; = [1, 2, 3];   // mesma coisa que number[]
+</div></div></div>
+<p><code>T[]</code> e <code>Array&lt;T&gt;</code> são equivalentes. Lê-se "array <strong>de</strong> T".</p>
+  </section>
+
+  <section class="slide" data-eyebrow="6. typescript">
+<p class="eyebrow">6. typescript</p><h3>6.4 Objetos: <code>type</code></h3>
+<p>Para descrever o <strong>formato</strong> de um objeto, nomeie com <code>type</code>: lista cada propriedade e o tipo dela.</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">type Produto = {
+  id: number;
+  nome: string;
+  preco: number;
+  emEstoque: boolean;
+};
+
+const caneta: Produto = { id: 1, nome: &quot;Caneta&quot;, preco: 3.5, emEstoque: true };
+</div></div></div>
+<p>O TypeScript confere <strong>tudo</strong>: faltou propriedade, sobrou propriedade ou tipo errado, dá erro.</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">anotação</span></div><div class="term-body"><div class="term-line">const x: Produto = { id: 1, nome: &quot;Caneta&quot; };               ✗ faltam preco e emEstoque
+const y: Produto = { id: &quot;1&quot;, nome: &quot;Caneta&quot;, ... };        ✗ id é string, deveria ser number
+</div></div></div>
+<p>Variações úteis:</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">type Endereco = { rua: string; cidade: string };
+
+type Cliente = {
+  id: number;
+  nome: string;
+  telefone?: string;      // ? = propriedade OPCIONAL (pode não existir)
+  endereco: Endereco;     // um type dentro de outro
+  tags: string[];         // array dentro do objeto
+};
+</div></div></div>
+<p><strong>Array de objetos</strong>: use o <code>type</code> seguido de <code>[]</code>.</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">const produtos: Produto[] = [
+  { id: 1, nome: &quot;Caneta&quot;, preco: 3.5, emEstoque: true },
+  { id: 2, nome: &quot;Caderno&quot;, preco: 18, emEstoque: false },
+];
+</div></div></div>
+<p>Separador entre propriedades no <code>type</code>: <code>;</code> (ou <code>,</code>). Dentro do <strong>valor</strong> do objeto, <code>,</code>.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="6. typescript">
+<p class="eyebrow">6. typescript</p><h3>6.5 Funções: tipar argumentos <strong>e</strong> retorno</h3>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">function somar(a: number, b: number): number {
+  return a + b;
+}
+//        └ tipo de cada argumento ┘   └ tipo do RETORNO (depois dos parênteses)
+
+const dobrar = (n: number): number =&gt; n * 2;   // arrow function: mesma regra
+
+function avisar(msg: string): void {            // void = não retorna nada
+  console.log(msg);
+}
+
+async function listar(): Promise&lt;Produto[]&gt; {   // async sempre devolve Promise&lt;...&gt;
+  return [];
+}
+</div></div></div>
+<p><strong>Função como argumento (callback)</strong>: o tipo é escrito como uma "assinatura" com seta <code>=&gt;</code>.</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">//                    ┌ nome do parâmetro ┐   ┌ retorno do callback
+function aplicar(lista: number[], regra: (n: number) =&gt; boolean): number[] {
+  return lista.filter(regra);
+}
+
+aplicar([1, 2, 3, 4], (n) =&gt; n % 2 === 0);   // [2, 4]
+</div></div></div>
+<p>Repare que <code>(n: number) =&gt; boolean</code> usa <strong><code>=&gt;</code></strong> (assinatura do callback), enquanto o retorno da função usa <strong><code>:</code></strong>.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="6. typescript">
+<p class="eyebrow">6. typescript</p><h3>6.6 Generics: a mesma função para qualquer tipo</h3>
+<p><strong>O problema.</strong> Sem generics, uma função que serve a vários tipos vira cópia e cola:</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">function primeiroDeNumeros(lista: number[]): number { return lista[0]; }
+function primeiroDeTextos(lista: string[]): string { return lista[0]; }
+function primeiroDeProdutos(lista: Produto[]): Produto { return lista[0]; }
+// ...uma nova cópia para cada tipo. Mudou a regra? Edita todas, e esquece uma.
+</div></div></div>
+<p><strong>A solução: um parâmetro de tipo <code>&lt;T&gt;</code></strong> ("T" de <em>Type</em>; é só um nome, podia ser <code>&lt;Item&gt;</code>). É um <strong>espaço reservado</strong> que o TypeScript preenche <strong>na hora da chamada</strong>.</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">function primeiro&lt;T&gt;(lista: T[]): T {
+  return lista[0];
+}
+
+primeiro([10, 20, 30]);        // T = number   → retorna number
+primeiro([&quot;a&quot;, &quot;b&quot;]);          // T = string   → retorna string
+primeiro(produtos);            // T = Produto  → retorna Produto
+primeiro&lt;string&gt;([&quot;x&quot;, &quot;y&quot;]);  // também dá pra informar T na mão
+</div></div></div>
+<p>Uma só função, <strong>sem perder a segurança</strong>: <code>primeiro(produtos).nome</code> funciona; <code>primeiro(produtos).foo</code> dá erro.</p>
+<p>Como ler <code>function primeiro&lt;T&gt;(lista: T[]): T</code>: "para <strong>qualquer</strong> tipo <code>T</code>, recebo uma lista <strong>de T</strong> e devolvo <strong>um T</strong>".</p>
+<p><strong>Receita para transformar uma função tipada em genérica</strong>
+1. Escreva o <code>&lt;T&gt;</code> <strong>logo depois do nome</strong> da função: <code>function nome&lt;T&gt;(...)</code>.
+2. Troque o tipo concreto (<code>Produto</code>, <code>Usuario</code>...) por <code>T</code> <strong>em todos os lugares</strong>: parâmetros, retorno <strong>e</strong> dentro do tipo do callback.
+3. O <code>T</code> só existe dentro da função. Quem chama é que "decide" o T.</p>
+<p><strong>Onde isso aparece no dia a dia: o Axios.</strong> O <code>&lt;T&gt;</code> em <code>get&lt;T&gt;</code> diz ao TypeScript qual é o tipo de <code>response.data</code>:</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">const response = await clientApi.get&lt;Produto[]&gt;(&quot;/produtos&quot;);
+response.data;   // Produto[]  → autocomplete e erros de tipo em tudo que vem da API
+</div></div></div>
+  </section>
+
+  <section class="slide" data-eyebrow="6. typescript">
+<p class="eyebrow">6. typescript</p><h3>6.7 Passo a passo: tipar uma função e torná-la genérica</h3>
+<p>Parta de um JS como este:</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.js</span></div><div class="term-body"><div class="term-line">const produtos = [
+  { id: 1, nome: 'Caneta', preco: 3.5, emEstoque: true },
+  { id: 2, nome: 'Caderno', preco: 18, emEstoque: false }
+];
+
+function contar(lista, regra) {
+  let total = 0;
+  for (const item of lista) {
+    if (regra(item)) {
+      total++;
+    }
+  }
+  return total;
+}
+
+const qtdEmEstoque = contar(produtos, (p) =&gt; p.emEstoque);
+</div></div></div>
+<p>E tipe em <strong>etapas</strong>, uma de cada vez:</p>
+<p><strong>1) Criar o <code>type</code></strong>: olhe para <strong>um</strong> objeto do array e copie cada propriedade com o tipo do valor.</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">type Produto = {
+  id: number;
+  nome: string;
+  preco: number;
+  emEstoque: boolean;
+};
+</div></div></div>
+<p><strong>2) Tipar o array</strong>: <code>: Tipo[]</code> depois do nome da constante.</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">const produtos: Produto[] = [
+  { id: 1, nome: 'Caneta', preco: 3.5, emEstoque: true },
+  { id: 2, nome: 'Caderno', preco: 18, emEstoque: false },
+];
+</div></div></div>
+<p><strong>3) Tipar a função (argumentos e retorno)</strong>: a lista é <code>Produto[]</code>; o callback recebe um <code>Produto</code> e devolve <code>boolean</code>; a função devolve um <code>number</code> (a contagem).</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">function contar(
+  lista: Produto[],
+  regra: (item: Produto) =&gt; boolean
+): number {
+  let total = 0;
+  for (const item of lista) {
+    if (regra(item)) {
+      total++;
+    }
+  }
+  return total;
+}
+</div></div></div>
+<p><strong>4) Tornar genérica</strong>: <code>&lt;T&gt;</code> depois do nome e <code>Produto</code> vira <code>T</code> onde aparecia. O retorno continua <code>number</code>, porque a função devolve uma contagem, não um <code>T</code>.</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">function contar&lt;T&gt;(
+  lista: T[],
+  regra: (item: T) =&gt; boolean
+): number {
+  let total = 0;
+  for (const item of lista) {
+    if (regra(item)) {
+      total++;
+    }
+  }
+  return total;
+}
+
+const qtdEmEstoque = contar(produtos, (p) =&gt; p.emEstoque);   // T = Produto
+const qtdPares = contar([1, 2, 3, 4], (n) =&gt; n % 2 === 0);   // T = number
+</div></div></div>
+<blockquote>
+<p>O essencial é o que aparece na <strong>assinatura</strong> (nome, parâmetros e retorno).</p>
+</blockquote>
+  </section>
+
+  <section class="slide" data-eyebrow="6. typescript">
+<p class="eyebrow">6. typescript</p><h3>6.8 Erros comuns</h3>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Erro</th>
+<th>Certo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nome: String</code>, <code>id: Number</code></td>
+<td><code>nome: string</code>, <code>id: number</code> (minúsculo)</td>
+</tr>
+<tr>
+<td>Esquecer o <code>[]</code> no array de objetos: <code>const produtos: Produto = [...]</code></td>
+<td><code>const produtos: Produto[] = [...]</code></td>
+</tr>
+<tr>
+<td>Esquecer o tipo de <strong>retorno</strong></td>
+<td><code>function f(...): Tipo { }</code></td>
+</tr>
+<tr>
+<td>Tipar o callback como <code>Function</code> ou <code>any</code></td>
+<td><code>(item: T) =&gt; boolean</code></td>
+</tr>
+<tr>
+<td>Esquecer o <code>&lt;T&gt;</code> depois do nome: <code>function f(lista: T[])</code></td>
+<td><code>function f&lt;T&gt;(lista: T[])</code></td>
+</tr>
+<tr>
+<td>Generic pela metade: <code>&lt;T&gt;</code> declarado, mas <code>lista: Produto[]</code></td>
+<td>trocar <strong>todos</strong> os <code>Produto</code> por <code>T</code></td>
+</tr>
+<tr>
+<td>Retorno do callback errado: <code>(item: T) =&gt; T</code></td>
+<td><code>(item: T) =&gt; boolean</code> (quando é um filtro/regra)</td>
+</tr>
+<tr>
+<td><code>{ id: number, nome: string }</code> com valores no lugar de tipos: <code>{ id: 1 }</code></td>
+<td>no <code>type</code> vão <strong>tipos</strong>, não valores</td>
+</tr>
+</tbody>
+</table></div>
+  </section>
+
+  <section class="slide" data-eyebrow="6. typescript">
+<p class="eyebrow">6. typescript</p><h3>6.9 Exercícios (tente sem olhar a resposta; gabarito no fim)</h3>
+<p><strong>Ex. 1.</strong> Tipe o objeto e o array abaixo, criando o <code>type Tarefa</code>:</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.js</span></div><div class="term-body"><div class="term-line">const tarefas = [
+  { id: 1, titulo: &quot;Estudar TS&quot;, concluida: false },
+  { id: 2, titulo: &quot;Revisar DOM&quot;, concluida: true },
+];
+</div></div></div>
+<p><strong>Ex. 2.</strong> Tipe os argumentos e o retorno:</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.js</span></div><div class="term-body"><div class="term-line">function mediaDe(notas) {
+  let soma = 0;
+  for (const n of notas) {
+    soma += n;
+  }
+  return soma / notas.length;
+}
+</div></div></div>
+<p><strong>Ex. 3.</strong> Tipe a função, em que <code>formatar</code> é um callback que recebe uma <code>Tarefa</code> e devolve uma <code>string</code>, e a função devolve um array de <code>string</code>:</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.js</span></div><div class="term-body"><div class="term-line">function listarTitulos(lista, formatar) {
+  return lista.map(formatar);
+}
+</div></div></div>
+<p><strong>Ex. 4.</strong> Transforme a função do Ex. 3 em genérica, para aceitar <strong>qualquer</strong> tipo de item (não só <code>Tarefa</code>).</p>
+<p><strong>Ex. 5.</strong> Escreva uma função genérica <code>ultimo</code> que receba um array de qualquer tipo e devolva o último elemento.</p>
+<p><strong>Ex. 6.</strong> O que está errado, e como corrigir?</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">anotação</span></div><div class="term-body"><div class="term-line">type Aluno = { nome: String; nota: number };
+const alunos: Aluno = [{ nome: &quot;Bia&quot;, nota: 9 }];
+function maior&lt;T&gt;(lista: Aluno[]): Aluno { return lista[0]; }
+</div></div></div>
+  </section>
+
+  <section class="slide" data-eyebrow="7. treino">
+<p class="eyebrow">7. treino</p><h2>7. Treino: questões de alternativas (dos briefings)</h2>
+<p>Gabarito comentado no fim desta seção. Justifique cada resposta, não decore a letra.</p>
+<h3>Aula 01 — Nginx, HTML semântico e DOM</h3>
+<p><strong>Questão 1.</strong> Qual das alternativas descreve corretamente a vantagem de usar um container Nginx com Docker para servir arquivos estáticos em vez de abrir o arquivo HTML diretamente no navegador?</p>
+<ul>
+<li>A) Permite que o navegador renderize a página sem precisar do protocolo HTTP.</li>
+<li>B) Garante que o código JavaScript seja executado sem precisar de um navegador.</li>
+<li>C) Cria um ambiente de servidor real, simulando como os arquivos seriam servidos em produção.</li>
+<li>D) Torna desnecessário o uso do navegador, pois o Nginx já renderiza o HTML.</li>
+<li>E) Substitui completamente a necessidade de HTML e CSS no frontend.</li>
+</ul>
+<p><strong>Questão 2.</strong> Por que usar tags semânticas (como <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;footer&gt;</code>) em vez de apenas divs em um documento HTML?</p>
+<ul>
+<li>A) Porque as tags semânticas deixam a página mais colorida automaticamente.</li>
+<li>B) Porque os navegadores não conseguem interpretar div.</li>
+<li>C) Porque melhoram a interpretação do conteúdo por navegadores, mecanismos de busca e leitores de tela.</li>
+<li>D) Porque as tags semânticas eliminam a necessidade de CSS.</li>
+<li>E) Porque o HTML semântico é obrigatório para que o JavaScript funcione.</li>
+</ul>
+<p><strong>Questão 3.</strong> No contexto do DOM (Document Object Model), qual das alternativas abaixo descreve corretamente o uso de querySelector?</p>
+<ul>
+<li>A) Cria um novo elemento no DOM e insere dentro de um nó pai.</li>
+<li>B) Seleciona todos os elementos que possuem um atributo específico.</li>
+<li>C) Seleciona o primeiro elemento que corresponde a um seletor CSS fornecido.</li>
+<li>D) Remove o elemento selecionado do DOM.</li>
+<li>E) Adiciona um evento de clique a um botão.</li>
+</ul>
+  </section>
+
+  <section class="slide" data-eyebrow="7. treino">
+<p class="eyebrow">7. treino</p><h3>Aula 02 — Seletores, <code>id</code>/<code>class</code> e eventos</h3>
+<p><strong>Questão 4.</strong> Sobre a relação entre os seletores usados em CSS (.classe, #id) e os métodos querySelector/querySelectorAll do JavaScript, é correto afirmar que:</p>
+<ul>
+<li>A) São linguagens de seleção completamente diferentes, e a semelhança na sintaxe entre .classe no CSS e .classe no querySelector é apenas coincidência.</li>
+<li>B) O CSS e o JS reutilizam a mesma linguagem de seletores, o que permite que uma expressão como section &gt; ul li a funcione igualmente para estilizar no CSS e para buscar elementos com querySelector.</li>
+<li>C) querySelector aceita apenas seletores de tag e classe, enquanto seletores de id só podem ser usados diretamente em CSS.</li>
+<li>D) querySelectorAll exige uma sintaxe própria de seleção, distinta da usada em folhas de estilo CSS, para evitar ambiguidade entre os dois contextos.</li>
+<li>E) Seletores avançados, como os de atributo ([type="text"]) e pseudo-classes (:hover), existem apenas no CSS e não podem ser usados como argumento em querySelector ou querySelectorAll.</li>
+</ul>
+<p><strong>Questão 5.</strong> Sobre a cardinalidade dos atributos id e class em um documento HTML, é correto afirmar que:</p>
+<ul>
+<li>A) Tanto id quanto class podem se repetir livremente em quantos elementos forem necessários, sem nenhuma restrição de unicidade.</li>
+<li>B) O id estabelece uma relação de 1 para 1 com o elemento, não devendo se repetir em nenhum outro elemento do documento, enquanto a class estabelece uma relação de n para n, podendo estar presente em vários elementos e um elemento podendo ter várias classes.</li>
+<li>C) O id estabelece uma relação de n para n, já que pode ser reaproveitado em diversos elementos, enquanto a class é sempre única por elemento.</li>
+<li>D) Um elemento pode ter no máximo um id e no máximo uma class, o que torna ambos os atributos equivalentes em termos de cardinalidade.</li>
+<li>E) A class é 1 para 1 porque cada classe só pode ser aplicada a um único elemento por vez, enquanto o id é n para n por poder ser reaproveitado.</li>
+</ul>
+<p><strong>Questão 6.</strong> Sobre o comportamento de event.target e event.currentTarget dentro de um listener registrado com addEventListener, é correto afirmar que:</p>
+<ul>
+<li>A) event.target e event.currentTarget são sempre o mesmo elemento, já que ambos se referem ao elemento em que o evento foi registrado.</li>
+<li>B) event.target é o elemento onde o listener foi registrado, enquanto event.currentTarget é o elemento onde o evento efetivamente ocorreu, podendo ser um filho.</li>
+<li>C) event.currentTarget é o elemento onde o listener foi registrado, enquanto event.target é o elemento onde o evento efetivamente ocorreu — podendo ser um filho interno, o que justifica o uso de closest() para localizar o elemento de interesse a partir dele.</li>
+<li>D) event.target só existe em eventos de teclado, enquanto event.currentTarget só existe em eventos de clique.</li>
+<li>E) stopPropagation() altera o valor de event.target, fazendo com que ele passe a apontar para o elemento no qual o listener foi registrado.</li>
+</ul>
+  </section>
+
+  <section class="slide" data-eyebrow="7. treino">
+<p class="eyebrow">7. treino</p><h3>Aula 03 — Vite, eventos e formulários</h3>
+<p><strong>Questão 7.</strong> Sobre o conceito de build e a finalidade do Vite no ambiente de desenvolvimento do frontend, é correto afirmar que:</p>
+<ul>
+<li>A) Build é o processo de leitura de arquivos estáticos pelo Nginx, sem relação com transformação de código.</li>
+<li>B) O HMR do Vite recarrega a página inteira a cada alteração salva, sendo equivalente a um F5 automático.</li>
+<li>C) Build é o processo que transforma o código-fonte em arquivos prontos para o navegador, e o Vite, como build tool, oferece Hot Module Reload (atualiza só o módulo alterado, sem recarregar a página) além de pré-compilação, sua finalidade mais relevante no curso.</li>
+<li>D) O Vite substitui o navegador, executando o JavaScript diretamente no servidor sem necessidade de DOM.</li>
+<li>E) A pré-compilação do Vite é opcional e só existe para projetos que não usam TypeScript.</li>
+</ul>
+<p><strong>Questão 8.</strong> Sobre as fases de propagação de um evento no DOM e o método stopPropagation(), é correto afirmar que:</p>
+<ul>
+<li>A) Um evento sempre ocorre em uma única fase, e stopPropagation() não tem efeito algum sobre listeners de elementos ancestrais.</li>
+<li>B) Um evento pode percorrer até três fases — capturing, target e bubbling —; por padrão addEventListener escuta na fase de bubbling, e stopPropagation() interrompe a propagação, impedindo que listeners de ancestrais sejam disparados pelo mesmo evento.</li>
+<li>C) A fase de capturing é a mais usada na prática e não pode ser desativada.</li>
+<li>D) stopPropagation() cancela o comportamento padrão do navegador para o evento, substituindo a função de preventDefault().</li>
+<li>E) Bubbling significa que o evento é disparado simultaneamente em todos os elementos da árvore, sem ordem definida.</li>
+</ul>
+<p><strong>Questão 9.</strong> Sobre o registro do listener de submit em um formulário HTML, é correto afirmar que:</p>
+<ul>
+<li>A) O listener deve ser registrado no botão de envio (button type="submit"), nunca no elemento form.</li>
+<li>B) O evento submit é disparado automaticamente mesmo sem um botão do tipo submit dentro do form, mas o listener correto é registrado no elemento form, que engloba os campos internos; preventDefault() evita o reload padrão da página ao enviar.</li>
+<li>C) preventDefault() dentro do listener de submit impede que os valores dos campos sejam lidos via JS.</li>
+<li>D) Campos com o atributo disabled são enviados normalmente no submit, junto com os demais.</li>
+<li>E) O atributo readonly impede que o campo seja enviado no submit, assim como disabled.</li>
+</ul>
+  </section>
+
+  <section class="slide" data-eyebrow="7. treino">
+<p class="eyebrow">7. treino</p><h3>Aula 04 — Cookies e JWT</h3>
+<p><strong>Questão 10.</strong> Sobre os atributos Max-Age, HttpOnly e Secure de um cookie, é correto afirmar que:</p>
+<ul>
+<li>A) HttpOnly impede que o cookie seja lido ou escrito via document.cookie pelo JS de frontend, Max-Age define por quantos segundos o cookie permanece válido antes de ser descartado automaticamente pelo navegador, e Secure garante que o cookie só seja enviado em conexões HTTPS.</li>
+<li>B) Max-Age define o algoritmo de criptografia do cookie, enquanto HttpOnly e Secure controlam apenas o domínio de origem.</li>
+<li>C) Um cookie HttpOnly continua acessível normalmente via document.cookie, servindo apenas como recomendação sem efeito prático no navegador.</li>
+<li>D) Secure impede que o cookie expire, tornando o atributo Max-Age desnecessário quando os dois são usados juntos.</li>
+<li>E) HttpOnly e Secure são atributos equivalentes, ambos controlando exclusivamente por quanto tempo o cookie é válido.</li>
+</ul>
+<p><strong>Questão 11.</strong> Sobre a estrutura de um JWT e o armazenamento do secret usado para assiná-lo, é correto afirmar que:</p>
+<ul>
+<li>A) O JWT é composto por header, payload e signature, separados por ponto; o payload pode ser lido por qualquer pessoa (é apenas Base64), mas o secret usado para gerar e validar a signature fica armazenado somente no backend, tipicamente em uma variável de ambiente no .env, nunca exposto ao frontend.</li>
+<li>B) O secret usado para assinar o JWT deve ficar salvo no frontend, para que o navegador consiga validar sozinho a assinatura de cada token recebido.</li>
+<li>C) O payload de um JWT é criptografado e ilegível sem a chave secreta, o que impede qualquer pessoa de ver os dados nele contidos.</li>
+<li>D) A signature de um JWT tem como única função identificar o algoritmo usado no header, sem relação com o payload.</li>
+<li>E) Armazenar o secret em um arquivo .env no backend é uma prática desnecessária, já que o valor pode ser escrito diretamente no código-fonte versionado sem nenhum risco.</li>
+</ul>
+  </section>
+
+  <section class="slide" data-eyebrow="7. treino">
+<p class="eyebrow">7. treino</p><h3>Aula 05 — Generics, Vite e API contextual</h3>
+<p><strong>Questão 12.</strong> Sobre Generics em TypeScript, é correto afirmar que:</p>
+<ul>
+<li>A) Generics são tipos que só funcionam com números e strings; para outros tipos é preciso duplicar a função.</li>
+<li>B) Generics são uma forma de escrever código reutilizável e type-safe que funciona com qualquer tipo, usando um placeholder <T> que é substituído quando a função é chamada; evita duplicação de código mantendo verificação de tipos.</li>
+<li>C) Generics apenas funcionam dentro de classes; funções não podem ser genéricas.</li>
+<li>D) Um generic sem constraints aceita qualquer tipo, mas se você adicionar uma constraint (extends), ele perde a capacidade de ser genérico.</li>
+<li>E) Generics são compilados para tipos reais apenas no navegador, não durante a compilação do TypeScript.</li>
+</ul>
+<p><strong>Questão 13.</strong> Sobre o Vite como pré compilador e entry point, é correto afirmar que:</p>
+<ul>
+<li>A) O Vite é apenas um servidor com HMR; não compila TypeScript ou outras linguagens.</li>
+<li>B) O Vite é um pré compilador completo que transforma TypeScript em JavaScript, compila automaticamente, e pode ser containerizado como um entry point separado no Docker Compose; a configuração atual (root: 'resources', server.host, IS_CONTAINER) já foi preparada para isso.</li>
+<li>C) O Vite só funciona com CSS; TypeScript precisa de outro compilador.</li>
+<li>D) Pré compiladores removem a necessidade de um servidor web; o Vite gera arquivos .js que rodam sozinhos sem nenhum processo.</li>
+<li>E) A pasta resources é opcional; o Vite funcionará sem ela usando raízes padrão.</li>
+</ul>
+<p><strong>Questão 14.</strong> Sobre API Contextual e a relação entre JWT e URLs, é correto afirmar que:</p>
+<ul>
+<li>A) API Contextual significa que o servidor infere o contexto do usuário a partir do JWT no cookie, sem o cliente precisar passar esse dado redundantemente na URL; isso elimina redundância e reduz pontos de falha, porque a URL não contém IDs que já estão no token.</li>
+<li>B) API Contextual exige que o cliente continue passando o ID do usuário na URL, mesmo que esteja no JWT, para garantir que o backend sempre receba uma confirmação dupla de identidade.</li>
+<li>C) O uso de JWT em cookies já garante automaticamente segurança contra endpoints chamados com IDs incorretos; não há necessidade de refatorar URLs.</li>
+<li>D) Remover o ID da URL torna a API menos segura, porque o backend não consegue mais validar quem é o usuário sem receber o ID como parâmetro.</li>
+<li>E) API Contextual é apenas uma convenção de nomenclatura; não afeta a segurança ou funcionamento real da aplicação.</li>
+</ul>
+  </section>
+
+  <section class="slide" data-eyebrow="7. treino">
+<p class="eyebrow">7. treino</p><h3>Aula 06 — Revisão geral</h3>
+<p><strong>Questão 15.</strong> Sobre a diretiva <code>try_files $uri $uri/ =404;</code> em uma configuração do Nginx, é correto afirmar que:</p>
+<ul>
+<li>A) O Nginx ignora a ordem dos argumentos e responde com o que for mais rápido de achar.</li>
+<li>B) <code>$uri</code> tenta servir o caminho como arquivo; se não existir, <code>$uri/</code> tenta o mesmo caminho como diretório (servindo seu index); se nenhum dos dois existir, <code>=404</code> responde com esse status.</li>
+<li>C) <code>=404</code> é sempre executado primeiro, e só depois o Nginx tenta <code>$uri</code> e <code>$uri/</code> como alternativa.</li>
+<li>D) <code>$uri/</code> serve arquivos estáticos apenas quando o Nginx está rodando fora de um container Docker.</li>
+<li>E) A diretiva <code>try_files</code> é usada exclusivamente para servir arquivos <code>.html</code>, nunca diretórios.</li>
+</ul>
+<p><strong>Questão 16.</strong> Sobre a árvore DOM e a cardinalidade dos atributos <code>id</code> e <code>class</code>, é correto afirmar que:</p>
+<ul>
+<li>A) <code>id</code> e <code>class</code> têm a mesma cardinalidade, já que ambos podem se repetir livremente em quantos elementos forem necessários.</li>
+<li>B) <code>id</code> estabelece uma relação 1 para 1 (não se repete no documento), enquanto <code>class</code> estabelece uma relação n para n (um elemento pode ter várias classes, e uma classe pode estar em vários elementos) — por isso <code>getElementById</code> sempre retorna um elemento único ou <code>null</code>, enquanto <code>getElementsByClassName</code> retorna uma coleção.</li>
+<li>C) <code>class</code> é 1 para 1 e <code>id</code> é n para n, o inverso do que a maioria dos desenvolvedores assume.</li>
+<li>D) A cardinalidade de <code>id</code> e <code>class</code> depende apenas da ordem em que os elementos aparecem no HTML, não de nenhuma regra fixa.</li>
+<li>E) <code>getElementById</code> retorna uma <code>HTMLCollection</code>, exatamente como <code>getElementsByClassName</code>.</li>
+</ul>
+<p><strong>Questão 17.</strong> Sobre <code>event.target</code> e <code>event.currentTarget</code> dentro de um listener registrado com <code>addEventListener</code>, é correto afirmar que:</p>
+<ul>
+<li>A) <code>event.target</code> é o elemento onde o evento efetivamente ocorreu (podendo ser um filho interno), enquanto <code>event.currentTarget</code> é o elemento no qual o listener foi registrado — o que justifica usar <code>closest()</code> a partir do <code>target</code> para achar o elemento de interesse.</li>
+<li>B) <code>event.target</code> e <code>event.currentTarget</code> são sempre idênticos, não importa onde o clique ocorra dentro do elemento.</li>
+<li>C) <code>event.currentTarget</code> é o elemento onde o evento ocorreu, enquanto <code>event.target</code> é o elemento onde o listener foi registrado.</li>
+<li>D) <code>event.target</code> só existe em eventos de teclado, nunca em eventos de clique.</li>
+<li>E) <code>closest()</code> só pode ser chamado a partir de <code>event.currentTarget</code>, nunca a partir de <code>event.target</code>.</li>
+</ul>
+<p><strong>Questão 18.</strong> Sobre a relação entre os objetos <code>window</code> e <code>document</code>, é correto afirmar que:</p>
+<ul>
+<li>A) <code>window</code> e <code>document</code> são objetos completamente independentes, sem nenhuma relação hierárquica entre si.</li>
+<li>B) <code>document</code> é uma propriedade de <code>window</code>, que representa a própria janela/aba do navegador e expõe outras APIs, como <code>localStorage</code> e eventos próprios (<code>resize</code>, <code>scroll</code>), que não pertencem a <code>document</code>.</li>
+<li>C) <code>window</code> é uma propriedade de <code>document</code>, acessível apenas depois que o DOM termina de ser parseado.</li>
+<li>D) <code>window.document === document</code> retorna <code>false</code> em qualquer navegador atualizado.</li>
+<li>E) <code>document</code> é exclusivo de ambientes de backend (Node), enquanto <code>window</code> é exclusivo do navegador.</li>
+</ul>
+<p><strong>Questão 19.</strong> Sobre generics em TypeScript, considerando a função abaixo:</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">function wrap&lt;T&gt;(valor: T): T {
+  return valor;
+}
+</div></div></div>
+<p>é correto afirmar que:</p>
+<ul>
+<li>A) <code>&lt;T&gt;</code> obriga o desenvolvedor a especificar manualmente o tipo em toda chamada da função, nunca podendo ser inferido.</li>
+<li>B) <code>&lt;T&gt;</code> é um placeholder de tipo que o TypeScript infere a partir do argumento passado na chamada, permitindo que a mesma função funcione para qualquer tipo sem duplicar código e sem perder segurança de tipos.</li>
+<li>C) Generics eliminam a necessidade de tipar o retorno da função, que passa a ser sempre <code>any</code>.</li>
+<li>D) <code>wrap&lt;T&gt;</code> só pode ser usada com tipos primitivos (<code>string</code>, <code>number</code>, <code>boolean</code>), nunca com objetos.</li>
+<li>E) Generics são exclusivos de bibliotecas como o Axios e não podem ser usados em funções definidas pelo próprio desenvolvedor.</li>
+</ul>
+  </section>
+
+  <section class="slide" data-eyebrow="7. treino">
+<p class="eyebrow">7. treino</p><h4>Gabarito do treino</h4>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Questão</th>
+<th>Resposta</th>
+<th>Por quê</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>C</strong></td>
+<td>Nginx no Docker cria um ambiente de servidor real, igual à produção.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>C</strong></td>
+<td>Tags semânticas ajudam navegadores, buscadores e leitores de tela a entender a página.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>C</strong></td>
+<td><code>querySelector</code> devolve o primeiro elemento que casa com o seletor CSS.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>B</strong></td>
+<td>CSS e JS usam a mesma linguagem de seletores.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>B</strong></td>
+<td><code>id</code> é 1 para 1; <code>class</code> é n para n.</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>C</strong></td>
+<td><code>target</code> = onde ocorreu; <code>currentTarget</code> = onde o listener está; <code>closest()</code> ajuda a achar o elemento de interesse.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>C</strong></td>
+<td>Build transforma o código-fonte em arquivos prontos; o HMR atualiza só o módulo alterado; a pré-compilação é o recurso mais relevante.</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>B</strong></td>
+<td>Três fases (capturing, target, bubbling); o padrão é bubbling; <code>stopPropagation</code> interrompe a propagação.</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>B</strong></td>
+<td>O listener de <code>submit</code> vai no <code>&lt;form&gt;</code>; <code>preventDefault()</code> evita o recarregamento da página.</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>A</strong></td>
+<td><code>HttpOnly</code> bloqueia o JS, <code>Max-Age</code> define a validade, <code>Secure</code> exige HTTPS.</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>A</strong></td>
+<td>JWT = header.payload.signature; payload legível por qualquer um; secret só no backend.</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>B</strong></td>
+<td>Generics: <code>&lt;T&gt;</code> é um espaço reservado preenchido na chamada; reutiliza código sem perder checagem de tipos.</td>
+</tr>
+<tr>
+<td>13</td>
+<td><strong>B</strong></td>
+<td>O Vite transforma TS em JS puro e pode ser containerizado como entry point.</td>
+</tr>
+<tr>
+<td>14</td>
+<td><strong>A</strong></td>
+<td>API contextual: o servidor lê o usuário do JWT, sem o ID redundante na URL.</td>
+</tr>
+<tr>
+<td>15</td>
+<td><strong>B</strong></td>
+<td><code>try_files</code> testa em ordem: arquivo, diretório, 404.</td>
+</tr>
+<tr>
+<td>16</td>
+<td><strong>B</strong></td>
+<td><code>id</code> 1 para 1, <code>class</code> n para n; por isso id devolve um elemento e class uma coleção.</td>
+</tr>
+<tr>
+<td>17</td>
+<td><strong>A</strong></td>
+<td><code>target</code> é onde ocorreu; <code>currentTarget</code> é onde o listener foi registrado.</td>
+</tr>
+<tr>
+<td>18</td>
+<td><strong>B</strong></td>
+<td><code>document</code> é propriedade de <code>window</code>; <code>localStorage</code>, <code>resize</code> e <code>scroll</code> pertencem a <code>window</code>.</td>
+</tr>
+<tr>
+<td>19</td>
+<td><strong>B</strong></td>
+<td><code>&lt;T&gt;</code> é inferido do argumento: mesma função para qualquer tipo, sem perder segurança.</td>
+</tr>
+</tbody>
+</table></div>
+  </section>
+
+  <section class="slide" data-eyebrow="8. dissertativas do tf 06">
+<p class="eyebrow">8. dissertativas do tf 06</p><h2>8. Dissertativas do TF 06: pontos-chave para a resposta</h2>
+<p>Use como roteiro: uma boa resposta explica <strong>o que é</strong>, <strong>por que existe</strong> e <strong>o que acontece sem isso</strong>.</p>
+<p><strong>1. <code>try_files</code> (Aula 01).</strong> Testa os argumentos <strong>em ordem</strong>, da esquerda para a direita, e o primeiro que resolver vence (por isso a ordem importa: não dá para testar tudo ao mesmo tempo). <code>$uri</code> busca um <strong>arquivo</strong>; <code>$uri/</code> busca um <strong>diretório</strong> e serve o <code>index</code> dele; <code>=404</code> é a resposta final quando nada deu certo. Sem a busca por diretório, <code>/blog</code> daria 404 mesmo existindo <code>blog/index.html</code>; o visitante teria de digitar <code>/blog/index.html</code>, e até a página inicial quebraria.</p>
+<p><strong>2. <code>Node</code>, <code>Element</code> e <code>HTMLElement</code> (Aula 02).</strong> É uma cadeia de <strong>especialização</strong>: <code>Node</code> é a base de <strong>tudo</strong> que existe na árvore (elemento, texto, comentário, o próprio <code>document</code>); <code>Element</code> é o nó que representa uma <strong>tag</strong> (HTML ou SVG) e traz o que só faz sentido para tags: atributos, <code>children</code>, <code>closest</code>, <code>querySelector</code>; <code>HTMLElement</code> é a tag <strong>HTML</strong> em particular (<code>style</code>, <code>innerText</code>, <code>dataset</code>). Um tipo único para tudo obrigaria a ter, num simples texto, métodos que não fazem sentido (um texto não tem <code>children</code>). Diferença prática: <code>childNodes</code> inclui <strong>nós de texto</strong> (os espaços e quebras de linha entre as tags); <code>children</code> só os <strong>elementos</strong>. Importa ao percorrer ou manipular filhos: com <code>childNodes</code> o primeiro filho pode ser um texto em branco, não a tag que você queria.</p>
+<p><strong>3. <code>target</code> e <code>currentTarget</code> (Aula 03).</strong> <code>target</code> é onde o clique <strong>realmente</strong> aconteceu (o <code>&lt;button&gt;</code>); <code>currentTarget</code> é onde o listener foi <strong>registrado</strong> (o <code>&lt;ul&gt;</code>). Como o evento <strong>borbulha</strong> do botão para os ancestrais, o <code>&lt;ul&gt;</code> o recebe. Um único listener no pai (<strong>delegação</strong>) é comum porque usa menos listeners e menos memória, e funciona para itens <strong>criados depois</strong> sem registrar nada novo; o código usa <code>event.target.closest("li")</code> para achar o item.</p>
+<p><strong>4. Fases, <code>preventDefault</code> e <code>stopPropagation</code> (Aula 03).</strong> <strong>Capturing</strong>: o evento desce da raiz até o alvo. <strong>Target</strong>: chega ao elemento de origem. <strong>Bubbling</strong>: sobe do alvo de volta à raiz. O padrão é escutar no bubbling (o mais útil na prática: o pai reage ao que aconteceu nos filhos); capturing só com <code>{ capture: true }</code>. <code>preventDefault()</code> cancela o <strong>comportamento padrão</strong> do navegador (navegar num link, recarregar no submit), <strong>sem</strong> parar a propagação. <code>stopPropagation()</code> interrompe a <strong>subida</strong> do evento aos ancestrais, <strong>sem</strong> cancelar o padrão. Os dois juntos: um link <code>&lt;a href="#"&gt;</code> dentro de um elemento que tem listener de clique (ex.: o menu que fecha ao clicar fora): <code>preventDefault</code> evita pular para o topo, <code>stopPropagation</code> evita que o clique chegue ao listener do ancestral.</p>
+<p><strong>5. <code>window</code> e <code>document</code> (Aula 04).</strong> <code>window</code> é o <strong>objeto global</strong> do navegador (a janela/aba); <code>document</code> é <strong>propriedade</strong> dele. Em <code>window</code> vivem <code>localStorage</code>, <code>fetch</code> e eventos como <code>resize</code> e <code>scroll</code>; em <code>document</code>, o DOM. <code>document.querySelector</code> funciona sem o <code>window.</code> porque propriedades do objeto global são acessíveis <strong>diretamente</strong>; isso é só atalho de escrita, <code>document</code> continua sendo parte de <code>window</code>.</p>
+<p><strong>6. Generics (Aula 05).</strong> Sem generics, cada tipo exigiria uma cópia da função (<code>string</code>, <code>number</code>, <code>Usuario</code>...). Num projeto que cresce isso causa <strong>duplicação</strong>: uma mudança de regra precisa ser repetida em N lugares (e alguém esquece um), mais tipos significam mais cópias, mais código para revisar e mais risco de <strong>divergência entre as versões</strong>. Com <code>&lt;T&gt;</code> há <strong>uma</strong> função: o TypeScript preenche o <code>T</code> em cada chamada e continua conferindo os tipos (<code>T</code> não é <code>any</code>). Tipar a resposta HTTP, como em <code>clientApi.get&lt;Usuario[]&gt;(...)</code>, é a aplicação mais comum: diz ao TypeScript qual é o tipo de <code>response.data</code>, e a partir daí o autocomplete e os erros de tipo valem para tudo que veio da API.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="9. gabarito dos exercícios de typescript (parte ">
+<p class="eyebrow">9. gabarito dos exercícios de typescript (parte </p><h2>9. Gabarito dos exercícios de TypeScript (Parte 6.9)</h2>
+<p><strong>Ex. 1</strong></p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">type Tarefa = {
+  id: number;
+  titulo: string;
+  concluida: boolean;
+};
+
+const tarefas: Tarefa[] = [
+  { id: 1, titulo: &quot;Estudar TS&quot;, concluida: false },
+  { id: 2, titulo: &quot;Revisar DOM&quot;, concluida: true },
+];
+</div></div></div>
+<p><strong>Ex. 2</strong></p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">function mediaDe(notas: number[]): number {
+  let soma = 0;
+  for (const n of notas) {
+    soma += n;
+  }
+  return soma / notas.length;
+}
+</div></div></div>
+<p><strong>Ex. 3</strong></p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">function listarTitulos(lista: Tarefa[], formatar: (item: Tarefa) =&gt; string): string[] {
+  return lista.map(formatar);
+}
+</div></div></div>
+<p><strong>Ex. 4</strong> (só o que era <code>Tarefa</code> vira <code>T</code>; o retorno continua <code>string[]</code>, porque o callback devolve <code>string</code>, não <code>T</code>)</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">function listarTitulos&lt;T&gt;(lista: T[], formatar: (item: T) =&gt; string): string[] {
+  return lista.map(formatar);
+}
+
+listarTitulos(tarefas, (t) =&gt; t.titulo.toUpperCase());   // T = Tarefa
+listarTitulos([1, 2, 3], (n) =&gt; `nº ${n}`);              // T = number
+</div></div></div>
+<p><strong>Ex. 5</strong></p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">function ultimo&lt;T&gt;(lista: T[]): T {
+  return lista[lista.length - 1];
+}
+</div></div></div>
+<p><strong>Ex. 6.</strong> Três erros: (1) <code>String</code> com maiúscula, o certo é <code>string</code>; (2) <code>alunos: Aluno</code> mas o valor é um array, o certo é <code>Aluno[]</code>; (3) <code>maior&lt;T&gt;</code> declara o <code>T</code> mas não o usa (<code>lista: Aluno[]</code>, retorno <code>Aluno</code>), então a função <strong>não</strong> é genérica de verdade. Corrigido:</p>
+<div class="term"><div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-path">exemplo.ts</span></div><div class="term-body"><div class="term-line">type Aluno = { nome: string; nota: number };
+const alunos: Aluno[] = [{ nome: &quot;Bia&quot;, nota: 9 }];
+function maior&lt;T&gt;(lista: T[]): T { return lista[0]; }
+</div></div></div>
+  </section>
+
+  <section class="slide" data-eyebrow="10. checklist final">
+<p class="eyebrow">10. checklist final</p><h2>10. Checklist final</h2>
+<ul>
+<li class="check">Explico <code>try_files</code> em ordem (<code>$uri</code>, <code>$uri/</code>, <code>=404</code>) e o que quebraria sem <code>$uri/</code>.</li>
+<li class="check">Sei dizer o que <code>closest</code>, <code>parentElement</code>, <code>children</code> e <code>childNodes</code> devolvem, e que <code>closest</code> começa <strong>no próprio elemento</strong>.</li>
+<li class="check">Monto um seletor com <code>&gt;</code>, <code>+</code>, <code>~</code> e <code>.a.b</code> traduzindo frase por frase.</li>
+<li class="check">Diferencio <code>target</code> de <code>currentTarget</code> e sei por que a delegação funciona (bubbling).</li>
+<li class="check">Sei o que <code>preventDefault</code> e <code>stopPropagation</code> cancelam (e que um não faz o trabalho do outro).</li>
+<li class="check">Sei que <code>document</code> é propriedade de <code>window</code>, e onde vivem <code>localStorage</code>, <code>fetch</code>, <code>resize</code>.</li>
+<li class="check">Listo 4 benefícios de um pré-compilador <strong>com explicação</strong>.</li>
+<li class="check">Escrevo, sem olhar, um <code>type</code> de objeto, um array tipado e uma função com argumentos, callback e retorno tipados.</li>
+<li class="check">Transformo essa função em genérica (<code>&lt;T&gt;</code> no nome, <code>T</code> em todo lugar do tipo concreto).</li>
+<li class="check">Refiz os exercícios 1 a 6 sem consultar o gabarito.</li>
+</ul>
+  </section>
+
+</div>
+
+<nav class="hud">
+  <button id="prevBtn" aria-label="Slide anterior">‹</button>
+  <div class="hud-mid">
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="hud-meta">
+      <span><span id="counterCurrent">01</span> / <span id="counterTotal">32</span> — <span id="eyebrowLabel">abertura</span></span>
+      <span class="hint">use ← → ou espaço para navegar · T alterna o tema</span>
+    </div>
+  </div>
+  <button id="nextBtn" aria-label="Próximo slide">›</button>
+</nav>
+<script src="../../assets/slide.js"></script>
+<script src="../../assets/slide-16x9.js"></script>
+</body>
+</html>

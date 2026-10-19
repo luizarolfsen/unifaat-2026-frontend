@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login - Tasks</title>
+  <link rel="icon" type="image/png" href="/img/favicon.ico">
+  <%- vite(["css/app.css", "js/app.ts", "js/pages/login.ts"]) %>
+</head>
+
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+  <header class="bg-primary text-white text-center py-4 shadow-sm">
+    <h1 class="h3 m-0">Tasks - Login</h1>
+  </header>
+
+  <main class="container flex-grow-1 d-flex align-items-center justify-content-center py-5">
+    <div id="login-container" class="card shadow-sm p-5" style="max-width: 400px; width: 100%;">
+
+      <%# O formulário que o loginRender.ts montava via DOM agora já vem pronto do servidor %>
+      <form id="login-form" class="d-flex flex-column gap-3">
+        <h2 class="text-center mb-4">Login</h2>
+
+        <label for="email-input" class="form-label">Email</label>
+        <input id="email-input" type="email" class="form-control" placeholder="seu@email.com" required>
+
+        <label for="password-input" class="form-label">Senha</label>
+        <input id="password-input" type="password" class="form-control" placeholder="sua senha" required>
+
+        <button type="submit" class="btn btn-primary btn-lg mt-3">Entrar</button>
+
+        <div id="login-message" class="alert alert-danger d-none"></div>
+      </form>
+
+    </div>
+  </main>
+
+  <footer class="bg-primary text-white text-center py-3 mt-auto">
+    <div class="small">Frontend 2026.2</div>
+  </footer>
+
+</body>
+
+</html>

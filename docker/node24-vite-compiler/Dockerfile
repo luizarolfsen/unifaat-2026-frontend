@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copia arquivos necessários para instalar as dependencia node_modules EM TEMPO DE BUILD
 COPY src/package*.json ./
-COPY src/frontend/resources/ ./resources/
+COPY src/resources/ ./resources/
 COPY docker/node24-vite-compiler/vite.config.js ./
 
 # Instala dependências

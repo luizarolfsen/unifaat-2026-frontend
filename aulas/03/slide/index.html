@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 03 — Vite, Forms e Listeners</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="../../../assets/slide.css">
+<link rel="stylesheet" href="../../../assets/slide-16x9.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar" aria-label="Miniaturas dos slides">
+  <a class="sidebar-back" href="../../../index.html">← Voltar</a>
+</aside>
+
+<div class="deck" id="deck">
+
+  <section class="slide" data-eyebrow="abertura">
+    <div class="cover-top">
+      <span class="cover-uni">Unifaat</span>
+      <span class="cover-sem">2026.2</span>
+    </div>
+    <h1><span class="cover-num">03</span> - Vite, Forms e Listeners</h1>
+    <p class="cover-prof">Prof. Luan Lourenço</p>
+  </section>
+
+  <section class="slide" data-eyebrow="repositório">
+    <h2>O repositório <span class="accent">do bimestre</span></h2>
+    <p class="body-text"><a href="https://github.com/luan-tavares/unifaat-frontend-bimestre-01" target="_blank" rel="noopener noreferrer"><code>github.com/luan-tavares/unifaat-frontend-bimestre-01</code></a></p>
+    <p class="payoff">A partir desta aula o projeto ganha a tabela de Usuários e um CRUD completo — com a API ainda aberta.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="build">
+    <h2>O que é um <span class="accent">build?</span></h2>
+    <p class="lede">O processo que transforma o código-fonte em arquivos prontos para produção.</p>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># 1 · código-fonte</span><br>
+        múltiplos arquivos, sintaxes modernas,<br>
+        TypeScript
+      </div>
+      <div class="tree">
+        <span class="dim"># 2 · build tool</span><br>
+        empacota, otimiza e transforma<br>
+        o código
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># 3 · produção</span><br>
+        JS puro, compatível com o navegador
+      </div>
+      <div class="tree">
+        <span class="dim"># exemplos de build tools</span><br>
+        Vite · Webpack · Parcel · esbuild
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="vite">
+    <h2>Vite: <span class="accent">para que serve?</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># hot module reload</span><br>
+        atualiza só o módulo que mudou —<br>
+        sem recarregar a página
+      </div>
+      <div class="tree">
+        <span class="dim"># pré-compilação</span><br>
+        escreva TypeScript e sintaxes modernas;<br>
+        o Vite transforma em JS puro
+      </div>
+    </div>
+    <p class="payoff">A pré-compilação é o recurso mais relevante pro curso. O HMR resolve a produtividade do dia a dia.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="vite · hmr">
+    <h2>HMR: <span class="accent">sem recarregar a página</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># sem hmr</span><br>
+        salvar → recarregar a página inteira<br>
+        → perder estado (formulário, scroll)
+      </div>
+      <div class="tree">
+        <span class="dim"># com hmr</span><br>
+        o Vite detecta o módulo alterado<br>
+        → envia só ele ao navegador<br>
+        → estado preservado
+      </div>
+    </div>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">vite.config.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">export default defineConfig({</span></div>
+        <div class="term-line"><span class="cmd">  root: 'public',</span></div>
+        <div class="term-line"><span class="cmd">  server: {</span></div>
+        <div class="term-line"><span class="cmd">    hmr: true,</span></div>
+        <div class="term-line"><span class="cmd">    host: true,   // aceita conexões de fora do localhost</span></div>
+        <div class="term-line"><span class="cmd">    port: 5173</span></div>
+        <div class="term-line"><span class="cmd">  }</span></div>
+        <div class="term-line"><span class="cmd">})</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="vite · executando">
+    <h2>Executando <span class="accent">o Vite</span></h2>
+    <p class="lede">Instalado como dependência <strong>local</strong>: o binário fica em <code>node_modules/.bin</code>.</p>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">terminal</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line comment"># caminho relativo — funciona sempre, sem depender do PATH</div>
+        <div class="term-line"><span class="prompt">$</span> <span class="cmd">./node_modules/.bin/vite</span></div>
+        <div class="term-line comment"># via npm script — o npm adiciona .bin ao PATH sozinho</div>
+        <div class="term-line"><span class="prompt">$</span> <span class="cmd">npm run dev</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="eventos · catálogo">
+    <h2>Eventos: revisão e <span class="accent">catálogo</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">console.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">botao.addEventListener("click", function (event) {</span></div>
+        <div class="term-line"><span class="cmd">  console.log(event.target);  // onde ocorreu</span></div>
+        <div class="term-line"><span class="cmd">});</span></div>
+        <div class="term-line comment">// target → onde ocorreu · currentTarget → onde o listener está</div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># mouse</span><br>
+        click · dblclick<br>
+        mouseover · mouseenter
+      </div>
+      <div class="tree">
+        <span class="dim"># teclado, input, formulário e página</span><br>
+        keydown · keyup · input · change<br>
+        submit · focus · blur · DOMContentLoaded
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="preventdefault e stoppropagation">
+    <h2><code>preventDefault</code> e <span class="accent"><code>stopPropagation</code></span></h2>
+    <div class="two-col">
+      <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">preventDefault.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">link.addEventListener("click",</span></div>
+        <div class="term-line"><span class="cmd">  function (event) {</span></div>
+        <div class="term-line"><span class="cmd">    event.preventDefault();</span></div>
+        <div class="term-line comment">// o link não navega</div>
+        <div class="term-line"><span class="cmd">  }</span></div>
+        <div class="term-line"><span class="cmd">);</span></div>
+      </div>
+    </div>
+      <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">stopPropagation.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">item.addEventListener("click",</span></div>
+        <div class="term-line"><span class="cmd">  function (event) {</span></div>
+        <div class="term-line"><span class="cmd">    event.stopPropagation();</span></div>
+        <div class="term-line comment">// o evento para aqui</div>
+        <div class="term-line"><span class="cmd">  }</span></div>
+        <div class="term-line"><span class="cmd">);</span></div>
+      </div>
+    </div>
+    </div>
+    <p class="body-text"><code>preventDefault()</code> cancela o comportamento padrão e o evento <strong>continua</strong> propagando. <code>stopPropagation()</code> interrompe o bubbling: listeners dos pais não disparam.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="fases do evento">
+    <h2>Fases <span class="accent">do evento</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">dom-tree</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">① capturing ↓   window → html → body → main → section → div</span></div>
+        <div class="term-line"><span class="cmd">② target       button  ← alvo do evento</span></div>
+        <div class="term-line"><span class="cmd">③ bubbling  ↑   div → section → main → body → html → window</span></div>
+      </div>
+    </div>
+    <p class="body-text">Por padrão, <code>addEventListener</code> escuta na fase de <strong>bubbling</strong>. Pra capturing: <code>{ capture: true }</code> como terceiro argumento.</p>
+    <p class="payoff">É por isso que o clique no filho também dispara os listeners dos pais.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="forms">
+    <h2>Formulários <span class="accent">HTML</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">index.html</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">&lt;form id="form-usuario"&gt;</span></div>
+        <div class="term-line"><span class="cmd">  &lt;input type="text" name="nome" placeholder="Nome" required&gt;</span></div>
+        <div class="term-line"><span class="cmd">  &lt;input type="email" name="email"&gt;</span></div>
+        <div class="term-line"><span class="cmd">  &lt;input type="checkbox" name="ativo" checked&gt;</span></div>
+        <div class="term-line"><span class="cmd">  &lt;input type="text" name="id" value="123" readonly&gt;</span></div>
+        <div class="term-line"><span class="cmd">  &lt;button type="submit" disabled&gt;Salvar&lt;/button&gt;</span></div>
+        <div class="term-line"><span class="cmd">&lt;/form&gt;</span></div>
+      </div>
+    </div>
+    <p class="body-text"><code>value</code> valor atual · <code>placeholder</code> exemplo com campo vazio · <code>disabled</code> não é enviado · <code>readonly</code> não edita, mas é enviado · <code>required</code> / <code>name</code> validação e identificação.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="forms · submit">
+    <h2>O evento <span class="accent">submit</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">console.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">const form = document.querySelector("#form-usuario");</span></div>
+        <div class="term-line"><span class="cmd">form.addEventListener("submit", function (event) {</span></div>
+        <div class="term-line comment">// sem isso, a página recarrega e os dados se perdem</div>
+        <div class="term-line"><span class="cmd">  event.preventDefault();</span></div>
+        <div class="term-line"><span class="cmd">  const nome = form.nome.value;</span></div>
+        <div class="term-line"><span class="cmd">  const email = form.email.value;</span></div>
+        <div class="term-line"><span class="cmd">  console.log(nome, email);</span></div>
+        <div class="term-line"><span class="cmd">});</span></div>
+      </div>
+    </div>
+    <p class="payoff">Listener no <code>&lt;form&gt;</code> — não no botão, não nos inputs.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="json">
+    <h2>JSON: a mesma lógica <span class="accent">desde a aula 01</span></h2>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># rede</span><br>
+        os dados trafegam como <strong>string</strong>
+      </div>
+      <div class="tree">
+        <span class="dim"># parsing</span><br>
+        string JSON → objeto JS
+      </div>
+    </div>
+    <p class="body-text">Depois do parsing, vira objeto manipulável — no frontend ou no backend.</p>
+    <p class="payoff">O Axios faz o parsing automaticamente: <code>response.data</code> já é o objeto.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="axios">
+    <h2>Axios: cliente HTTP <span class="accent">com Promises</span></h2>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">terminal</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="prompt">$</span> <span class="cmd">npm install axios</span></div>
+      </div>
+    </div>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-path">usuarios.js</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="cmd">import axios from "axios";</span></div>
+        <div class="term-line comment">// GET: lista usuários — response.data já vem parseado</div>
+        <div class="term-line"><span class="cmd">const response = await axios.get("http://localhost:3000/usuarios");</span></div>
+        <div class="term-line comment">// POST: cria um usuário</div>
+        <div class="term-line"><span class="cmd">await axios.post("http://localhost:3000/usuarios", { nome: "Ana", email: "ana@email.com" });</span></div>
+      </div>
+    </div>
+    <p class="payoff">Baseado em Promises (<code>async</code>/<code>await</code>) e com a mesma API no frontend e no Node.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="crud de usuários">
+    <h2>CRUD <span class="accent">de usuários</span></h2>
+    <p class="lede">A API está aberta — a autenticação entra na próxima aula.</p>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># GET</span><br>
+        listar usuários
+      </div>
+      <div class="tree">
+        <span class="dim"># POST</span><br>
+        criar usuário
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="tree">
+        <span class="dim"># PUT</span><br>
+        atualizar usuário
+      </div>
+      <div class="tree">
+        <span class="dim"># DELETE</span><br>
+        remover usuário
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-eyebrow="fim da aula 03">
+    <h2>Vite, listeners, forms e Axios.</h2>
+    <p class="lede">Fechamos o ciclo de comunicação entre frontend e backend. A seguir: <strong>navegadores web e API</strong> — o objeto <code>window</code>, cookies, JWT e CORS.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="tf 03 · entrega">
+    <span class="kicker-badge">tarefa</span>
+    <h2>TF 03: <span class="accent">Vite, Forms e Listeners</span></h2>
+    <p class="body-text">Entrega pelo formulário abaixo —<br><a href="https://docs.google.com/forms/d/e/1FAIpQLSfVSiBxATYNmBNf0aLWIwGsq7BChyBwGIvV4y6BqKFiTUySAg/viewform?usp=dialog" target="_blank" rel="noopener noreferrer"><code>docs.google.com/forms/d/e/1FAIpQLSfVSiBxATYNmBNf0aLWIwGsq7BChyBwGIvV4y6BqKFiTUySAg/viewform</code></a></p>
+  </section>
+
+</div>
+
+<nav class="hud">
+  <button id="prevBtn" aria-label="Slide anterior">‹</button>
+  <div class="hud-mid">
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="hud-meta">
+      <span><span id="counterCurrent">01</span> / <span id="counterTotal">16</span> — <span id="eyebrowLabel">abertura</span></span>
+      <span class="hint">use ← → ou espaço para navegar · T alterna o tema</span>
+    </div>
+  </div>
+  <button id="nextBtn" aria-label="Próximo slide">›</button>
+</nav>
+<script src="../../../assets/slide.js"></script>
+<script src="../../../assets/slide-16x9.js"></script>
+</body>
+</html>

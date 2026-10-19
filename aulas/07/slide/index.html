@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 07 — Views e Elasticsearch</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="../../../assets/slide.css">
+<link rel="stylesheet" href="../../../assets/slide-16x9.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar" aria-label="Miniaturas dos slides">
+  <a class="sidebar-back" href="../../../index.html">← Voltar</a>
+</aside>
+
+<div class="deck" id="deck">
+
+  <section class="slide" data-eyebrow="abertura">
+    <div class="cover-top">
+      <span class="cover-uni">Unifaat</span>
+      <span class="cover-sem">2026.2</span>
+    </div>
+    <h1><span class="cover-num">07</span> - Views e Elasticsearch</h1>
+    <p class="cover-prof">Prof. Luan Lourenço</p>
+  </section>
+
+  <section class="slide" data-eyebrow="estático x dinâmico">
+    <h2>Estático <span class="accent">x</span> Dinâmico</h2>
+    <div class="two-col">
+    <div class="tree">
+<span class="dim"># estático · Nginx (Aula 01)</span><br>
+→ arquivo pronto no disco<br>
+→ igual para todo mundo<br>
+→ nenhum código roda no servidor backend
+    </div>
+    <div class="tree">
+<span class="dim"># dinâmico · Node</span><br>
+→ o servidor executa código<br>
+→ DW: JSON montado do banco<br>
+→ muda a cada requisição
+    </div>
+    </div>
+    <div class="tree">
+<span class="dim"># o HTML também é só texto: mesmo corpo "&lt;h1&gt;Olá&lt;/h1&gt;", dois headers</span><br>
+Content-Type: <span class="hl">text/plain</span>&nbsp;&nbsp;→ o navegador mostra os caracteres &lt;h1&gt;Olá&lt;/h1&gt;<br>
+Content-Type: <span class="hl">text/html</span>&nbsp;&nbsp;&nbsp;→ o navegador monta a página e cria o DOM
+    </div>
+    <p class="payoff">Qualquer arquivo pode sair do backend. Quem decide o que fazer com os bytes é o Content-Type.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="views · 1º impulso">
+    <h2>O controller <span class="accent">monta o HTML</span>?</h2>
+    <div class="tree">
+TasksPageController<br>
+&nbsp;&nbsp;→ busca as tarefas do usuário no banco<br>
+&nbsp;&nbsp;→ concatena o HTML numa template string: `&lt;li&gt;${task.name}&lt;/li&gt;`<br>
+&nbsp;&nbsp;→ responde com Content-Type: text/html
+    </div>
+    <ul class="points">
+      <li><strong>Mistura responsabilidades</strong>: lógica HTTP e formatação do HTML no mesmo arquivo</li>
+      <li><strong>Não escala</strong>: cabeçalho, menu e rodapé copiados em todo controller</li>
+      <li><strong>Não escapa</strong>: uma tarefa chamada <code>&lt;script&gt;</code> executa no navegador (XSS, Aula 08)</li>
+    </ul>
+    <p class="payoff">Funciona, mas é má prática.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="mvc · ciclo http">
+    <h2>MVC: o <span class="accent">V</span> que faltava</h2>
+    <div class="two-col">
+    <ul class="points">
+      <li><strong>Model</strong>: acessa os dados (já existia)</li>
+      <li><strong>Controller</strong>: trata a requisição e chama os Models (já existia)</li>
+      <li><strong>View</strong>: recebe dados prontos e devolve HTML (a novidade)</li>
+    </ul>
+    <div class="tree">
+GET /tasks<br>
+&nbsp;&nbsp;↓ middlewares (cookie, auth)<br>
+&nbsp;&nbsp;↓ controller<br>
+&nbsp;&nbsp;↓ models (Postgres)<br>
+&nbsp;&nbsp;↓ <span class="hl">view</span> (HTML com os dados)<br>
+&nbsp;&nbsp;↓ Content-Type: text/html
+    </div>
+    </div>
+    <p class="payoff">O HTML passa pelo ciclo de vida HTTP inteiro, como o JSON da API sempre passou: middlewares, banco e regras de negócio valem para a página.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="login · antes x agora">
+    <h2>Login: <span class="accent">quem decide a sessão?</span></h2>
+    <div class="two-col">
+    <div class="tree">
+<span class="dim"># antes · login.html estático</span><br>
+Nginx entrega login.html a todos<br>
+&nbsp;&nbsp;↓ a página chega, o JS roda<br>
+&nbsp;&nbsp;↓ checkAuthentication()<br>
+&nbsp;&nbsp;↓ GET /users/me<br>
+&nbsp;&nbsp;↓ token ok? redireciona<br>
+<span class="dim">decide DEPOIS da página chegar</span>
+    </div>
+    <div class="tree">
+<span class="dim"># agora · View + middleware</span><br>
+GET /login<br>
+&nbsp;&nbsp;↓ ParseCookiesMiddleware<br>
+&nbsp;&nbsp;↓ RedirectIfAuthenticated...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;token ok → <span class="hl">302 /tasks.html</span><br>
+&nbsp;&nbsp;↓ LoginViewController → login.ejs<br>
+<span class="dim">decide ANTES do HTML existir</span>
+    </div>
+    </div>
+    <p class="payoff">O Nginx não sabe o que é um JWT; um middleware sabe. O inverso protege página privada: sem token, redirect para /login. (código completo: <a href="../raio-x/index.html">raio-x da aula</a>)</p>
+  </section>
+
+  <section class="slide" data-eyebrow="ejs">
+    <h2>EJS: <span class="accent">Embedded JavaScript</span></h2>
+    <p class="lede">Um arquivo que é quase HTML, com marcações onde entram os dados. Instalado com npm, configurado no _web.js (view engine ejs, views em resources/views).</p>
+    <div class="tree">
+<span class="hl">&lt;%= valor %&gt;</span>&nbsp;&nbsp;&nbsp;&nbsp;imprime ESCAPADO: um &lt;script&gt; vira texto<br>
+<span class="hl">&lt;%- valor %&gt;</span>&nbsp;&nbsp;&nbsp;&nbsp;imprime sem escape: só HTML confiável<br>
+<span class="hl">&lt;% código %&gt;</span>&nbsp;&nbsp;&nbsp;&nbsp;executa JS sem imprimir: if, laços<br>
+<span class="hl">&lt;%# nota %&gt;</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comentário: não vai para o HTML
+    </div>
+    <div class="callout"><span class="mark">docker</span><p>O node_modules fica num volume nomeado, criado uma vez só. Lib nova: <code>down</code>, <code>docker volume rm fe-2026_nodemodules-volume</code>, <code>up -d --build</code>.</p></div>
+  </section>
+
+  <section class="slide" data-eyebrow="hello world">
+    <h2>Hello World: <span class="accent">a primeira view</span></h2>
+    <div class="tree">
+GET /hello?nome=Luan<br>
+&nbsp;&nbsp;↓ controller: só decide os dados (nome, padrão "mundo"; hora do servidor)<br>
+&nbsp;&nbsp;↓ hello.ejs: Olá, <span class="hl">&lt;%= nome %&gt;</span>!<br>
+&nbsp;&nbsp;↓ "Olá, Luan!": um HTML que não existe em disco
+    </div>
+    <div class="two-col">
+    <div class="tree">
+<span class="dim"># ?nome=Luan</span><br>
+Olá, Luan!
+    </div>
+    <div class="tree">
+<span class="dim"># ?nome=&lt;script&gt;alert(1)&lt;/script&gt;</span><br>
+vira texto na tela, nada executa
+    </div>
+    </div>
+    <p class="payoff">O &lt;%= escapa por padrão. Escape e XSS são assunto da Aula 08.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="elasticsearch">
+    <h2>Elasticsearch: <span class="accent">busca</span></h2>
+    <div class="two-col">
+    <ul class="points">
+      <li>Filtro por N campos em SQL: <code>ILIKE '%x%'</code> lê linha a linha</li>
+      <li>Um índice por combinação de filtros? Impossível</li>
+      <li>Sem relevância e sem linguagem: relatório e relatorio são textos diferentes</li>
+    </ul>
+    <div class="tree">
+índice&nbsp;&nbsp;&nbsp;&nbsp;≈ tabela<br>
+documento ≈ linha, em JSON<br>
+_id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span class="hl">PK do Postgres</span><br>
+<span class="dim"># índice invertido</span><br>
+relatorio → tarefas 42, 57, 90
+    </div>
+    </div>
+    <div class="tree">
+<span class="dim"># busca vetorial, em uma linha</span><br>
+texto → vetor de significado: "pagar boleto" acha "quitar conta de luz"
+    </div>
+    <p class="payoff">Buscar = ler listas prontas e cruzá-las, com nota de relevância (score).</p>
+  </section>
+
+  <section class="slide" data-eyebrow="elasticsearch · rede interna">
+    <span class="kicker-badge">importante</span>
+    <h2>Sem <span class="accent">porta exposta</span></h2>
+    <div class="tree">
+navegador ──✗──→ elasticsearch_host:9200&nbsp;&nbsp;&nbsp;<span class="dim">(nenhuma porta no host)</span><br>
+navegador → Nginx → servidor web ──→ elasticsearch_host:9200&nbsp;&nbsp;<span class="hl">✓ busca</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;worker&nbsp;&nbsp;──→ elasticsearch_host:9200&nbsp;&nbsp;<span class="hl">✓ alimenta</span>
+    </div>
+    <ul class="points">
+      <li>Mais um container (<code>elasticsearch:9.5.5</code>), <strong>sem bloco ports</strong>: só a rede interna (app-network) alcança</li>
+      <li>Falam com ele o <strong>servidor web</strong> e o <strong>worker</strong>; o navegador nunca, toda busca passa pela API</li>
+      <li>Sem usuário e senha só em ambiente local, e só porque não há porta exposta</li>
+    </ul>
+    <p class="payoff">Teste de dentro da rede: docker compose exec nodeweb-container curl http://elasticsearch_host:9200</p>
+  </section>
+
+  <section class="slide" data-eyebrow="busca · duas etapas">
+    <span class="kicker-badge">o ponto mais importante</span>
+    <h2>Busca em <span class="accent">duas etapas</span></h2>
+    <div class="tree">
+<span class="hl">1)</span> Elasticsearch: a query complexa (texto + N filtros)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← só os ids, já por relevância: 57, 42, 90<br>
+<span class="hl">2)</span> Postgres: <span class="hl">WHERE id IN (57, 42, 90)</span>, pela chave primária<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← os dados completos, reordenados pelos ids
+    </div>
+    <div class="callout"><span class="mark">→</span><p>O Elasticsearch decide <strong>QUEM</strong> aparece. O Postgres decide <strong>O QUE</strong> aparece.</p></div>
+    <p class="payoff">Excluída no Postgres? Não aparece. Alterada? Vem a versão atual. O Postgres segue sendo a fonte da verdade.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="elasticsearch · exemplo">
+    <h2>Exemplo: <span class="accent">a busca</span></h2>
+    <p class="lede">Usuário 7 busca <strong>"relatorio"</strong>, só <strong>pendentes</strong>, criadas <strong>desde 01/10</strong>.</p>
+    <div class="tree">
+<span class="dim"># índice tasks no Elasticsearch (cópia para busca)</span><br>
+_id&nbsp;&nbsp;name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is_done&nbsp;&nbsp;id_user&nbsp;&nbsp;created_at<br>
+<span class="hl">42&nbsp;&nbsp;&nbsp;Entregar relatório&nbsp;&nbsp;&nbsp;&nbsp;false&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;03/10</span>&nbsp;&nbsp;✓<br>
+<span class="hl">57&nbsp;&nbsp;&nbsp;Relatórios do mês&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;05/10</span>&nbsp;&nbsp;✓<br>
+<span class="hl">90&nbsp;&nbsp;&nbsp;Revisar relatorio&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;02/10</span>&nbsp;&nbsp;✓<br>
+61&nbsp;&nbsp;&nbsp;Relatório antigo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;03/10&nbsp;&nbsp;<span class="dim">✗ já concluída</span><br>
+73&nbsp;&nbsp;&nbsp;Relatório da Ana&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;04/10&nbsp;&nbsp;<span class="dim">✗ outro usuário</span><br>
+77&nbsp;&nbsp;&nbsp;Comprar pão&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;06/10&nbsp;&nbsp;<span class="dim">✗ texto não bate</span>
+    </div>
+    <div class="callout"><span class="mark">→</span><p>"relatorio" acha relatório, Relatórios e relatorio: com o analisador de português no mapping, o Elastic <strong>normaliza</strong> acento, maiúscula e plural. Resposta: só os ids, por relevância: <strong>57, 42, 90</strong>.</p></div>
+  </section>
+
+  <section class="slide" data-eyebrow="elasticsearch · exemplo">
+    <h2>Exemplo: <span class="accent">a volta ao Postgres</span></h2>
+    <div class="tree">
+<span class="dim"># 200 ms antes, no Postgres: tarefa 90 excluída, tarefa 42 renomeada</span><br>
+<span class="dim"># o worker ainda não sincronizou o Elastic</span><br>
+Elastic devolveu&nbsp;&nbsp;→ <span class="hl">57, 42, 90</span><br>
+Postgres&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ <span class="hl">WHERE id IN (57, 42, 90)</span><br>
+57&nbsp;&nbsp;Relatórios do mês&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✓<br>
+42&nbsp;&nbsp;Entregar relatório <span class="hl">final</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✓ <span class="dim">nome novo, direto da fonte da verdade</span><br>
+90&nbsp;&nbsp;<span class="dim">(não existe mais: o WHERE IN não acha)&nbsp;&nbsp;✗ some do resultado</span>
+    </div>
+    <div class="callout"><span class="mark">!</span><p>O Elastic estava atrasado e a resposta saiu <strong>certa</strong> mesmo assim: quem aparece veio do Elastic, o que aparece veio do Postgres.</p></div>
+    <p class="payoff">O WHERE IN não garante a ordem: reordena pelos ids do Elastic.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="sincronização · filas">
+    <h2>Alimentação <span class="accent">assíncrona</span></h2>
+    <p class="lede">Indexar não é o que o usuário pediu: sai do ciclo HTTP.</p>
+    <div class="two-col">
+    <ul class="points">
+      <li><strong>RabbitMQ</strong> (conhecido): a fila</li>
+      <li><strong>Worker</strong> (conhecido): processo Node sem rota HTTP</li>
+      <li><strong>Elasticsearch</strong> (novo): o banco de busca</li>
+    </ul>
+    <div class="tree">
+POST /me/tasks<br>
+&nbsp;&nbsp;↓ grava no Postgres<br>
+&nbsp;&nbsp;↓ job com <span class="hl">só o id</span> na fila<br>
+&nbsp;&nbsp;↓ responde 201<br>
+<span class="dim">··· outro container ···</span><br>
+worker lê o estado atual<br>
+&nbsp;&nbsp;↓ upsert ou DELETE no Elastic
+    </div>
+    </div>
+    <p class="payoff">API REST do Elastic: PUT (upsert) · _update · DELETE · _search · _bulk (carga inicial).</p>
+  </section>
+
+  <section class="slide" data-eyebrow="elasticsearch · exemplo">
+    <h2>Exemplo: <span class="accent">a vida da tarefa 95</span></h2>
+    <div class="tree">
+<span class="dim"># cria</span><br>
+t = 0 ms&nbsp;&nbsp;&nbsp;&nbsp;POST /me/tasks → INSERT no Postgres (id <span class="hl">95</span>)<br>
+t = 3 ms&nbsp;&nbsp;&nbsp;&nbsp;job na fila: { job: "SyncTaskSearchJob", payload: { id: 95 } }<br>
+t = 5 ms&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">201</span> para o usuário <span class="dim">(não esperou o Elastic)</span><br>
+t = 40 ms&nbsp;&nbsp;&nbsp;worker: PUT /tasks/_doc/95 → <span class="hl">"result": "created"</span><br>
+t ≤ 1 s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;refresh do índice: a 95 aparece na busca<br>
+<span class="dim"># edita</span>&nbsp;&nbsp;&nbsp;&nbsp;mesmo job, mesmo id → PUT de novo → <span class="hl">"updated"</span><br>
+<span class="dim"># exclui</span>&nbsp;&nbsp;&nbsp;mesmo job: a 95 não existe no Postgres → DELETE → <span class="hl">"deleted"</span>
+    </div>
+    <div class="callout"><span class="mark">→</span><p>Um job só, que recebe <strong>só o id</strong> e copia o estado atual do Postgres: inserir, editar e excluir viram a mesma operação de sincronizar.</p></div>
+    <p class="payoff">Até o refresh, a busca não vê a 95. Dado errado, nunca.</p>
+  </section>
+
+  <section class="slide" data-eyebrow="consistência eventual">
+    <span class="kicker-badge">importante</span>
+    <h2>Consistência <span class="accent">eventual</span></h2>
+    <p class="lede">Fila + refresh do índice (~1 s): por alguns milissegundos, Postgres e Elasticsearch estão diferentes.</p>
+    <div class="two-col">
+    <div class="tree">
+<span class="dim"># o preço: busca e agregação</span><br>
+contagem uma unidade a mais/menos<br>
+concluída ainda nas pendentes<br>
+recém-criada ainda não aparece
+    </div>
+    <div class="tree">
+<span class="dim"># a garantia: WHERE IN no Postgres</span><br>
+nunca um dado errado<br>
+nunca um registro que não existe<br>
+a integridade fica no Postgres
+    </div>
+    </div>
+    <p class="payoff">A busca atrasa milissegundos; o dado exibido nunca fica errado. (código completo: <a href="../raio-x/index.html">raio-x da aula</a>)</p>
+  </section>
+
+  <section class="slide" data-eyebrow="tf 07 · entrega">
+    <span class="kicker-badge">TF 07</span>
+    <h2><span class="accent">Views e Elasticsearch</span></h2>
+    <p class="lede">Na tela de tarefas, um modal para criar uma tarefa e atribuí-la a outro usuário, encontrado pela API de search (qualquer campo).</p>
+    <a class="link-card" href="https://docs.google.com/forms/d/e/1FAIpQLSdJEQMCfZT5hO48KjOPJpwLvxU4O7_JJaMZPW3w5OmqTCxZUQ/viewform?usp=publish-editor" target="_blank" rel="noopener">https://docs.google.com/forms/d/e/1FAIpQLSdJEQMCfZT5hO48KjOPJpwLvxU4O7_JJaMZPW3w5OmqTCxZUQ/viewform?usp=publish-editor</a>
+    <p class="payoff">Prazo: 26/10/2026 às 23:59:59 · detalhes completos em TF07.md.</p>
+  </section>
+
+</div>
+
+<nav class="hud">
+  <button id="prevBtn" aria-label="Slide anterior">‹</button>
+  <div class="hud-mid">
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="hud-meta">
+      <span><span id="counterCurrent">01</span> / <span id="counterTotal">15</span> — <span id="eyebrowLabel">abertura</span></span>
+      <span class="hint">use ← → ou espaço para navegar · T alterna o tema</span>
+    </div>
+  </div>
+  <button id="nextBtn" aria-label="Próximo slide">›</button>
+</nav>
+<script src="../../../assets/slide.js"></script>
+<script src="../../../assets/slide-16x9.js"></script>
+</body>
+</html>

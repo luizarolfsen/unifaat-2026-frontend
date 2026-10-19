@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rede Docker do projeto</title>
+<link rel="stylesheet" href="../../assets/rede-docker.css">
+<script src="../../assets/tema.js"></script>
+</head>
+<body>
+<div class="page">
+
+  <nav class="topbar"><a class="back" href="../../index.html">← Voltar</a></nav>
+
+  <p class="eyebrow">Frontend · 2026.2 · documentação</p>
+  <h1>Rede <span class="accent">Docker</span> do projeto</h1>
+
+  <div class="controls">
+    <div class="group" role="group" aria-label="Camadas">
+      <span class="group-title">Camadas</span>
+      <button type="button" class="btn" data-layer="net" aria-pressed="true">rede</button>
+      <button type="button" class="btn" data-layer="vol" aria-pressed="true">volumes internos</button>
+      <button type="button" class="btn" data-layer="bind" aria-pressed="true">pastas do PC</button>
+      <button type="button" class="btn" data-layer="port" aria-pressed="true">portas do host</button>
+    </div>
+    <div class="group" role="group" aria-label="Cenários">
+      <span class="group-title">Cenários</span>
+      <button type="button" class="btn" data-scenario="pagina">HTTP estático (Vite pré-compiler)</button>
+      <button type="button" class="btn" data-scenario="list">HTTP API · list e get one (GET)</button>
+      <button type="button" class="btn" data-scenario="fila">HTTP API · actions (POST/PUT/DELETE)</button>
+      <button type="button" class="btn" data-scenario="busca">HTTP API · search (Elastic)</button>
+            <button type="button" class="btn" data-scenario="hmr">Vite HMR</button>
+      <button type="button" class="btn" data-scenario="migration">migration</button>
+    </div>
+  </div>
+
+  <div class="scroller">
+    <div class="stage" id="stage">
+
+      <span class="host-title" style="--x:28;--y:18;--w:300;--h:40">Host (seu PC)</span>
+
+      <div class="net" style="--x:200;--y:200;--w:1580;--h:780"><span class="net-title">app-network (bridge)</span></div>
+
+      <!-- clientes no host -->
+      <div class="item client" data-id="browser" tabindex="0" style="--x:18;--y:434;--w:124;--h:62">Navegador</div>
+      <div class="item client" data-id="tools" tabindex="0" style="--x:820;--y:40;--w:300;--h:58">psql · DBeaver · Node local</div>
+
+      <!-- containers -->
+      <div class="item container" data-id="nginx" tabindex="0" style="--x:232;--y:400;--w:520;--h:130">nginx<span class="addr">nginx-container:80</span><span class="mount-badge top" data-mb="mb-nginx-aulas" style="left:22%">./aulas:/var/www/aulas</span><span class="mount-badge top" data-mb="mb-nginx-logs" style="left:68%">./src/logs/nginx:/var/log/nginx</span><span class="mount-badge bottom vol" data-mb="mb-nginx-public" style="left:20%">public-volume<br>:/var/www</span></div>
+      <div class="item container" data-id="rabbitmq" tabindex="0" style="--x:700;--y:262;--w:360;--h:120">rabbitmq<span class="addr">rabbitmq_host:5672 · :15672</span><span class="mount-badge top vol" data-mb="mb-rabbit-vol" style="left:15%">rabbitmq-volume<br>:/var/lib/rabbitmq</span></div>
+      <div class="item container" data-id="postgres" tabindex="0" style="--x:1080;--y:262;--w:440;--h:120">postgres<span class="addr">postgres_host:5432</span><span class="mount-badge top" data-mb="mb-pg-init" style="left:23%">./src/docker/postgres/init<br>:/docker-entrypoint-initdb.d</span><span class="mount-badge top vol" data-mb="mb-pg-vol" style="left:85%">postgres-volume<br>:/var/lib/postgresql</span></div>
+      <div class="item container" data-id="elasticsearch" tabindex="0" style="--x:1550;--y:262;--w:220;--h:120">elasticsearch<span class="addr">elasticsearch_host:9200</span><span class="mount-badge top vol" data-mb="mb-es-vol" style="left:50%">elastic-volume<br>:/usr/share/<br>elasticsearch/data</span></div>
+      <div class="item container" data-id="vitehmr" tabindex="0" style="--x:262;--y:720;--w:300;--h:150">vite-hmr<span class="addr">nodevitehmr-container:5172</span><span class="mount-badge bottom" data-mb="mb-hmr-resources" style="left:26%">./src/resources<br>:/app/resources</span><span class="mount-badge bottom vol" data-mb="mb-hmr-nm" style="left:74%">nodemodules-volume<br>:/app/node_modules</span></div>
+      <div class="item container" data-id="vitecompiler" tabindex="0" style="--x:576;--y:720;--w:300;--h:150">vite-compiler<span class="addr">nodevitecompiler-container</span><span class="mount-badge top vol" data-mb="mb-compiler-public" style="left:22%">public-volume<br>:/app/public</span><span class="mount-badge bottom" data-mb="mb-compiler-resources" style="left:26%">./src/resources<br>:/app/resources</span><span class="mount-badge bottom vol" data-mb="mb-compiler-nm" style="left:74%">nodemodules-volume<br>:/app/node_modules</span></div>
+      <div class="item container" data-id="nodeweb" tabindex="0" style="--x:890;--y:720;--w:270;--h:150">nodeweb<span class="addr">nodeweb_host:3000</span><span class="mount-badge top vol" data-mb="mb-web-public" style="left:20%">public-volume<br>:/app/public</span><span class="mount-badge bottom" data-mb="mb-web-src" style="left:76%">./src:/app</span><span class="mount-badge bottom vol" data-mb="mb-web-nm" style="left:28%">nodemodules-volume<br>:/app/node_modules</span></div>
+      <div class="item container ephemeral" data-id="nodecommand" tabindex="0" style="--x:1174;--y:720;--w:270;--h:150">nodecommand<span class="addr">nodecommand_host</span><small>efêmero: run --rm</small><span class="mount-badge bottom" data-mb="mb-cmd-src" style="left:25%">./src:/app</span><span class="mount-badge bottom vol" data-mb="mb-cmd-nm" style="left:72%">nodemodules-volume<br>:/app/node_modules</span></div>
+      <div class="item container" data-id="nodeworker" tabindex="0" style="--x:1458;--y:720;--w:270;--h:150">nodeworker<span class="addr">nodeworker_host</span><span class="mount-badge bottom" data-mb="mb-worker-src" style="left:25%">./src:/app</span><span class="mount-badge bottom vol" data-mb="mb-worker-nm" style="left:72%">nodemodules-volume<br>:/app/node_modules</span></div>
+
+      <!-- portas publicadas (host → container), na borda da rede -->
+      <div class="item port" data-id="p8080" tabindex="0" style="--x:124;--y:449;--w:104;--h:32">8080 → 80</div>
+      <div class="item port" data-id="p5172" tabindex="0" style="--x:140;--y:779;--w:120;--h:32">5172 → 5172</div>
+      <div class="item port" data-id="p5672" tabindex="0" style="--x:822;--y:184;--w:120;--h:32">5672 → 5672</div>
+      <div class="item port" data-id="p15672" tabindex="0" style="--x:960;--y:184;--w:140;--h:32">15672 → 15672</div>
+      <div class="item port" data-id="p6789" tabindex="0" style="--x:1290;--y:184;--w:120;--h:32">6789 → 5432</div>
+
+      <!-- volumes internos (named volumes), na borda -->
+      <div class="item volume" data-id="v-rabbitmq" tabindex="0" style="--x:728;--y:174;--w:52;--h:52"><span class="icon"></span><span class="mount-label above"><b>rabbitmq-volume</b></span></div>
+      <div class="item volume" data-id="v-postgres" tabindex="0" style="--x:1428;--y:174;--w:52;--h:52"><span class="icon"></span><span class="mount-label above"><b>postgres-volume</b></span></div>
+      <div class="item volume" data-id="v-elastic" tabindex="0" style="--x:1634;--y:174;--w:52;--h:52"><span class="icon"></span><span class="mount-label above"><b>elastic-volume</b></span></div>
+      <div class="item volume" data-id="v-public" tabindex="0" style="--x:174;--y:614;--w:52;--h:52"><span class="icon"></span><span class="mount-label left"><b>public-volume</b><br>saída do Vite</span></div>
+      <div class="item volume" data-id="v-nodemodules" tabindex="0" style="--x:900;--y:954;--w:52;--h:52"><span class="icon"></span><span class="mount-label below"><b>nodemodules-volume</b></span></div>
+
+      <!-- pastas do host montadas (bind mounts), na borda -->
+      <div class="item bind" data-id="b-aulas" tabindex="0" style="--x:320;--y:176;--w:52;--h:42"><span class="icon"></span><span class="mount-label above"><b>./aulas</b></span></div>
+      <div class="item bind" data-id="b-logs" tabindex="0" style="--x:560;--y:176;--w:52;--h:42"><span class="icon"></span><span class="mount-label above"><b>./src/logs/nginx</b></span></div>
+      <div class="item bind" data-id="b-init" tabindex="0" style="--x:1155;--y:176;--w:52;--h:42"><span class="icon"></span><span class="mount-label above"><b>./src/docker/<br>postgres/init</b></span></div>
+      <div class="item bind" data-id="b-resources" tabindex="0" style="--x:455;--y:956;--w:52;--h:42"><span class="icon"></span><span class="mount-label below"><b>./src/resources</b></span></div>
+      <div class="item bind" data-id="b-src" tabindex="0" style="--x:1215;--y:956;--w:52;--h:42"><span class="icon"></span><span class="mount-label below"><b>./src</b></span></div>
+
+      <svg class="wires" id="wires" aria-hidden="true"></svg>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i class="lg-node"></i>container</span>
+    <span><i class="lg-node lg-ephemeral"></i>container efêmero (sobe, executa e some)</span>
+    <span><i class="lg-port"></i>porta do host → porta do container</span>
+    <span><i class="lg-vol"></i>volume interno (gerenciado pelo Docker)</span>
+    <span><i class="lg-bind"></i>pasta do seu PC montada (bind mount)</span>
+    <span><i class="lg-net"></i>conexão pela rede</span>
+    <span><i class="lg-mount"></i>montagem de volume/pasta</span>
+    <span>a seta sempre sai de quem usa e aponta para o que é usado (container → volume, container → serviço, navegador → porta)</span>
+    <span><i class="lg-bind"></i>badge <code>origem:destino</code> na borda do container, como no compose: pasta do seu PC → badge, badge laranja → volume interno</span>
+    <span>linha tracejada grossa = fronteira da <code>app-network</code></span>
+  </div>
+
+
+</div>
+<script src="../../assets/rede-docker.js"></script>
+</body>
+</html>

@@ -6,8 +6,8 @@ WORKDIR /app
 
 # Copia arquivos necessários para instalar as dependencia node_modules EM TEMPO DE BUILD
 COPY src/package*.json ./
-COPY src/backend/ ./backend/
 COPY src/_command.js ./
+# O resto do código (app/, database/, utils/...) entra pelo volume ./src:/app do compose
 
 # Instala dependências + nodemon para "ouvir" as mudanças
 RUN npm install -g nodemon && npm install
