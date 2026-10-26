@@ -1,5 +1,6 @@
 import tasksListRender from "../render/tasksListRender";
 import tasksListeners from "../listeners/tasksListeners";
+import assignTaskModalListeners from "../listeners/assignTaskModalListeners";
 import { checkAuthentication, redirectToLogin } from "../utils/checkAuthentication";
 import { setUserId, clearUserId } from "../utils/getUserIdFromAuth";
 
@@ -19,6 +20,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     await tasksListRender(idUser);
     await tasksListeners(idUser);
+    assignTaskModalListeners(idUser);
   } catch (error) {
     console.error("Falha ao carregar tarefas:", error);
     clearUserId();

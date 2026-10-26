@@ -65,3 +65,14 @@ export interface AuthCheckResult {
   authenticated: boolean;
   idUser?: number;
 }
+
+//cria filtros
+export interface UserSearchFilters {
+  name?: string;
+  email?: string;
+  job_title?: string;
+  bio?: string;
+  city?: string;
+  state?: string;
+  is_active?: boolean;
+}

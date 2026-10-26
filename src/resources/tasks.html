@@ -19,6 +19,7 @@
     <button id="logout-btn" class="btn btn-light btn-sm">Sair</button>
   </header>
 
+
   <main class="container flex-grow-1 py-5 d-flex flex-column flex-lg-row gap-4">
 
     <section id="tasks-container" class="card shadow-sm p-4 flex-grow-1"></section>
@@ -27,6 +28,7 @@
       <h5>Nova Tarefa</h5>
       <input type="text" id="task-input" class="form-control" placeholder="Digite a tarefa..." />
       <button id="add-task-btn" class="btn btn-primary" type="button">Adicionar</button>
+      <button data-bs-toggle="modal" data-bs-target="#assign-task-modal" class="btn btn-primary" type="button">Nova Tarefa Para Outro Usuário</button>
     </section>
 
   </main>
@@ -34,6 +36,47 @@
   <footer class="bg-primary text-white text-center py-3 mt-auto">
     <div class="small">Frontend 2026.2</div>
   </footer>
-</body>
 
-</html>
+<div class="modal fade" id="assign-task-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Nova tarefa para outro usuário</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body d-flex flex-column gap-3">
+
+        <input type="text" id="assign-task-name" class="form-control" placeholder="Nome da tarefa..." />
+
+        <div class="d-flex gap-2">
+          <select id="assign-search-field" class="form-select">
+            <option value="name">Nome</option>
+            <option value="email">E-mail</option>
+            <option value="job_title">Cargo</option>
+            <option value="city">Cidade</option>
+            <option value="state">UF</option>
+            <option value="bio">Bio</option>
+          </select>
+          <input type="text" id="assign-search-value" class="form-control" placeholder="Buscar..." />
+          <button type="button" id="assign-search-btn" class="btn btn-secondary">Buscar</button>
+        </div>
+
+        <div id="assign-search-results"></div>
+
+        <div id="assign-selected-user"></div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="assign-task-submit" class="btn btn-primary">Criar tarefa</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+</body>
