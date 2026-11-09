@@ -209,15 +209,35 @@ git commit -m "TF-09"
 git push -u origin 1234567-tf-09
 ```
 
-6. Abrir o **Pull Request** da sua branch para o `main` do professor
-   (`luan-tavares/unifaat-2026-frontend`):
+6. Abrir o **Pull Request no repositório do professor**
+   (`luan-tavares/unifaat-2026-frontend`). O PR **nasce no repositório do
+   professor** (o *base*) e traz a sua branch do **seu fork** (o *head*): é o
+   professor quem recebe e corrige, não o seu fork.
+
+   **Pelo navegador**, abra este endereço (troque `SEU-USUARIO` pelo seu
+   usuário do GitHub; ele já escolhe o `main` do professor como destino):
 
 ```text
 https://github.com/luan-tavares/unifaat-2026-frontend/compare/main...SEU-USUARIO:1234567-tf-09?expand=1
 ```
 
+   **Ou pelo terminal** (GitHub CLI), na raiz do seu clone, com `--repo`
+   apontando para o repositório do professor:
+
+```sh
+gh pr create \
+  --repo luan-tavares/unifaat-2026-frontend \
+  --base main \
+  --head SEU-USUARIO:1234567-tf-09 \
+  --title "TF-09 · 1234567 · Maria da Silva" \
+  --body-file 1234567-tf-09/tf.md
+```
+
    - **Título do PR:** `TF-09 · RA · Nome` (ex.: `TF-09 · 1234567 · Maria da Silva`)
    - **Descrição:** o conteúdo do seu `tf.md`
+   - **Conferir:** a página do PR fica em
+     `github.com/luan-tavares/unifaat-2026-frontend/pull/NÚMERO` (no repositório
+     do **professor**, não no seu) e mostra `luan-tavares:main ← SEU-USUARIO:1234567-tf-09`
 
 O PR nunca será mergeado: o professor o fecha depois de corrigir.
 
@@ -247,7 +267,7 @@ a partir do seu PR.
 ## Regras gerais
 
 - ✅ Uma branch por TF, com o nome `RA-tf-09`
-- ✅ Entrega por Pull Request (título `TF-09 · RA · Nome`)
+- ✅ Entrega por Pull Request **aberto no repositório do professor** (título `TF-09 · RA · Nome`)
 - ❌ Não commitar no `main`, nem fazer merge do PR
 - ❌ Nome da branch fora do formato `RA-tf-09` = TF com nota ZERO
 
