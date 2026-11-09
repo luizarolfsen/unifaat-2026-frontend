@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { Task, User } from "../types/api"
 import { taskCreateApi } from "../api/taskCreateApi"
 import { taskUpdateApi } from "../api/taskUpdateApi"
@@ -20,15 +20,27 @@ export function TaskApp({ idUser, userName, initialTasks }: TaskAppProps) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [message, setMessage] = useState("")
 
+    // Referência para o <input> do HTML: o React coloca o elemento em .current depois de montar
+    const nameInputRef = useRef<HTMLInputElement>(null)
+
     const pending = tasks.filter(task => !task.is_done).length
+
+    // Efeito: depois da primeira renderização, o campo já nasce com o foco
+    useEffect(() => {
+        nameInputRef.current?.focus()
+    }, [])
 
     // C: create
     async function create() {
-        if (name.trim() === "") return
+        if (name.trim() === "") {
+            nameInputRef.current?.focus()
+            return
+        }
 
         const created = await taskCreateApi(idUser, { name })
         setTasks(current => [...current, created])
         setName("")
+        nameInputRef.current?.focus()
     }
 
     // U: update (marcar/desmarcar como feita)
@@ -68,6 +80,7 @@ export function TaskApp({ idUser, userName, initialTasks }: TaskAppProps) {
 
                     <div className="input-group mb-3">
                         <input
+                            ref={nameInputRef}
                             className="form-control"
                             value={name}
                             onChange={event => setName(event.target.value)}

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Custom Hook - useAxios</title>
+  <link rel="icon" type="image/png" href="/img/favicon.ico">
+  <%- vite(["css/app.css", "js/app.ts", "js/pages/hooks.tsx"]) %>
+</head>
+
+<body class="container py-5">
+
+  <h1 class="text-primary mb-1">Custom hook: useAxios</h1>
+  <p class="text-muted mb-4">Logado como <%= user.name %> · <a href="/usuarios">voltar</a></p>
+
+  <%# O React se pendura aqui: o laboratório do hook é um componente (components/HookLab.tsx) %>
+  <div id="root"></div>
+
+</body>
+
+</html>

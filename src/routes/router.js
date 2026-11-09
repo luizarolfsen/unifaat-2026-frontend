@@ -27,6 +27,8 @@ import RedirectIfAuthenticatedMiddleware from '../app/Http/Middlewares/RedirectI
 import RedirectIfGuestMiddleware from '../app/Http/Middlewares/RedirectIfGuestMiddleware.js';
 import TasksViewController from '../app/Http/Controllers/Views/TasksViewController.js';
 import CounterViewController from '../app/Http/Controllers/Views/CounterViewController.js';
+import RefsViewController from '../app/Http/Controllers/Views/RefsViewController.js';
+import HooksViewController from '../app/Http/Controllers/Views/HooksViewController.js';
 import LogoutController from '../app/Http/Controllers/Views/LogoutController.js';
 import UsersViewController from '../app/Http/Controllers/Views/UsersViewController.js';
 
@@ -92,6 +94,12 @@ router.get('/hello', HelloWorldController);
 
 /** Contador em React: View pública, sem login e sem middleware (demonstração de estado) */
 router.get('/contador', CounterViewController);
+
+/** Laboratório de referências e efeitos em React: View pública (demonstração de useRef e useEffect) */
+router.get('/refs', RefsViewController);
+
+/** Laboratório do custom hook useAxios (React dentro da View): precisa de sessão, porque o hook chama a API com o cookie */
+router.get('/hooks', RedirectIfGuestMiddleware, HooksViewController);
 
 /** Login: se já tem sessão válida, o middleware redireciona antes do HTML existir */
 router.get('/login', RedirectIfAuthenticatedMiddleware, LoginViewController);

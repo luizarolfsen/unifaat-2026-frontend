@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Referências e Efeitos em React</title>
+  <link rel="icon" type="image/png" href="/img/favicon.ico">
+  <%- vite(["css/app.css", "js/app.ts", "js/pages/refs.tsx"]) %>
+</head>
+
+<body class="container py-5">
+
+  <h1 class="text-primary mb-4">Referências e Efeitos</h1>
+
+  <%# O React se pendura aqui: o laboratório é um componente (components/RefsLab.tsx) %>
+  <div id="root"></div>
+
+</body>
+
+</html>

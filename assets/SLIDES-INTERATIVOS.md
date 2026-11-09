@@ -34,6 +34,13 @@ Se o padrão mudar, mude **aqui** e nos dois arquivos de `assets/`, nunca dentro
 ## Teclado
 - `← →` (e espaço, PageUp/PageDown) trocam de slide.
 - `↑ ↓` acionam o vai e volta do interativo do slide aberto (passos, abas, semáforo). `N` / `B` fazem o mesmo. Slide sem interativo: ↑ ↓ não fazem nada.
+- `P` para / retoma a animação do passo a passo e das abas do slide aberto.
+
+## Autoplay (sem botões)
+- **Passos e abas animam sozinhos, em loop** (passo a cada ~2,8 s; o último fica mais tempo; abas a cada ~4 s), **sem nenhum botão na tela** (os ‹ › da barra ficam escondidos; a legenda e o contador continuam). Só anda enquanto o slide está aberto; ao reabrir recomeça do passo 1.
+- Teclado: **`P`** para/retoma; **↑ ↓ / N B** vão passo a passo e **param** a animação; clicar numa aba (o próprio rótulo) também para.
+- No PDF nada se mexe: cada widget mostra o `data-print`. `prefers-reduced-motion` começa parado.
+- Semáforo, re-render e foto continuam acionados por clique (não têm autoplay).
 
 ## Widgets (markup mínimo)
 | Widget | Marcação | Notas |
@@ -47,3 +54,14 @@ Se o padrão mudar, mude **aqui** e nos dois arquivos de `assets/`, nunca dentro
 
 ## PDF
 `google-chrome --headless --disable-gpu --password-store=basic --no-pdf-header-footer --print-to-pdf=<saida>.pdf file://.../slide/index.html`. Cada widget imprime o passo de `data-print`; as setas são redesenhadas na impressão. Conferir o PDF em imagem (`pdftoppm`) antes de entregar.
+
+## Variantes de cor (Aula 09)
+- `--c-efeito` (rosa) = o que roda **depois** da tela (`useEffect`); `--c-ref` (ciano) = referência/heap. Nas duas paletas.
+- Fluxo em caixas: `<div class="cx efeito">` e `<div class="cx ref">` (além de `cli`/`srv`). Em texto de código: `<span class="efeito">`, `<span class="ref">`, `<span class="erro">` (demo errada).
+- `.chip-passo` = etiqueta que aparece por passo (ex.: "efeito: GET ..."), dentro de um `.slot` com `data-de`/`data-ate`.
+- `.var .slot.v`: valor de variável que **troca por passo** (vários `<span data-de data-ate>` empilhados no mesmo lugar, só um visível). Modelo: `aulas/09/slide/`.
+
+## Mock de tela com log que se escreve sozinho (Aula 09)
+- `.mock-tela` (`.mock-barra`, `.mock-corpo`, `.mock-estados`, `.mk-*`, `.mock-log .l`): um quadro simples de "tela do projeto" em HTML/CSS, sem screenshot. As linhas do `.mock-log` aparecem em sequência por animação CSS em loop (`animation-delay` por `nth-child`), sem botão; no PDF todas aparecem.
+- `.fluxo .cx.erro`: caixa de passo "ERRADO" (borda e número na cor `--warn`).
+- `.dois-fixos`: duas colunas (código | mock) que **não empilham** no PDF, ao contrário de `.two-col`.

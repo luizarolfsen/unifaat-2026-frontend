@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 09 — React: Referências e Efeitos</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="../../../assets/slide.css">
+<link rel="stylesheet" href="../../../assets/slide-16x9.css">
+<link rel="stylesheet" href="../../../assets/slide-interativo.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar" aria-label="Miniaturas dos slides">
+  <a class="sidebar-back" href="../../../index.html">← Voltar</a>
+</aside>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · capa -->
+  <section class="slide" data-eyebrow="abertura">
+    <div class="cover-top">
+      <span class="cover-uni">Unifaat</span>
+      <span class="cover-sem">2026.2</span>
+    </div>
+    <h1><span class="cover-num">09</span> - React: Referências e Efeitos</h1>
+    <p class="cover-prof">Prof. Luan Lourenço</p>
+  </section>
+
+  <!-- 2 · recap: tudo dentro do componente roda de novo -->
+  <section class="slide" data-eyebrow="reforço · re-renderização">
+    <h2>Tudo dentro do componente <span class="accent">roda de novo</span></h2>
+    <div class="w" data-render>
+      <div class="rr">
+        <div class="painel"><h4>pai · parâmetro</h4><div class="painel-corpo">
+          <code class="rr-tag">&lt;Tarefa nome={…} /&gt;</code>
+          <button class="w-btn acao" data-nome="Estudar React" aria-pressed="true">"Estudar React"</button>
+          <button class="w-btn acao" data-nome="Ler o briefing" aria-pressed="false">"Ler o briefing"</button>
+        </div></div>
+
+        <div class="painel"><h4>função Tarefa() · código</h4><div class="painel-corpo"><pre class="cod"><span class="ln" data-l="1"><span class="k">function</span> Tarefa({ nome }: Props) {</span><span class="ln" data-l="2">    <span class="k">const</span> [isDone, setIsDone] = useState(<span class="k">false</span>)</span><span class="ln" data-l="3"> </span><span class="ln" data-l="4" data-ev="2">    <span class="k">function</span> aoClicar() {</span><span class="ln" data-l="5" data-ev="2">        setIsDone(!isDone)</span><span class="ln" data-l="6" data-ev="2">    }</span><span class="ln" data-l="7"> </span><span class="ln" data-l="8">    <span class="k">return</span> (</span><span class="ln" data-l="9" data-ev="1">        &lt;li <span class="hl">onClick={aoClicar}</span>&gt;</span><span class="ln" data-l="10">            &lt;input type="checkbox"</span><span class="ln" data-l="11">                checked={isDone} readOnly /&gt;</span><span class="ln" data-l="12">            {nome}</span><span class="ln" data-l="13">        &lt;/li&gt;</span><span class="ln" data-l="14">    )</span><span class="ln" data-l="15">}</span></pre></div></div>
+
+        <div class="painel"><h4>frame · tela</h4><div class="painel-corpo">
+          <div class="frame rr-frame"><b>Tarefa()</b>
+            <div class="var"><span>nome</span><span class="v rr-nome"></span></div>
+            <div class="var"><span>isDone</span><span class="v rr-is-done"></span></div>
+          </div>
+          <ul class="rr-tela"><li class="acao acao-pill"><span class="cb"></span><span class="rr-txt"></span></li></ul>
+          <div class="renders">renderizações: <b class="rr-n">1</b></div>
+          <ol class="rr-fases"><li data-fase="1">1 · clique no &lt;li&gt;: o navegador chama <code>onClick</code></li><li data-fase="2">2 · <code>aoClicar()</code> chama <code>setIsDone</code>: o React guarda o estado novo</li><li data-fase="3">3 · <code>Tarefa()</code> roda de novo, inteira</li></ol>
+          <div class="rr-causa">primeira renderização</div>
+        </div></div>
+      </div>
+    </div>
+    <p class="payoff">Variáveis, <code>const</code> derivados, funções internas e o JSX: <strong>tudo</strong> é recriado a cada renderização. Só o estado (e a ref) vive fora da função.</p>
+  </section>
+
+  <!-- 3 · parâmetros desestruturados -->
+  <section class="slide" data-eyebrow="reforço · parâmetros">
+    <h2>Parâmetros <span class="accent">desestruturados</span>: uma foto por renderização</h2>
+    <div class="two-col">
+    <div class="tree" style="font-size:1.1rem">
+<span class="dim"># o componente recebe UM objeto: props</span><br>
+<span class="hl">function</span> TaskItem(props: TaskItemProps) {<br>
+&nbsp;&nbsp;<span class="hl">const</span> { task, onToggle } = props<br>
+<span class="dim"># o mesmo, desestruturando na assinatura</span><br>
+<span class="hl">function</span> TaskItem({ task, onToggle }: TaskItemProps)
+    </div>
+    <div class="tree" style="font-size:1.1rem">
+<span class="dim"># valor padrão · renomear · aninhar</span><br>
+<span class="hl">function</span> Paginacao({<br>
+&nbsp;&nbsp;page = 1,<br>
+&nbsp;&nbsp;user: { id, name: <span class="hl">userName</span> }<br>
+}: PaginacaoProps)
+    </div>
+    </div>
+    <ul class="points">
+      <li><code>task</code> e <code>onToggle</code> são <strong><code>const</code> novas a cada execução</strong>: a foto dos parâmetros daquela renderização</li>
+      <li>Parâmetro é <strong>somente leitura</strong>: quem muda o dado é o dono do estado, avisado por callback</li>
+      <li>O pai renderizou? O filho roda de novo, <strong>mesmo com parâmetros iguais</strong></li>
+    </ul>
+  </section>
+
+  <!-- 4 · pai e filho em cascata (passo a passo) -->
+  <section class="slide" data-eyebrow="reforço · pai e filho">
+    <h2>A renderização cai <span class="accent">de cima para baixo</span></h2>
+    <div class="w passos fluxo" data-passos="5" data-print="5">
+      <div class="fluxo-dois">
+        <div class="fluxo">
+          <div class="cx srv" data-de="1"><i>1</i><span>Clique num usuário: <code>handleSelect</code> chama <code>setSelected(user)</code></span></div>
+          <div class="cx srv" data-de="2"><i>2</i><span><b>UsersApp</b> (o dono do estado) roda <b>inteira</b>, com o <code>selected</code> novo</span></div>
+          <div class="cx cli" data-de="3"><i>3</i><span>O JSX dela contém <code>&lt;UserTasks user={selected} /&gt;</code>: o filho roda em seguida, com o <code>user</code> novo</span></div>
+          <div class="cx cli" data-de="4"><i>4</i><span>O React compara o JSX novo com o anterior e altera <b>só o que mudou</b> no DOM</span></div>
+          <div class="cx efeito" data-de="5"><i>5</i><span>Se o <b>filho</b> tem estado e ele muda, só o filho (e quem está abaixo) roda: o <b>pai não</b></span></div>
+        </div>
+        <div class="tree" style="font-size:1.05rem">
+<span class="dim"># a árvore</span><br>
+Page<br>
+&nbsp;└ <span class="hl">UsersApp</span>&nbsp;<span class="dim">← estado: selected</span><br>
+&nbsp;&nbsp;&nbsp;└ <span class="ref">UserTasks</span>&nbsp;<span class="dim">← user (parâmetro)</span><br>
+<span class="dim"># para baixo: parâmetros<br>
+# para cima: callbacks</span>
+        </div>
+      </div>
+      <div class="w-barra"><button class="p-prev" aria-label="Passo anterior">‹</button><span class="w-n"></span><span class="w-leg"></span><button class="p-next acao" aria-label="Próximo passo">›</button></div>
+      <ol class="passos-legendas">
+        <li><b>Passo 1.</b> Um evento muda o estado no <b>pai</b>: é ele quem guarda o <code>selected</code>.</li>
+        <li><b>Passo 2.</b> A função do pai roda inteira: variáveis, derivados e JSX são recalculados.</li>
+        <li><b>Passo 3.</b> Os filhos devolvidos no JSX rodam em seguida, <b>mesmo com parâmetros iguais</b>; aqui o <code>user</code> mudou.</li>
+        <li><b>Passo 4.</b> Só a diferença vai para o DOM: o React compara, não refaz a página.</li>
+        <li><b>Passo 5.</b> O sentido contrário não existe: estado do filho muda, só o filho renderiza. Por isso o estado fica no ancestral comum mais baixo.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 5 · tipagem -->
+  <section class="slide" data-eyebrow="reforço · tipagem">
+    <h2>A <span class="accent">tipagem</span> mantém pai e filho coerentes</h2>
+    <div class="two-col">
+    <div class="tree" style="font-size:1.05rem">
+<span class="dim"># o contrato do filho</span><br>
+<span class="hl">type</span> TaskItemProps = {<br>
+&nbsp;&nbsp;task: Task<br>
+&nbsp;&nbsp;onToggle: (task: Task) =&gt; void<br>
+&nbsp;&nbsp;variant?: <span class="hl">"success" | "danger"</span><br>
+}<br>
+&lt;TaskItem task={task} /&gt;&nbsp;<span class="erro">← ERRO: falta onToggle</span>
+    </div>
+    <div class="tree" style="font-size:1.05rem">
+<span class="dim"># estado que começa vazio</span><br>
+<span class="hl">const</span> [selected, setSelected] =<br>
+&nbsp;&nbsp;useState&lt;<span class="hl">User | null</span>&gt;(null)<br>
+<span class="hl">if</span> (selected === null) <span class="hl">return</span> ...<br>
+selected.name&nbsp;<span class="dim">← aqui já é User</span><br>
+<span class="dim"># genérico: T = o que a API devolve</span><br>
+useAxios&lt;<span class="hl">PaginatedResponse&lt;Task&gt;</span>&gt;(url)
+    </div>
+    </div>
+    <ul class="points">
+      <li>O erro aparece <strong>antes de rodar</strong>: parâmetro faltando, união fora da lista, callback com outra assinatura</li>
+      <li>Depois de um <em>early return</em>, o TypeScript <strong>estreita</strong> o tipo: <code>null</code> some</li>
+    </ul>
+  </section>
+
+  <!-- 6 · useRef: memória (passo a passo) -->
+  <section class="slide" data-eyebrow="useRef · heap">
+    <h2><span class="accent">useRef</span>: o mesmo objeto do heap em toda renderização</h2>
+    <div class="w passos" data-passos="5" data-print="5">
+      <div class="cena mem">
+        <div class="painel"><h4>código</h4><div class="painel-corpo"><pre class="cod"><span class="ln" data-ativo="1"><span class="k">const</span> [count, setCount] = useState(0)</span><span class="ln" data-ativo="1"><span class="k">const</span> <span class="ref">clicksRef</span> = useRef(0)</span><span class="ln"> </span><span class="ln" data-ativo="2 4"><span class="c">// na ref: altera o objeto, sem renderizar</span></span><span class="ln" data-ativo="2 4">clicksRef.current += 1</span><span class="ln"> </span><span class="ln" data-ativo="3 5"><span class="c">// no estado: o React renderiza de novo</span></span><span class="ln" data-ativo="3 5">setCount(atual =&gt; atual + 1)</span></pre></div></div>
+
+        <div class="memoria"><h4>memória do programa</h4>
+          <div class="memoria-corpo">
+            <div class="painel"><h4>pilha · renderização</h4><div class="painel-corpo base">
+              <div class="slot" style="min-height:96px">
+                <div class="frame" data-de="1" data-ate="2"><b>render 1</b>
+                  <div class="var"><span>count</span><span class="v">0</span></div>
+                  <div class="var"><span>clicksRef</span><span class="ref" data-aponta="r">0x3C</span></div>
+                </div>
+                <div class="frame" data-de="3" data-ate="4"><b>render 2</b>
+                  <div class="var"><span>count</span><span class="v">1</span></div>
+                  <div class="var"><span>clicksRef</span><span class="ref" data-aponta="r">0x3C</span></div>
+                </div>
+                <div class="frame" data-de="5"><b>render 3</b>
+                  <div class="var"><span>count</span><span class="v">2</span></div>
+                  <div class="var"><span>clicksRef</span><span class="ref" data-aponta="r">0x3C</span></div>
+                </div>
+              </div>
+            </div></div>
+            <div class="painel"><h4>heap</h4><div class="painel-corpo">
+              <div class="slot" style="min-height:60px">
+                <div class="heap-obj" data-de="1" data-ate="1" data-alvo="r"><b>0x3C</b>{ current: 0 }</div>
+                <div class="heap-obj" data-de="2" data-ate="3" data-alvo="r"><b>0x3C</b>{ current: 1 }</div>
+                <div class="heap-obj" data-de="4" data-alvo="r"><b>0x3C</b>{ current: 2 }</div>
+              </div>
+            </div></div>
+          </div>
+          <p class="memoria-obs"><b>Observação:</b> o <code>count</code> é uma <b>foto nova</b> a cada execução (frame novo). A ref é <b>um só objeto</b>: o endereço <code>0x3C</code> não muda, só o conteúdo.</p>
+          <svg class="setas" aria-hidden="true"></svg>
+        </div>
+      </div>
+      <div class="w-barra"><button class="p-prev" aria-label="Passo anterior">‹</button><span class="w-n"></span><span class="w-leg"></span><button class="p-next acao" aria-label="Próximo passo">›</button></div>
+      <ol class="passos-legendas">
+        <li><b>1.</b> Primeira renderização: <code>useRef(0)</code> cria <code>{ current: 0 }</code> <b>no heap</b>; a variável guarda o endereço.</li>
+        <li><b>2.</b> <code>clicksRef.current += 1</code> altera o objeto <b>no lugar</b>. Nenhuma renderização: o <code>count</code> continua 0 na tela.</li>
+        <li><b>3.</b> Agora o <b>estado</b> muda: o componente roda de novo (frame novo, <code>count</code> = 1) e a ref <b>persiste</b>: mesmo <code>0x3C</code>, <code>current</code> ainda 1.</li>
+        <li><b>4.</b> Outra mudança na ref: <code>current</code> vai a 2, e de novo a tela não se mexe.</li>
+        <li><b>5.</b> A próxima renderização (por causa do estado) encontra a ref <b>exatamente como você a deixou</b>. Só muda se você modificar.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 7 · variável x estado x ref -->
+  <section class="slide" data-eyebrow="useRef · quando usar">
+    <h2>Variável, estado ou <span class="accent">referência</span>?</h2>
+    <table class="data-table">
+      <thead><tr><th></th><th>variável local</th><th>useState</th><th>useRef</th></tr></thead>
+      <tbody>
+        <tr><td>onde vive</td><td>frame da pilha</td><td>guardado pelo React</td><td class="ref">objeto <code>{ current }</code> no heap</td></tr>
+        <tr><td>sobrevive às renderizações</td><td>não</td><td>sim (foto nova)</td><td class="ref">sim (mesmo objeto)</td></tr>
+        <tr><td>mudar renderiza</td><td>não</td><td class="hl">sim</td><td class="ref">não</td></tr>
+        <tr><td>como mudar</td><td>atribuição</td><td><code>setEstado(...)</code></td><td><code>ref.current = ...</code></td></tr>
+        <tr><td>serve para</td><td>cálculo temporário</td><td>o que <b>aparece</b> na tela</td><td class="ref">o que só o <b>código</b> lembra</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><span class="mark" style="white-space:nowrap">regra</span><p>O usuário precisa <strong>ver</strong> a mudança? <strong>Estado</strong>. Só o código precisa lembrar? <strong>Ref</strong>. E nunca leia nem escreva <code>ref.current</code> durante a renderização: só em <strong>handlers</strong> e <strong>efeitos</strong>.</p></div>
+  </section>
+
+  <!-- 8 · ref no DOM e em componentes (abas) -->
+  <section class="slide" data-eyebrow="useRef · DOM e componentes">
+    <h2>Ref para o <span class="accent">HTML</span> e para componentes</h2>
+    <div class="w" data-abas>
+      <div class="abas">
+        <div class="painel"><h4>clique numa parte</h4><div class="painel-corpo"><pre class="cod"><span class="parte" data-parte="params" data-rotulo="① criar"><span class="k">const</span> inputRef = useRef&lt;HTMLInputElement&gt;(null)</span><span class="parte" data-parte="codigo" data-rotulo="② ligar">&lt;input <span class="hl">ref={inputRef}</span> /&gt;</span><span class="parte" data-parte="retorno" data-rotulo="③ acionar"><span class="k">function</span> aoFocar() {
+    inputRef.current?.focus()
+}
+<span class="c">// também: click() · select() · scrollIntoView()</span></span><span class="parte" data-parte="uso" data-rotulo="④ componente"><span class="k">function</span> TextField({ ref }: TextFieldProps) {
+    <span class="k">return</span> &lt;input ref={ref} /&gt;
+}</span></pre></div></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="abas-nav">
+            <button class="w-btn acao" data-aba="params">① Criar a ref</button>
+            <button class="w-btn acao" data-aba="codigo">② Ligar no elemento</button>
+            <button class="w-btn acao" data-aba="retorno">③ Acionar o evento</button>
+            <button class="w-btn acao" data-aba="uso">④ Em componente</button>
+          </div>
+          <div class="abas-txt">
+            <p data-texto="params"><b>Criar.</b> O generic diz <b>qual elemento</b> vai morar ali. Começa em <code>null</code>: antes de montar não há elemento.</p>
+            <p data-texto="codigo"><b>Ligar.</b> A prop <code>ref</code> entrega o elemento ao React, que o coloca em <code>current</code> <b>depois de montar</b> (e volta a <code>null</code> ao desmontar).</p>
+            <p data-texto="retorno"><b>Acionar.</b> Com o elemento em mãos, chamamos os <b>métodos nativos</b> do HTML: <code>focus()</code>, <code>click()</code> de um <code>input file</code> escondido, <code>requestSubmit()</code>. O <code>?.</code> cobre o <code>null</code>.</p>
+            <p data-texto="uso"><b>Componente.</b> No React 19, <code>ref</code> é um <b>parâmetro comum</b>: o filho decide a quem entregar, e o pai passa a controlar aquele elemento. Com <code>useImperativeHandle</code> o filho expõe só os métodos que quer.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · ref para dados que vão ao backend -->
+  <section class="slide" data-eyebrow="useRef · dados e backend">
+    <h2>Ref guarda o que o <span class="accent">código</span> lembra, não a tela</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">
+    <div class="tree" style="font-size:.95rem">
+<span class="dim"># campo não controlado</span><br>
+<span class="hl">const</span> name =<br>
+&nbsp;&nbsp;nameRef.current?.value<br>
+await taskCreateApi(<br>
+&nbsp;&nbsp;idUser, { name })<br>
+<span class="dim">o valor vai direto ao POST;<br>
+nenhuma renderização por tecla</span>
+    </div>
+    <div class="tree" style="font-size:.95rem">
+<span class="dim"># último dado enviado</span><br>
+<span class="hl">if</span> (key ===<br>
+&nbsp;&nbsp;lastSearchRef.current)<br>
+&nbsp;&nbsp;<span class="hl">return</span><br>
+lastSearchRef.current = key<br>
+<span class="dim">mesma busca: não chama<br>
+o backend de novo</span>
+    </div>
+    <div class="tree" style="font-size:.95rem">
+<span class="dim"># id do timer (debounce)</span><br>
+window.clearTimeout(<br>
+&nbsp;&nbsp;timerRef.current)<br>
+timerRef.current =<br>
+&nbsp;&nbsp;window.setTimeout(buscar, 400)<br>
+<span class="dim">cancela o timer anterior<br>
+sem renderizar</span>
+    </div>
+    </div>
+    <p class="payoff">Três usos, um motivo: o dado <strong>não aparece na tela</strong>, então guardá-lo em estado só renderizaria à toa.</p>
+  </section>
+
+  <!-- 10 · Turing: efeito = ação da transição -->
+  <section class="slide" data-eyebrow="useEffect · Turing">
+    <h2>Efeito: a <span class="accent">ação</span> da transição de estados</h2>
+    <table class="data-table">
+      <thead><tr><th>Máquina de Turing</th><th>React</th></tr></thead>
+      <tbody>
+        <tr><td>estado atual</td><td><code>useState</code> e parâmetros</td></tr>
+        <tr><td>função de transição</td><td>o componente: estado + parâmetros → tela</td></tr>
+        <tr><td>entrada</td><td>evento do usuário, resposta da API</td></tr>
+        <tr><td class="hl">ação ao transitar</td><td class="efeito"><code>useEffect</code></td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><span class="mark" style="white-space:nowrap">ideia</span><p>Depois que o <strong>estado é atualizado</strong> (e a tela já foi desenhada), executa-se o <strong>efeito dessa mudança</strong>: buscar na API, assinar um evento, mexer no título da aba.</p></div>
+    <p class="payoff">O componente só calcula tela. O efeito é o lugar do que acontece <strong>fora</strong> dela.</p>
+  </section>
+
+  <!-- 11 · ordem de execução (passo a passo) -->
+  <section class="slide" data-eyebrow="useEffect · ordem">
+    <h2>Renderiza, desenha a tela, <span class="accent">e só então</span> o efeito</h2>
+    <div class="w passos fluxo" data-passos="5" data-print="5">
+      <div class="fluxo-dois">
+        <div class="fluxo">
+          <div class="cx cli" data-de="1"><i>1</i><span>O evento chama <code>setEstado</code>: o React agenda uma renderização</span></div>
+          <div class="cx srv" data-de="2"><i>2</i><span>A <b>função do componente roda</b> inteira e devolve o JSX</span></div>
+          <div class="cx srv" data-de="3"><i>3</i><span>O React atualiza o DOM e o navegador <b>pinta a tela</b></span></div>
+          <div class="cx efeito" data-de="4"><i>4</i><span>Só então rodam os <b>efeitos</b> cujas dependências mudaram (a <b>limpeza</b> do anterior vem antes)</span></div>
+          <div class="cx cli" data-de="5"><i>5</i><span>O efeito chama <code>setEstado</code> com a resposta da API: <b>volta ao passo 1</b></span></div>
+        </div>
+        <div class="tree" style="font-size:1.05rem">
+useEffect(() =&gt; {<br>
+&nbsp;&nbsp;<span class="dim">// 1 · o efeito: DEPOIS da tela</span><br>
+&nbsp;&nbsp;<span class="hl">return</span> () =&gt; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">// 2 · a limpeza</span><br>
+&nbsp;&nbsp;}<br>
+}, [<span class="hl">deps</span>])&nbsp;<span class="dim">// 3 · quando roda de novo</span>
+        </div>
+      </div>
+      <div class="w-barra"><button class="p-prev" aria-label="Passo anterior">‹</button><span class="w-n"></span><span class="w-leg"></span><button class="p-next acao" aria-label="Próximo passo">›</button></div>
+      <ol class="passos-legendas">
+        <li><b>Passo 1.</b> Tudo começa com uma mudança de estado, por clique ou por resposta de API.</li>
+        <li><b>Passo 2.</b> A renderização é só cálculo: a função roda e descreve a tela.</li>
+        <li><b>Passo 3.</b> O usuário já enxerga a tela (por exemplo, "Carregando...") antes de o efeito existir.</li>
+        <li><b>Passo 4.</b> O efeito é a ação da transição: chamada ao backend, assinatura, timer.</li>
+        <li><b>Passo 5.</b> A resposta vira estado de novo, e o ciclo completo recomeça.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 12 · dependências e heap -->
+  <section class="slide" data-eyebrow="useEffect · dependências">
+    <h2>Dependências: primitivo por <span class="accent">valor</span>, objeto por <span class="accent">endereço</span></h2>
+    <div class="two-col">
+    <table class="data-table" style="font-size:1.1rem">
+      <thead><tr><th>deps</th><th>o efeito roda</th></tr></thead>
+      <tbody>
+        <tr><td><code>[]</code></td><td>uma vez, ao montar</td></tr>
+        <tr><td><code>[user.id]</code></td><td>ao montar e quando <code>user.id</code> muda</td></tr>
+        <tr><td>omitido</td><td>depois de <b>toda</b> renderização</td></tr>
+      </tbody>
+    </table>
+    <div class="tree" style="font-size:1.05rem">
+<span class="erro"># ERRADO · loop infinito</span><br>
+<span class="hl">const</span> params = { page: 1 }&nbsp;<span class="dim">← endereço novo<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a cada renderização</span><br>
+useEffect(..., [<span class="erro">params</span>])<br>
+<span class="dim"># certo: dependa de primitivos</span><br>
+useEffect(..., [<span class="hl">user.id, page</span>])
+    </div>
+    </div>
+    <ul class="points">
+      <li>O React compara cada dependência com <code>Object.is</code>: é a mesma regra do <strong>heap</strong> da Aula 08</li>
+      <li>Efeito muda estado, estado renderiza, objeto novo: o efeito dispara de novo. E de novo</li>
+    </ul>
+  </section>
+
+  <!-- 13 · limpeza e condição de corrida (passo a passo) -->
+  <section class="slide" data-eyebrow="useEffect · AbortController">
+    <h2><span class="accent">AbortController</span>: cancela a requisição velha</h2>
+    <div class="w passos fluxo" data-passos="5" data-print="5">
+      <div class="fluxo-dois">
+        <div class="fluxo">
+          <div class="cx cli" data-de="1"><i>1</i><span>Clica em <b>Ana</b>: o efeito dispara <code>GET /users/7/tasks</code> com o <code>signal</code> do controller dela</span></div>
+          <div class="cx cli" data-de="2"><i>2</i><span>Antes da resposta, clica em <b>Bruno</b>: a dependência <code>user.id</code> muda</span></div>
+          <div class="cx erro" data-de="3"><i>3</i><span><b>ERRADO, sem abort:</b> a resposta de Ana chega depois e <b>sobrescreve</b> a tela de Bruno</span></div>
+          <div class="cx efeito" data-de="4"><i>4</i><span><b>Com abort:</b> a limpeza chama <code>controller.abort()</code>; o GET de Ana rejeita com <code>CanceledError</code> e o <code>isCancel</code> ignora</span></div>
+          <div class="cx ref" data-de="5"><i>5</i><span>Só a resposta de <b>Bruno</b> vira estado: a tela e o nome combinam</span></div>
+        </div>
+        <div class="tree" style="font-size:1.0rem">
+<span class="dim"># ① cria o controle (API nativa do navegador)</span><br>
+<span class="hl">const</span> controller = <span class="hl">new</span> AbortController()<br>
+<span class="dim"># ② entrega o signal à requisição</span><br>
+get(url, { <span class="hl">signal</span>: controller.signal })<br>
+<span class="dim"># ③ na limpeza do efeito, cancela</span><br>
+<span class="hl">return</span> () =&gt; controller.<span class="efeito">abort</span>()<br>
+<span class="dim"># É do navegador, não do React nem do Axios.<br>
+# O abort só faz o cliente parar de esperar:<br>
+# o que o servidor já processou não desfaz.</span>
+        </div>
+      </div>
+      <div class="w-barra"><button class="p-prev" aria-label="Passo anterior">‹</button><span class="w-n"></span><span class="w-leg"></span><button class="p-next acao" aria-label="Próximo passo">›</button></div>
+      <ol class="passos-legendas">
+        <li><b>Passo 1.</b> O efeito cria um <code>AbortController</code>, passa o <code>signal</code> dele ao Axios e devolve a limpeza.</li>
+        <li><b>Passo 2.</b> A resposta de Ana ainda não chegou e o usuário escolhe outro: é a <b>condição de corrida</b>.</li>
+        <li><b>Passo 3.</b> Sem cancelar, quem responde por último vence: a rede não garante a ordem das respostas.</li>
+        <li><b>Passo 4.</b> A limpeza roda <b>antes</b> do próximo efeito: <code>abort()</code> cancela só o GET de Ana (o de Bruno tem outro controller).</li>
+        <li><b>Passo 5.</b> O cancelamento não é falha de verdade: por isso o <code>isCancel(err)</code> sai sem mostrar erro.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 14 · efeito com API assíncrona -->
+  <section class="slide" data-eyebrow="custom hook · feito por nós">
+    <h2>O hook <span class="accent">feito por nós</span>: useAxios e a tela dele</h2>
+    <div class="dois-fixos">
+    <div class="tree" style="font-size:.78rem">
+<span class="hl">export function</span> useAxios&lt;T&gt;(url, onEvent?) {<br>
+&nbsp;&nbsp;<span class="hl">const</span> [data, setData] = useState&lt;T | null&gt;(null)<br>
+&nbsp;&nbsp;<span class="hl">const</span> [error, setError] = useState("")<br>
+&nbsp;&nbsp;<span class="hl">const</span> [isLoading, setIsLoading] = useState(url !== null)<br>
+&nbsp;&nbsp;<span class="hl">const</span> onEventRef = <span class="ref">useRef</span>(onEvent)&nbsp;<span class="dim">// ref: fora das deps</span><br>
+&nbsp;&nbsp;useEffect(() =&gt; { onEventRef.current = onEvent })<br>
+&nbsp;&nbsp;useEffect(() =&gt; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">const</span> controller = <span class="hl">new</span> AbortController()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">const</span> request = { isPending: true }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">async function</span> load() { <span class="dim">/* GET + estados */</span> }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;load()&nbsp;<span class="dim">// o efeito em si não é async</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">return</span> () =&gt; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">if</span> (!request.isPending) <span class="hl">return</span>&nbsp;<span class="dim">// já chegou</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;controller.<span class="efeito">abort</span>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;}, [url, attempt])&nbsp;<span class="dim">// só primitivos</span><br>
+&nbsp;&nbsp;<span class="hl">return</span> { data, error, isLoading, refetch }<br>
+}
+    </div>
+    <div class="mock-tela">
+      <div class="mock-barra"><span class="mock-url">/hooks</span><span>HookLab · View do projeto</span></div>
+      <div class="mock-corpo">
+        <div class="mock-estados">
+          <span>isLoading <b class="mk mk-ok">false</b></span>
+          <span>error <b class="mk mk-mudo">""</b></span>
+          <span>data <b class="mk mk-ok">3 task(s)</b></span>
+        </div>
+        <div class="mock-rotulo">trocar 3x rápido: o que o hook contou</div>
+        <div class="mock-log">
+          <div class="l"><u>14:02:11</u> GET começou &nbsp;/users/7/tasks</div>
+          <div class="l"><u>14:02:11</u> GET <b class="mk-abort">CANCELADO</b> /users/7/tasks</div>
+          <div class="l"><u>14:02:11</u> GET começou &nbsp;/users/9/tasks</div>
+          <div class="l"><u>14:02:11</u> GET <b class="mk-abort">CANCELADO</b> /users/9/tasks</div>
+          <div class="l"><u>14:02:11</u> GET começou &nbsp;/users/12/tasks</div>
+          <div class="l"><u>14:02:12</u> GET <b class="mk-chegou">chegou</b> &nbsp;&nbsp;/users/12/tasks</div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <p class="payoff">Os estados <strong>nascem no hook</strong> e o componente <strong>herda</strong>. O <code>onEvent</code> mora numa <strong>ref</strong>, e o <code>abort</code> só roda se a requisição ainda está no ar (<code>isPending</code>).</p>
+  </section>
+
+  <!-- 15 · custom hook useAxios (passo a passo) -->
+  <section class="slide" data-eyebrow="custom hook · estados herdados">
+    <h2><span class="accent">useAxios</span>: o componente herda o estado do hook</h2>
+    <div class="w passos" data-passos="4" data-print="3">
+      <div class="cena" style="grid-template-columns:1.3fr 1fr 1fr">
+        <div class="painel"><h4>UserTasks · código</h4><div class="painel-corpo"><pre class="cod"><span class="ln" data-ativo="1 2 3 4"><span class="k">const</span> { data, error, isLoading } =</span><span class="ln" data-ativo="1 2 3 4">    <span class="efeito">useAxios</span>&lt;PaginatedResponse&lt;Task&gt;&gt;(</span><span class="ln" data-ativo="1 2 3 4">        `/users/${user.id}/tasks`)</span><span class="ln"> </span><span class="ln" data-ativo="1 4"><span class="k">if</span> (isLoading)</span><span class="ln" data-ativo="1 4">    <span class="k">return</span> &lt;p&gt;Carregando...&lt;/p&gt;</span><span class="ln"> </span><span class="ln" data-ativo="3"><span class="k">return</span> &lt;ul&gt;{ tasks }&lt;/ul&gt;</span></pre></div></div>
+
+        <div class="painel"><h4>estados herdados do hook</h4><div class="painel-corpo">
+          <div class="frame"><b>UserTasks()</b>
+            <div class="var"><span>data</span><span class="slot v"><span data-de="1" data-ate="2">null</span><span data-de="3" data-ate="3">{ data: [...] }</span><span data-de="4">null</span></span></div>
+            <div class="var"><span>error</span><span class="v">""</span></div>
+            <div class="var"><span>isLoading</span><span class="slot v"><span data-de="1" data-ate="2">true</span><span data-de="3" data-ate="3">false</span><span data-de="4">true</span></span></div>
+          </div>
+          <div class="slot" style="min-height:60px">
+            <div class="chip-passo" data-de="2" data-ate="2">efeito do hook: GET /users/7/tasks</div>
+            <div class="chip-passo" data-de="3" data-ate="3">setData + setIsLoading(false): 1 renderização</div>
+            <div class="chip-passo" data-de="4">limpeza: abort() · key mudou · estados do zero</div>
+          </div>
+        </div></div>
+
+        <div class="painel"><h4>tela</h4><div class="painel-corpo">
+          <div class="slot" style="min-height:120px">
+            <div class="heap-obj" data-de="1" data-ate="2">Carregando as tasks de Ana...</div>
+            <div class="heap-obj" data-de="3" data-ate="3"><b>Tasks de Ana</b>Estudar React · feita<br>Ler o briefing · pendente</div>
+            <div class="heap-obj" data-de="4">Carregando as tasks de Bruno...</div>
+          </div>
+        </div></div>
+      </div>
+      <div class="w-barra"><button class="p-prev" aria-label="Passo anterior">‹</button><span class="w-n"></span><span class="w-leg"></span><button class="p-next acao" aria-label="Próximo passo">›</button></div>
+      <ol class="passos-legendas">
+        <li><b>1.</b> <code>UserTasks</code> monta. O hook cria <b>três estados</b>, que pertencem ao <b>componente</b>: <code>isLoading</code> começa verdadeiro e a tela já diz "Carregando".</li>
+        <li><b>2.</b> Depois da tela, o <b>efeito do hook</b> dispara o GET. O componente não escreveu um <code>useEffect</code>.</li>
+        <li><b>3.</b> A resposta chega: o hook chama <code>setData</code> e <code>setIsLoading(false)</code>. Quem renderiza de novo é o <b>UserTasks</b> (o pai não).</li>
+        <li><b>4.</b> Outro usuário (<code>key</code> muda): o componente desmonta, a limpeza cancela a requisição <b>se ela ainda estiver no ar</b> (<code>isPending</code>) e o novo nasce com os estados do zero.</li>
+      </ol>
+    </div>
+    <p class="payoff">Cada chamada ao hook tem os <strong>seus</strong> estados: o hook reaproveita <strong>lógica</strong>, não dados.</p>
+  </section>
+
+  <!-- 16 · qual ferramenta -->
+  <section class="slide" data-eyebrow="resumo">
+    <h2>Qual ferramenta para qual <span class="accent">problema</span></h2>
+    <table class="data-table" style="font-size:1.2rem">
+      <thead><tr><th>preciso de...</th><th>uso</th></tr></thead>
+      <tbody>
+        <tr><td>um valor que <b>aparece na tela</b> e muda</td><td class="hl"><code>useState</code></td></tr>
+        <tr><td>um valor <b>calculado</b> de estado e parâmetros</td><td>conta solta no componente</td></tr>
+        <tr><td>acessar o HTML, <code>focus()</code>, dado de bastidor sem renderizar</td><td class="ref"><code>useRef</code></td></tr>
+        <tr><td>algo <b>depois da tela</b>, por causa de uma mudança de estado</td><td class="efeito"><code>useEffect</code></td></tr>
+        <tr><td>reaproveitar estado e efeito entre componentes</td><td><code>use...</code> (custom hook)</td></tr>
+        <tr><td>reagir a uma <b>ação do usuário</b></td><td>handler (<code>onClick</code>, <code>onSubmit</code>)</td></tr>
+      </tbody>
+    </table>
+    <p class="payoff">estado → renderização → tela → <strong>efeito</strong> → estado. A ref é a gaveta que <strong>não</strong> entra nesse ciclo.</p>
+  </section>
+
+  <!-- 17 · TF (sempre por último) -->
+  <section class="slide" data-eyebrow="tf 09 · entrega">
+    <span class="kicker-badge">TF 09</span>
+    <h2><span class="accent">React: Referências e Efeitos</span></h2>
+    <div class="callout"><span class="mark" style="white-space:nowrap">enunciado</span><p>O TF é o <strong>README do diretório da aula</strong> no repositório do professor:<br><code>https://github.com/luan-tavares/unifaat-2026-frontend/tree/main/aulas/09</code></p></div>
+    <ul class="points">
+      <li><strong>O que pede:</strong> app React + Vite + TypeScript com <strong>Axios</strong> na API pública JSONPlaceholder; <strong>custom hook <code>useAxios</code> próprio</strong> com <code>AbortController</code> na limpeza; <strong><code>useRef</code></strong> para foco e dado de bastidor; <strong><code>useEffect</code></strong> no <code>document.title</code></li>
+      <li><strong>Entrega:</strong> branch <code>RA-tf-09</code> + diretório com o mesmo nome + <code>tf.md</code> (Nome, RA, GitHub) + <strong>Pull Request</strong> para o <code>main</code> do professor, título <code>TF-09 · RA · Nome</code></li>
+      <li><strong>Prazo:</strong> a definir</li>
+    </ul>
+  </section>
+
+</div>
+
+<nav class="hud">
+  <button id="prevBtn" aria-label="Slide anterior">‹</button>
+  <div class="hud-mid">
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="hud-meta">
+      <span><span id="counterCurrent">01</span> / <span id="counterTotal">17</span> — <span id="eyebrowLabel">abertura</span></span>
+      <span class="hint">← → trocam de slide · ↑ ↓ passo a passo · T alterna o tema</span>
+    </div>
+  </div>
+  <button id="nextBtn" aria-label="Próximo slide">›</button>
+</nav>
+<script src="../../../assets/slide-interativo.js"></script>
+<script src="../../../assets/slide.js"></script>
+<script src="../../../assets/slide-16x9.js"></script>
+</body>
+</html>

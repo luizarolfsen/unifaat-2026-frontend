@@ -1,8 +1,6 @@
 import { useState } from "react"
-import type { PaginatedResponse, Task, User } from "../types/api"
+import type { PaginatedResponse, User } from "../types/api"
 import { userListApi } from "../api/userListApi"
-import { tasksListApi } from "../api/tasksListApi"
-import { getErrorMessage } from "../utils/getErrorMessage"
 import { Page } from "./Page"
 import { UserTasks } from "./UserTasks"
 
@@ -14,23 +12,12 @@ type UsersAppProps = {
 export function UsersApp({ userName, initialUsers }: UsersAppProps) {
     const [list, setList] = useState<PaginatedResponse<User>>(initialUsers)
     const [selected, setSelected] = useState<User | null>(null)
-    const [tasks, setTasks] = useState<Task[] | null>(null)
-    const [error, setError] = useState("")
 
     const lastPage = Math.max(1, Math.ceil(list.total / list.limit))
 
-    // Clicar num usuário: busca as tasks dele (handler explícito, sem useEffect)
-    async function handleSelect(user: User) {
+    // Clicar num usuário: só guarda quem foi escolhido. A busca das tasks é do UserTasks (useAxios)
+    function handleSelect(user: User) {
         setSelected(user)
-        setTasks(null)
-        setError("")
-
-        try {
-            const result = await tasksListApi(user.id, { page: 1, limit: 20 })
-            setTasks(result.data)
-        } catch (error) {
-            setError(getErrorMessage(error, "Erro ao carregar as tasks"))
-        }
     }
 
     // Paginação: carrega a página pedida e mantém o usuário escolhido
@@ -76,7 +63,10 @@ export function UsersApp({ userName, initialUsers }: UsersAppProps) {
                     </section>
 
                     <section className="col-lg-6">
-                        <UserTasks user={selected} tasks={tasks} error={error} />
+                        {selected === null && <p className="text-muted">Escolha um usuário para ver as tasks dele.</p>}
+
+                        {/* key = identidade: outro usuário desmonta o UserTasks e cria um novo, com estado do zero */}
+                        {selected !== null && <UserTasks key={selected.id} user={selected} />}
                     </section>
                 </div>
             </Page>

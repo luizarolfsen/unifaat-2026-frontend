@@ -2,7 +2,8 @@
    miniaturas (clones) já nasçam com o estado inicial desenhado.
    Widgets: [data-passos] passo a passo · [data-abas] partes do componente ·
    [data-semaforo] máquina de estados · [data-render] re-renderização (estado e parâmetro) ·
-   [data-foto] "foto" do estado. Sem else: early return / continue. */
+   [data-foto] "foto" do estado. Passos e abas animam SOZINHOS (autoplay, sem botões); P para/retoma e
+   ↑ ↓ vão passo a passo. Sem else: early return / continue. */
 (function(){
   function $all(raiz, sel){ return Array.prototype.slice.call(raiz.querySelectorAll(sel)); }
   function aberto(sel){ return document.querySelector('.deck .slide:not([hidden]) ' + sel); }
@@ -71,6 +72,51 @@
   }
   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(andar);
 
+  /* ── autoplay: o widget anima sozinho, em loop, SEM botões na tela. Teclado: P para/retoma,
+        ↑ ↓ andam passo a passo (e param a animação). Só anda enquanto o slide está aberto. ── */
+  function autoplay(raiz, cfg){
+    var tocando = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var decorrido = 0;
+    var vistoAntes = false;
+
+    function rotulo(){
+      raiz.classList.toggle('pausado', !tocando);
+    }
+    function slideAberto(){
+      var slide = raiz.closest('.slide');
+      if(!slide) return true;
+      return !slide.hidden;
+    }
+    function definir(valor){
+      tocando = valor;
+      decorrido = 0;
+      rotulo();
+    }
+
+    setInterval(function(){
+      if(!slideAberto()){ vistoAntes = false; return; }
+      if(!vistoAntes){
+        vistoAntes = true;
+        decorrido = 0;
+        if(tocando) cfg.reiniciar();
+        return;
+      }
+      if(!tocando) return;
+      decorrido += 200;
+      if(decorrido < cfg.espera()) return;
+      decorrido = 0;
+      cfg.avancar();
+    }, 200);
+
+    rotulo();
+    return {
+      definir: definir,
+      alternar: function(){ definir(!tocando); },
+      tocando: function(){ return tocando; },
+      zerar: function(){ decorrido = 0; }
+    };
+  }
+
   /* ── passo a passo ──────────────────────────────────── */
   function initPassos(raiz){
     var total = parseInt(raiz.dataset.passos, 10);
@@ -106,12 +152,30 @@
       new ResizeObserver(function(){ desenharSetas(mem); }).observe(mem);
     }
 
+    var auto = null;
+
     raiz.irPara = function(i){
       n = Math.min(Math.max(i, 1), total);
+      if(auto) auto.zerar();
       mostrar();
     };
-    raiz.passo = function(delta){ raiz.irPara(n + delta); };
+    // passo manual (‹ ›, ↑ ↓): para a animação e segue passo a passo
+    raiz.passo = function(delta){
+      if(auto) auto.definir(false);
+      raiz.irPara(n + delta);
+    };
     raiz.atual = function(){ return n; };
+
+    if(raiz.querySelector('.w-barra')){
+      auto = autoplay(raiz, {
+        espera: function(){ return n === total ? 4500 : 2800; },
+        avancar: function(){ raiz.irPara(n === total ? 1 : n + 1); },
+        reiniciar: function(){ raiz.irPara(1); }
+      });
+    }
+    raiz.tocando = function(){ return auto ? auto.tocando() : false; };
+    raiz.definirTocando = function(valor){ if(auto) auto.definir(valor); };
+    raiz.alternar = function(){ if(auto) auto.alternar(); };
 
     if(prev) prev.addEventListener('click', function(){ raiz.passo(-1); });
     if(next) next.addEventListener('click', function(){ raiz.passo(1); });
@@ -130,12 +194,36 @@
       $all(raiz, '.abas-txt').forEach(function(e){ e.dataset.atual = nome; });
     }
     var atual = 0;
-    botoes.forEach(function(b, i){ b.addEventListener('click', function(){ atual = i; abrir(b.dataset.aba); }); });
+    var auto = null;
+    botoes.forEach(function(b, i){
+      b.addEventListener('click', function(){
+        if(auto) auto.definir(false);     // escolheu a aba na mão: para a animação
+        atual = i;
+        abrir(b.dataset.aba);
+      });
+    });
     raiz.aba = function(delta){
+      if(auto) auto.definir(false);
       atual = Math.min(Math.max(atual + delta, 0), botoes.length - 1);
       abrir(botoes[atual].dataset.aba);
     };
     abrir(botoes[0].dataset.aba);
+
+    // as abas passam sozinhas (sem botão); clicar numa aba ou usar ↑ ↓ para a animação
+    auto = autoplay(raiz, {
+      espera: function(){ return 4200; },
+      avancar: function(){
+        atual = (atual + 1) % botoes.length;
+        abrir(botoes[atual].dataset.aba);
+      },
+      reiniciar: function(){
+        atual = 0;
+        abrir(botoes[0].dataset.aba);
+      }
+    });
+    raiz.tocando = function(){ return auto.tocando(); };
+    raiz.definirTocando = function(valor){ auto.definir(valor); };
+    raiz.alternar = function(){ auto.alternar(); };
   }
 
   /* ── semáforo: máquina de estados ───────────────────── */
@@ -373,6 +461,11 @@
     }
 
     var tecla = e.key.toLowerCase();
+    if(tecla === 'p'){
+      var animado = aberto('[data-passos]') || aberto('[data-abas]');
+      if(animado) animado.alternar();
+      return;
+    }
     if(tecla !== 'n' && tecla !== 'b') return;
     interativo(tecla === 'n' ? 1 : -1);
   }, true);
@@ -382,12 +475,20 @@
   function paraImpressao(){
     guardado = [];
     $all(document, '.deck [data-passos]').forEach(function(w){
-      guardado.push([w, w.atual()]);
+      guardado.push([w, w.atual(), w.tocando()]);
+      w.definirTocando(false);          // PDF: nada se mexe sozinho
       if(w.dataset.print) w.irPara(parseInt(w.dataset.print, 10));
+    });
+    $all(document, '.deck [data-abas]').forEach(function(w){
+      guardado.push([w, null, w.tocando()]);
+      w.definirTocando(false);
     });
   }
   function voltarDaImpressao(){
-    guardado.forEach(function(par){ par[0].irPara(par[1]); });
+    guardado.forEach(function(par){
+      if(par[1] !== null) par[0].irPara(par[1]);
+      par[0].definirTocando(par[2]);
+    });
     guardado = [];
   }
   function redesenharTodas(){

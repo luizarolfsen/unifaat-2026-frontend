@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Briefing · Aula 09 — React: Referências e Efeitos</title>
+<link rel="stylesheet" href="../../../assets/briefing.css">
+<script src="../../../assets/tema.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <a class="back" href="../../../index.html">← Voltar</a>
+    <details class="toc" open><summary>Nesta página</summary><ol><li class="l1"><a href="#topo">09 - React: Referências e Efeitos</a></li><li class="l2"><a href="#s1-introdução">1 - Introdução</a></li><li class="l2"><a href="#s2-reforço-tudo-dentro-do-componente-roda-de-novo">2 - Reforço: Tudo Dentro do Componente Roda de Novo</a></li><li class="l3"><a href="#s2-1-a-função-inteira-roda-a-cada-renderização">2.1 - A Função Inteira Roda a Cada Renderização</a></li><li class="l3"><a href="#s2-2-o-que-dispara-uma-nova-renderização">2.2 - O Que Dispara uma Nova Renderização</a></li><li class="l3"><a href="#s2-3-parâmetros-desestruturados">2.3 - Parâmetros Desestruturados</a></li><li class="l3"><a href="#s2-4-pai-e-filho-aninhados">2.4 - Pai e Filho Aninhados</a></li><li class="l3"><a href="#s2-5-tipagem-o-que-o-typescript-garante-na-árvore">2.5 - Tipagem: o Que o TypeScript Garante na Árvore</a></li><li class="l2"><a href="#s3-referências-useref">3 - Referências: <code>useRef</code></a></li><li class="l3"><a href="#s3-1-o-problema-um-valor-que-sobrevive-mas-não-redesenha">3.1 - O Problema: Um Valor Que Sobrevive, Mas Não Redesenha</a></li><li class="l3"><a href="#s3-2-o-que-é-uma-referência">3.2 - O Que É uma Referência</a></li><li class="l3"><a href="#s3-3-variável-estado-ou-referência">3.3 - Variável, Estado ou Referência?</a></li><li class="l3"><a href="#s3-4-referência-para-elementos-do-html">3.4 - Referência para Elementos do HTML</a></li><li class="l3"><a href="#s3-5-referência-para-componentes">3.5 - Referência para Componentes</a></li><li class="l3"><a href="#s3-6-referência-para-guardar-dados-que-vão-ao-backend">3.6 - Referência para Guardar Dados Que Vão ao Backend</a></li><li class="l2"><a href="#s4-efeitos-useeffect">4 - Efeitos: <code>useEffect</code></a></li><li class="l3"><a href="#s4-1-de-novo-turing-a-transição-entre-estados">4.1 - De Novo Turing: a Transição Entre Estados</a></li><li class="l3"><a href="#s4-2-anatomia-e-ordem-de-execução">4.2 - Anatomia e Ordem de Execução</a></li><li class="l3"><a href="#s4-3-o-array-de-dependências">4.3 - O Array de Dependências</a></li><li class="l3"><a href="#s4-4-o-efeito-também-vê-a-foto">4.4 - O Efeito Também Vê a "Foto"</a></li><li class="l3"><a href="#s4-5-limpeza-e-cancelamento">4.5 - Limpeza e Cancelamento</a></li><li class="l3"><a href="#s4-6-abortcontroller-cancelando-uma-requisição">4.6 - AbortController: Cancelando uma Requisição</a></li><li class="l3"><a href="#s4-7-efeito-com-api-assíncrona">4.7 - Efeito com API Assíncrona</a></li><li class="l3"><a href="#s4-8-quando-não-usar-um-efeito">4.8 - Quando NÃO Usar um Efeito</a></li><li class="l3"><a href="#s4-9-o-efeito-roda-duas-vezes-em-desenvolvimento">4.9 - O Efeito Roda Duas Vezes em Desenvolvimento</a></li><li class="l2"><a href="#s5-custom-hooks">5 - Custom Hooks</a></li><li class="l3"><a href="#s5-1-o-problema-da-repetição">5.1 - O Problema da Repetição</a></li><li class="l3"><a href="#s5-2-o-useaxios">5.2 - O <code>useAxios</code></a></li><li class="l3"><a href="#s5-3-enxertando-o-hook-no-componente">5.3 - Enxertando o Hook no Componente</a></li><li class="l3"><a href="#s5-4-usando-no-pai-key-reinicia-o-estado">5.4 - Usando no Pai: <code>key</code> Reinicia o Estado</a></li><li class="l3"><a href="#s5-5-seguindo-uma-renderização-passo-a-passo">5.5 - Seguindo uma Renderização, Passo a Passo</a></li><li class="l3"><a href="#s5-6-a-tela-do-nosso-hook">5.6 - A Tela do Nosso Hook</a></li><li class="l2"><a href="#s6-juntando-tudo">6 - Juntando Tudo</a></li><li class="l3"><a href="#s6-1-qual-ferramenta-para-qual-problema">6.1 - Qual Ferramenta Para Qual Problema</a></li><li class="l3"><a href="#s6-2-o-ciclo-completo">6.2 - O Ciclo Completo</a></li><li class="l3"><a href="#s6-3-resumo-da-aula">6.3 - Resumo da Aula</a></li><li class="l2"><a href="#questoes">Questões do TA</a></li></ol></details>
+  </aside>
+  <main class="doc">
+    <header class="cover" id="topo">
+      <p class="eyebrow">UNIFAAT · 2026.2 · Briefing para produção de conteúdo</p>
+      <h1><span class="cn">09</span> - React: Referências e Efeitos</h1>
+      <dl class="ficha">
+        <div><dt>Professor</dt><dd>Luan Tavares Lourenço</dd></div>
+        <div><dt>Disciplina</dt><dd>Frontend</dd></div>
+        <div><dt>Aula</dt><dd>09</dd></div>
+        <div><dt>Opção do TA</dt><dd>Texto</dd></div>
+      </dl>
+    </header>
+<h2 id="s1-introdução"><span class="hn">1</span>Introdução</h2>
+<p>Na Aula 08 o React entrou pelo caminho mais importante: o <strong>estado</strong>. Vimos que um componente é uma função, que o <code>useState</code> guarda o valor fora da função, e que cada mudança de estado faz o componente <strong>inteiro</strong> rodar de novo, com uma "foto" nova do estado. Esta aula parte exatamente dali e faz duas coisas.</p>
+<p>A primeira é <strong>reforçar</strong> o que sustenta tudo no React, porque as duas novidades da aula só fazem sentido com isso firme: tudo o que está dentro do componente (variáveis, funções, derivados, o <code>return</code>) roda de novo a cada mudança de estado ou de parâmetro; os parâmetros chegam desestruturados e valem só para aquela execução; pais e filhos formam uma árvore em que a renderização cai de cima para baixo; e a <strong>tipagem</strong> em TypeScript é o que mantém essa árvore coerente.</p>
+<p>A segunda é apresentar as duas "saídas" do ciclo *estado → renderização → tela*:</p>
+<ul><li>**Referências (<code>useRef</code>)<strong>: uma caixa no </strong>heap<strong> que sobrevive às renderizações e que </strong>não** avisa o React quando muda. Serve para acessar elementos do HTML e de componentes (e acionar eventos nativos como <code>focus()</code> e <code>click()</code>) e para guardar dados "de bastidor" que vão para o backend sem redesenhar a tela;</li><li>**Efeitos (<code>useEffect</code>)<strong>: código que roda </strong>depois<strong> de a tela ser atualizada, </strong>por causa<strong> de uma mudança de estado. É a parte da máquina de Turing que cuida da </strong>transição entre estados**: o estado muda e algo fora da tela precisa acontecer (por exemplo, uma chamada assíncrona ao backend).</li></ul>
+<p>Fechamos juntando tudo num <strong>custom hook</strong> de Axios, o <code>useAxios</code>, que carrega seus próprios estados (<code>data</code>, <code>error</code>, <code>isLoading</code>) e os "enxerta" em qualquer componente: quando o estado do hook muda, o componente que o usa renderiza de novo, como se o estado fosse dele. No caminho explicamos o **<code>AbortController</code>**, a API nativa que cancela uma requisição e evita a condição de corrida, e uma tela do projeto (<code>GET /hooks</code>) mostra o hook funcionando, com um registro que conta cada requisição que começa, chega, falha ou é cancelada.</p>
+<p>A aula é conduzida com explicações animadas em passos, mostrando na tela o que acontece na memória e no ciclo do componente. Os exemplos usam o projeto do curso (usuários, tasks, <code>clientApi</code>, <code>PaginatedResponse&lt;T&gt;</code>), sem backend novo.</p>
+<h2 id="s2-reforço-tudo-dentro-do-componente-roda-de-novo"><span class="hn">2</span>Reforço: Tudo Dentro do Componente Roda de Novo</h2>
+<h3 id="s2-1-a-função-inteira-roda-a-cada-renderização"><span class="hn">2.1</span>A Função Inteira Roda a Cada Renderização</h3>
+<p>Um componente é uma função, e <strong>renderizar é chamar essa função</strong>. Cada chamada cria um frame novo na call stack, com variáveis novas, e devolve JSX novo. Isso vale para <strong>tudo</strong> que está dentro do componente, não só para o <code>return</code>:</p>
+<pre class="code"><code>import { useState } from "react"
+
+type ContadorProps = {
+    inicial: number
+}
+
+export function Contador({ inicial }: ContadorProps) {
+    const [count, setCount] = useState(inicial)
+
+    console.log("1. a função rodou; count =", count)
+
+    const dobro = count * 2
+
+    function handleClick() {
+        setCount(count + 1)
+    }
+
+    return &lt;button onClick={handleClick}&gt;{count} (dobro: {dobro})&lt;/button&gt;
+}</code></pre>
+<p>A cada clique o console mostra a linha 1 de novo, e o que muda de uma execução para outra é o seguinte:</p>
+<p>| O que está dentro do componente | A cada renderização |</p>
+<p>|---------------------------------|---------------------|</p>
+<p>| <code>const dobro = count * 2</code> | <strong>recalculado</strong> com o <code>count</code> daquela execução |</p>
+<p>| <code>function handleClick() { ... }</code> | <strong>função nova</strong> (endereço novo no heap) |</p>
+<p>| <code>const { inicial } = props</code> (parâmetros) | <strong>lidos de novo</strong> dos parâmetros recebidos |</p>
+<p>| <code>useState(inicial)</code> | devolve o valor <strong>guardado pelo React</strong>; o <code>inicial</code> só vale na primeira vez |</p>
+<p>| JSX do <code>return</code> | <strong>descrito de novo</strong>; o React compara com o anterior e altera só o que mudou |</p>
+<p>A consequência prática é a regra que vamos usar a aula toda: <strong>tudo que é calculado a partir de estado e de parâmetros deve ficar solto dentro do componente</strong> (valor derivado), porque ele se atualiza sozinho. Guardar um derivado em outro estado é criar duas verdades que precisam ser sincronizadas, o problema que o React veio resolver.</p>
+<h3 id="s2-2-o-que-dispara-uma-nova-renderização"><span class="hn">2.2</span>O Que Dispara uma Nova Renderização</h3>
+<p>Um componente roda de novo por três motivos, e só:</p>
+<ol><li><strong>O estado dele mudou</strong>: alguém chamou <code>setEstado</code> com um valor diferente (o React compara com <code>Object.is</code>: primitivos por valor, objetos e arrays por <strong>endereço</strong>, lembra do heap da Aula 08?). Se o valor novo for igual ao atual, o React nem renderiza;</li><li><strong>O pai renderizou</strong>: por padrão, quando um componente roda, todos os filhos que ele devolve no JSX rodam também, <strong>mesmo que os parâmetros sejam iguais</strong>;</li><li><strong>Os parâmetros mudaram</strong>: na prática é uma consequência do motivo 2, já que parâmetros só mudam quando o pai roda e entrega outros.</li></ol>
+<p>Observe a cascata com dois componentes:</p>
+<pre class="code"><code>import { useState } from "react"
+
+type FilhoProps = {
+    nome: string
+}
+
+function Filho({ nome }: FilhoProps) {
+    console.log("   Filho rodou")
+
+    return &lt;p&gt;{nome}&lt;/p&gt;
+}
+
+export function Pai() {
+    const [count, setCount] = useState(0)
+
+    console.log("Pai rodou")
+
+    function handleClick() {
+        setCount(count + 1)
+    }
+
+    return (
+        &lt;&gt;
+            &lt;button onClick={handleClick}&gt;{count}&lt;/button&gt;
+            &lt;Filho nome="Ana" /&gt;
+        &lt;/&gt;
+    )
+}</code></pre>
+<p>A cada clique o console imprime <code>Pai rodou</code> e, logo depois, <code>Filho rodou</code>, embora <code>nome="Ana"</code> nunca mude. O Filho não tem estado; ele roda porque o <strong>pai</strong> rodou. (Existe <code>React.memo</code> para pular filhos com parâmetros iguais, mas é otimização e fica fora desta aula.)</p>
+<h3 id="s2-3-parâmetros-desestruturados"><span class="hn">2.3</span>Parâmetros Desestruturados</h3>
+<p>Todo componente recebe <strong>um único objeto</strong> de parâmetros, as <code>props</code>. A sintaxe <code>({ task, onToggle }: Props)</code> é só a <strong>desestruturação</strong> desse objeto na própria assinatura. As duas formas abaixo são equivalentes:</p>
+<pre class="code"><code>type TaskItemProps = {
+    task: Task
+    onToggle: (task: Task) =&gt; void
+}
+
+<span class="cm">// Forma completa: recebe o objeto e desestrutura dentro</span>
+function TaskItem(props: TaskItemProps) {
+    const { task, onToggle } = props
+    return &lt;li onClick={() =&gt; onToggle(task)}&gt;{task.name}&lt;/li&gt;
+}
+
+<span class="cm">// Forma usual: desestrutura na assinatura</span>
+function TaskItem({ task, onToggle }: TaskItemProps) {
+    return &lt;li onClick={() =&gt; onToggle(task)}&gt;{task.name}&lt;/li&gt;
+}</code></pre>
+<p>Três propriedades da desestruturação que importam para o React:</p>
+<ul><li><code>task</code> e <code>onToggle</code> são **<code>const</code> novas a cada execução**: cada renderização tem a sua "foto" dos parâmetros, assim como tem a sua foto do estado (seção 7.6 da Aula 08);</li><li>parâmetros são <strong>somente leitura</strong>: nunca se altera <code>task.name = ...</code>; quem muda o dado é o dono do estado, avisado por um callback;</li><li>a desestruturação aceita <strong>valor padrão</strong>, <strong>renomear</strong> e <strong>aninhar</strong>, tudo tipado:</li></ul>
+<pre class="code"><code>type PaginacaoProps = {
+    page?: number                 // opcional
+    limit?: number
+    user: { id: number, name: string }
+}
+
+function Paginacao({ page = 1, limit = 10, user: { id, name: userName } }: PaginacaoProps) {
+    return &lt;p&gt;{userName} (#{id}): página {page}, {limit} por página&lt;/p&gt;
+}</code></pre>
+<p><code>page = 1</code> vale quando o pai não envia nada; <code>user: { id, name: userName }</code> entra no objeto <code>user</code> e renomeia <code>name</code> para <code>userName</code>.</p>
+<h3 id="s2-4-pai-e-filho-aninhados"><span class="hn">2.4</span>Pai e Filho Aninhados</h3>
+<p>Os componentes formam uma <strong>árvore</strong>, e a renderização cai por ela <strong>de cima para baixo</strong>. Pegue a tela de usuários do projeto:</p>
+<pre class="code"><code>Page
+ └── UsersApp            ← estado: list, selected
+      ├── (lista de usuários)
+      └── UserTasks      ← recebe `user` por parâmetro
+           └── (lista de tasks)</code></pre>
+<p>Seguindo uma mudança de estado em <code>UsersApp</code> (o usuário clicou num item e <code>setSelected</code> rodou):</p>
+<ol><li><code>UsersApp</code> roda inteira, com o <code>selected</code> novo;</li><li>o JSX que ela devolve inclui <code>&lt;UserTasks user={selected} /&gt;</code>, então <code>UserTasks</code> roda em seguida, já recebendo o <code>user</code> novo por parâmetro;</li><li>o que <code>UserTasks</code> devolve é comparado com o que estava na tela e só o necessário vai para o DOM.</li></ol>
+<p>E no sentido contrário? Se um <strong>filho</strong> tem estado próprio e ele muda, só <strong>aquele filho</strong> (e os descendentes dele) roda de novo; o pai <strong>não</strong> roda. Por isso o desenho é sempre o mesmo:</p>
+<ul><li><strong>Para baixo, por parâmetros</strong> (<code>user</code>, <code>tasks</code>);</li><li><strong>Para cima, por callbacks</strong> (<code>onSelect</code>, <code>onDelete</code>): o filho avisa, o dono do estado altera;</li><li>o estado fica no <strong>ancestral comum mais baixo</strong> de quem precisa dele (*lifting state up*).</li></ul>
+<p>Duas regras sobre a árvore que serão úteis na seção 5:</p>
+<ul><li>o React associa o estado ao <strong>lugar do componente na árvore</strong>: se o componente sai da tela (desmonta), o estado dele é <strong>destruído</strong>; quando volta, começa do zero;</li><li>a prop especial **<code>key</code>** funciona como "identidade": mudar a <code>key</code> faz o React desmontar o componente e criar outro, <strong>com estado novo</strong>. Dentro de listas é isso que distingue um item do outro; fora de listas é o jeito de "reiniciar" um componente.</li></ul>
+<h3 id="s2-5-tipagem-o-que-o-typescript-garante-na-árvore"><span class="hn">2.5</span>Tipagem: o Que o TypeScript Garante na Árvore</h3>
+<p>Numa árvore de componentes o que quebra é a <strong>conversa</strong> entre pai e filho: o pai manda um dado errado, o filho espera outro, o callback tem outra assinatura. É por isso que o curso usa <code>.tsx</code>: o contrato entre eles vira um <code>type Props</code>, e o compilador acusa o erro <strong>antes</strong> de rodar.</p>
+<pre class="code"><code>import type { ReactNode } from "react"
+
+type AlertProps = {
+    variant: "success" | "danger" | "warning"   // união literal: só esses três
+    message: string
+    onClose: () =&gt; void                         // callback sem parâmetros
+    children?: ReactNode                        // conteúdo aninhado, opcional
+}
+
+type TaskItemProps = {
+    task: Task
+    onToggle: (task: Task) =&gt; void              // o filho passa a task inteira
+    onDelete: (id: number) =&gt; void              // o filho passa só o id
+}
+
+<span class="cm">// No pai, o compilador confere cada uma dessas ligações:</span>
+&lt;Alert variant="info" message="Oi" onClose={fechar} /&gt;   // ERRO: "info" não existe em variant
+&lt;TaskItem task={task} onToggle={toggle} /&gt;               // ERRO: falta onDelete
+&lt;TaskItem task={task} onToggle={remove} onDelete={remove} /&gt;  // ERRO se remove for (id: number) =&gt; void</code></pre>
+<p>Onde a tipagem protege o fluxo de dados:</p>
+<p>| Situação | Tipagem |</p>
+<p>|----------|---------|</p>
+<p>| Parâmetros do componente | <code>type NomeProps = { ... }</code> na assinatura |</p>
+<p>| Estado com valor inicial vazio ou ausente | <code>useState&lt;Task[]&gt;([])</code>, <code>useState&lt;User \| null&gt;(null)</code> |</p>
+<p>| Callback que sobe | <code>(user: User) =&gt; void</code>, a assinatura que o pai precisa implementar |</p>
+<p>| Resposta de API reaproveitável | generic: <code>PaginatedResponse&lt;Task&gt;</code>, <code>PaginatedResponse&lt;User&gt;</code> |</p>
+<p>| Evento do HTML | <code>ChangeEvent&lt;HTMLInputElement&gt;</code>, <code>FormEvent</code> |</p>
+<p>| Referência (seção 3) | <code>useRef&lt;HTMLInputElement&gt;(null)</code> |</p>
+<p>E o <code>useState&lt;User | null&gt;(null)</code> gera um benefício que vamos explorar: depois de um *early return*, o TypeScript <strong>estreita</strong> o tipo, e dali para baixo ele sabe que o valor não é <code>null</code>:</p>
+<pre class="code"><code>type UserTasksProps = {
+    user: User | null
+}
+
+export function UserTasks({ user }: UserTasksProps) {
+    if (user === null) {
+        return &lt;p&gt;Escolha um usuário.&lt;/p&gt;
+    }
+
+    <span class="cm">// aqui o TypeScript sabe que user é User (e não User | null)</span>
+    return &lt;h2&gt;Tasks de {user.name}&lt;/h2&gt;
+}</code></pre>
+<h2 id="s3-referências-useref"><span class="hn">3</span>Referências: <code>useRef</code></h2>
+<h3 id="s3-1-o-problema-um-valor-que-sobrevive-mas-não-redesenha"><span class="hn">3.1</span>O Problema: Um Valor Que Sobrevive, Mas Não Redesenha</h3>
+<p>Já conhecemos dois lugares para guardar um valor num componente, e nenhum serve sempre:</p>
+<ul><li><strong>variável comum</strong>: nasce e morre dentro de cada execução da função (frame da call stack); a próxima renderização não a enxerga;</li><li><strong>estado</strong> (<code>useState</code>): sobrevive, mas <strong>toda</strong> mudança renderiza o componente de novo.</li></ul>
+<p>Existem valores que precisam sobreviver às renderizações <strong>sem</strong> provocar uma: o elemento HTML de um campo (para dar <code>focus()</code>), o id de um <code>setTimeout</code> (para cancelá-lo), a última busca enviada ao backend (para não repetir). Redesenhar a tela por causa deles seria desperdício, e às vezes causaria loop. Para isso existe o <code>useRef</code>.</p>
+<h3 id="s3-2-o-que-é-uma-referência"><span class="hn">3.2</span>O Que É uma Referência</h3>
+<p>O <code>useRef</code> cria **um objeto com uma única propriedade, <code>current</code>**, e o guarda para o componente:</p>
+<pre class="code"><code>import { useRef } from "react"
+
+const clicksRef = useRef(0)
+
+<span class="cm">// clicksRef é este objeto, criado UMA vez no heap:</span>
+<span class="cm">// { current: 0 }</span></code></pre>
+<p>O ponto central é o <strong>heap</strong> (Aula 08): na primeira renderização o React cria o objeto <code>{ current: 0 }</code> no heap. Nas renderizações seguintes, <code>useRef</code> devolve <strong>o mesmo endereço</strong>. Compare com o estado, que a cada renderização entrega uma foto nova:</p>
+<pre class="code"><code> Renderização 1          Renderização 2          Renderização 3
+ ┌──────────────┐        ┌──────────────┐        ┌──────────────┐
+ │ count = 0    │        │ count = 1    │        │ count = 2    │   ← estado: uma "foto" por execução
+ │ ref  ──┐     │        │ ref  ──┐     │        │ ref  ──┐     │
+ └────────┼─────┘        └────────┼─────┘        └────────┼─────┘
+          └────────────────────┬──┴─────────────────────┘
+                               ▼
+                    heap:  { current: ... }   ← o MESMO objeto nas três execuções</code></pre>
+<p>Daí vêm as duas propriedades que definem a referência:</p>
+<ul><li><strong>Persiste</strong>: o <code>current</code> continua valendo entre as renderizações, <strong>a não ser que você o modifique</strong>;</li><li><strong>Mudar não renderiza</strong>: <code>clicksRef.current += 1</code> altera o objeto no heap, no lugar. Lembra que, na Aula 08, alterar um objeto no lugar <strong>não avisa o React</strong>, e por isso proibimos isso com estado? Aqui acontece o inverso: usamos a mutação <strong>de propósito</strong>, justamente porque não queremos o aviso.</li></ul>
+<pre class="code"><code>export function ContadorDeCliques() {
+    const clicksRef = useRef(0)
+
+    function handleClick() {
+        clicksRef.current += 1
+        console.log("cliques:", clicksRef.current)   // o valor muda, a tela NÃO
+    }
+
+    return &lt;button onClick={handleClick}&gt;Clique (veja o console)&lt;/button&gt;
+}</code></pre>
+<p>O número cresce no console e a tela não se mexe, porque nenhuma renderização foi pedida. O valor só aparece na tela se alguma <strong>outra</strong> coisa (um estado) provocar uma renderização.</p>
+<h3 id="s3-3-variável-estado-ou-referência"><span class="hn">3.3</span>Variável, Estado ou Referência?</h3>
+<p>| | Variável local | <code>useState</code> | <code>useRef</code> |</p>
+<p>|---|----------------|------------|----------|</p>
+<p>| <strong>Onde vive</strong> | frame da call stack | guardado pelo React | objeto <code>{ current }</code> no heap |</p>
+<p>| <strong>Sobrevive às renderizações</strong> | não | sim (foto nova a cada execução) | sim (mesmo objeto) |</p>
+<p>| <strong>Mudar provoca renderização</strong> | não | <strong>sim</strong> | <strong>não</strong> |</p>
+<p>| <strong>Como mudar</strong> | atribuição | <code>setEstado(...)</code> | <code>ref.current = ...</code> |</p>
+<p>| <strong>Serve para</strong> | cálculos temporários | o que <strong>aparece na tela</strong> | o que <strong>não</strong> aparece na tela |</p>
+<p>A regra de bolso: *"se o usuário precisa <strong>ver</strong> a mudança, é estado; se só o <strong>código</strong> precisa lembrar, é referência"*. E uma regra de segurança do React: **não leia nem escreva <code>ref.current</code> durante a renderização<strong> (no corpo do componente). Leia e altere em </strong>handlers<strong> e em </strong>efeitos**, que é onde as coisas acontecem. Se a tela depende do valor, ele deveria ser estado.</p>
+<h3 id="s3-4-referência-para-elementos-do-html"><span class="hn">3.4</span>Referência para Elementos do HTML</h3>
+<p>O uso mais comum é acessar o <strong>elemento do DOM</strong> que o JSX criou. Passamos a referência na prop <code>ref</code> do elemento, e o React coloca o elemento em <code>current</code> depois de montar a tela (e volta para <code>null</code> quando o elemento sai):</p>
+<pre class="code"><code>import { useRef, useState } from "react"
+import { taskCreateApi } from "../api/taskCreateApi"
+import type { Task } from "../types/api"
+
+type TaskFormProps = {
+    idUser: number
+    onCreated: (task: Task) =&gt; void
+}
+
+export function TaskForm({ idUser, onCreated }: TaskFormProps) {
+    const [name, setName] = useState("")
+    const nameInputRef = useRef&lt;HTMLInputElement&gt;(null)
+
+    async function handleCreate() {
+        if (name.trim() === "") {
+            nameInputRef.current?.focus()      // evento nativo do HTML: foca o campo
+            return
+        }
+
+        const created = await taskCreateApi(idUser, { name })
+        onCreated(created)
+        setName("")
+        nameInputRef.current?.focus()          // pronto para a próxima task
+    }
+
+    return (
+        &lt;div className="input-group mb-3"&gt;
+            &lt;input
+                ref={nameInputRef}
+                className="form-control"
+                value={name}
+                onChange={event =&gt; setName(event.target.value)}
+            /&gt;
+            &lt;button className="btn btn-primary" onClick={handleCreate}&gt;Adicionar&lt;/button&gt;
+        &lt;/div&gt;
+    )
+}</code></pre>
+<p>Detalhes de tipagem que valem a atenção:</p>
+<ul><li><code>useRef&lt;HTMLInputElement&gt;(null)</code>: o generic diz <strong>qual elemento</strong> vai morar ali; o tipo resultante é <code>RefObject&lt;HTMLInputElement | null&gt;</code>;</li><li>como <code>current</code> é <code>null</code> antes de montar e depois de desmontar, usamos <code>?.</code> (<code>nameInputRef.current?.focus()</code>);</li><li>o nome do tipo vem do elemento: <code>HTMLInputElement</code>, <code>HTMLButtonElement</code>, <code>HTMLDivElement</code>, <code>HTMLFormElement</code>, <code>HTMLVideoElement</code>.</li></ul>
+<p>Com a referência em mãos, dá para <strong>acionar os eventos e métodos nativos</strong> do elemento, sem <code>document.getElementById</code>:</p>
+<p>| Elemento | Chamada | Para quê |</p>
+<p>|----------|---------|----------|</p>
+<p>| <code>input</code> | <code>ref.current?.focus()</code> / <code>.select()</code> | dar foco, selecionar o texto |</p>
+<p>| <code>input type="file"</code> escondido | <code>ref.current?.click()</code> | abrir o seletor de arquivo a partir de um botão bonito |</p>
+<p>| <code>form</code> | <code>ref.current?.requestSubmit()</code> | enviar o formulário por código |</p>
+<p>| qualquer <code>div</code> | <code>ref.current?.scrollIntoView()</code> | rolar até o elemento |</p>
+<p>| <code>video</code> | <code>ref.current?.play()</code> | controlar a mídia |</p>
+<h3 id="s3-5-referência-para-componentes"><span class="hn">3.5</span>Referência para Componentes</h3>
+<p>E quando o elemento está <strong>dentro de um componente filho</strong>? No React 19, <code>ref</code> é um <strong>parâmetro comum</strong> do componente (nas versões antigas era preciso <code>forwardRef</code>). O filho decide a quem entregar a referência, e o pai passa a controlar aquele elemento:</p>
+<pre class="code"><code>import type { ChangeEvent, Ref } from "react"
+
+type TextFieldProps = {
+    label: string
+    value: string
+    onChange: (event: ChangeEvent&lt;HTMLInputElement&gt;) =&gt; void
+    ref?: Ref&lt;HTMLInputElement&gt;
+}
+
+function TextField({ label, value, onChange, ref }: TextFieldProps) {
+    return (
+        &lt;label className="form-label w-100"&gt;
+            {label}
+            &lt;input ref={ref} className="form-control" value={value} onChange={onChange} /&gt;
+        &lt;/label&gt;
+    )
+}</code></pre>
+<p>No pai, é o mesmo uso da seção anterior, só que a ponte passa pelo componente:</p>
+<pre class="code"><code>const nameInputRef = useRef&lt;HTMLInputElement&gt;(null)
+
+&lt;TextField ref={nameInputRef} label="Nome" value={name} onChange={handleName} /&gt;</code></pre>
+<p>Em vez de entregar o elemento inteiro, o filho pode expor <strong>só os métodos que quer</strong> (uma "API" do componente) com <code>useImperativeHandle</code>. O pai aciona o <strong>componente</strong>, sem saber que existe um <code>input</code> lá dentro:</p>
+<pre class="code"><code>import { useImperativeHandle, useRef, useState } from "react"
+import type { Ref } from "react"
+
+type SearchBoxHandle = {
+    focus: () =&gt; void
+    clear: () =&gt; void
+}
+
+type SearchBoxProps = {
+    onSearch: (text: string) =&gt; void
+    ref?: Ref&lt;SearchBoxHandle&gt;
+}
+
+function SearchBox({ onSearch, ref }: SearchBoxProps) {
+    const [text, setText] = useState("")
+    const inputRef = useRef&lt;HTMLInputElement&gt;(null)
+
+    useImperativeHandle(ref, () =&gt; ({
+        focus() {
+            inputRef.current?.focus()
+        },
+        clear() {
+            setText("")
+        },
+    }))
+
+    function handleSearch() {
+        onSearch(text)
+    }
+
+    return (
+        &lt;div className="input-group"&gt;
+            &lt;input ref={inputRef} className="form-control" value={text} onChange={event =&gt; setText(event.target.value)} /&gt;
+            &lt;button className="btn btn-primary" onClick={handleSearch}&gt;Buscar&lt;/button&gt;
+        &lt;/div&gt;
+    )
+}</code></pre>
+<p>No pai: <code>const searchRef = useRef&lt;SearchBoxHandle&gt;(null)</code> e, num handler, <code>searchRef.current?.clear()</code>. O generic agora é o <strong>tipo do contrato</strong> (<code>SearchBoxHandle</code>), não um elemento do HTML.</p>
+<h3 id="s3-6-referência-para-guardar-dados-que-vão-ao-backend"><span class="hn">3.6</span>Referência para Guardar Dados Que Vão ao Backend</h3>
+<p>A referência não serve só para o DOM. É a "gaveta" do componente para dados que <strong>acompanham o trabalho com o backend</strong> mas que o usuário não vê. Três usos clássicos, todos em handlers:</p>
+<p><strong>a) Campo não controlado: ler o valor só na hora de enviar.</strong> O <code>input</code> controlado (<code>value</code> + <code>onChange</code>) renderiza o componente a cada tecla. Quando o valor só interessa no envio, a referência lê direto do elemento, sem nenhuma renderização durante a digitação:</p>
+<pre class="code"><code>import { useRef } from "react"
+import type { FormEvent } from "react"
+import { taskCreateApi } from "../api/taskCreateApi"
+
+type QuickTaskProps = {
+    idUser: number
+}
+
+export function QuickTask({ idUser }: QuickTaskProps) {
+    const nameRef = useRef&lt;HTMLInputElement&gt;(null)
+
+    async function handleSubmit(event: FormEvent) {
+        event.preventDefault()
+
+        const name = nameRef.current?.value.trim() ?? ""
+        if (name === "") return
+
+        await taskCreateApi(idUser, { name })      // o valor vai direto ao backend
+        nameRef.current!.value = ""
+    }
+
+    return (
+        &lt;form onSubmit={handleSubmit} className="input-group"&gt;
+            &lt;input ref={nameRef} className="form-control" defaultValue="" /&gt;
+            &lt;button className="btn btn-primary"&gt;Adicionar&lt;/button&gt;
+        &lt;/form&gt;
+    )
+}</code></pre>
+<p>Sem <code>value</code>, o campo é <strong>não controlado</strong> (o DOM é dono do valor; usamos <code>defaultValue</code>). Quando a interface precisa reagir ao texto (contador de caracteres, botão desabilitado, validação ao vivo), o certo é o campo controlado com estado.</p>
+<p><strong>b) Lembrar o que já foi enviado, para não repetir a chamada.</strong> O último termo buscado é um dado de bastidor: a tela não o mostra, mas ele evita uma requisição desnecessária:</p>
+<pre class="code"><code>const lastSearchRef = useRef("")
+
+async function handleSearch(event: FormEvent) {
+    event.preventDefault()
+
+    const term = text.trim()
+    if (term === "") return
+    if (term === lastSearchRef.current) return   // mesma busca: não chama o backend de novo
+
+    lastSearchRef.current = term
+
+    const result = await userSearchApi({ name: term }, 1, 10)
+    setUsers(result.data)
+}</code></pre>
+<p><strong>c) Guardar o id de um timer: *debounce* na busca.</strong> O <code>setTimeout</code> devolve um número. Precisamos dele <strong>na próxima renderização</strong> para cancelar o timer anterior, mas guardá-lo em estado renderizaria à toa:</p>
+<pre class="code"><code>const timerRef = useRef&lt;number | undefined&gt;(undefined)
+
+function handleType(event: ChangeEvent&lt;HTMLInputElement&gt;) {
+    const term = event.target.value
+    setText(term)
+
+    window.clearTimeout(timerRef.current)          // cancela o timer da tecla anterior
+    timerRef.current = window.setTimeout(() =&gt; {
+        search(term)                               // só busca 400 ms depois da última tecla
+    }, 400)
+}</code></pre>
+<p>Resumo de <strong>para que usar</strong> uma referência:</p>
+<ul><li>acessar <strong>elementos do HTML</strong> e <strong>acionar eventos nativos</strong> (<code>focus</code>, <code>click</code>, <code>scrollIntoView</code>, <code>requestSubmit</code>);</li><li>acessar <strong>componentes</strong> (<code>ref</code> como parâmetro, <code>useImperativeHandle</code>);</li><li>guardar <strong>dados que vão ao backend</strong> ou que acompanham a requisição (campo não controlado, último termo enviado, id de timer, id da última requisição);</li><li>guardar qualquer valor <strong>mutável de bastidor</strong> (contadores, valor anterior) sem provocar renderização.</li></ul>
+<h2 id="s4-efeitos-useeffect"><span class="hn">4</span>Efeitos: <code>useEffect</code></h2>
+<h3 id="s4-1-de-novo-turing-a-transição-entre-estados"><span class="hn">4.1</span>De Novo Turing: a Transição Entre Estados</h3>
+<p>Na Aula 08 apresentamos a máquina de Alan Turing: um <strong>estado atual</strong>, uma <strong>entrada</strong> e uma <strong>função de transição</strong> que decide o próximo estado e <strong>uma ação</strong>. O React espelha isso:</p>
+<p>| Máquina de Turing | React |</p>
+<p>|-------------------|-------|</p>
+<p>| estado atual | <code>useState</code> e parâmetros |</p>
+<p>| função de transição | o componente (estado + parâmetros → tela) |</p>
+<p>| entrada | evento do usuário, resposta da API |</p>
+<p>| <strong>ação executada na transição</strong> | **<code>useEffect</code>** |</p>
+<p>O componente, sozinho, é uma função "pura": recebe estado e parâmetros e devolve tela. Só que a vida real exige <strong>ações</strong> quando o estado transiciona: buscar dados no backend, assinar um evento, mexer no título da aba, focar um campo. Essas ações não cabem no cálculo do JSX. O <code>useEffect</code> é o lugar delas: <strong>o gerenciamento das transições de estado</strong>. A frase para guardar:</p>
+<p>&gt; *Depois que o estado é atualizado (e a tela já foi desenhada), executa-se o efeito dessa mudança.*</p>
+<h3 id="s4-2-anatomia-e-ordem-de-execução"><span class="hn">4.2</span>Anatomia e Ordem de Execução</h3>
+<pre class="code"><code>import { useEffect } from "react"
+
+useEffect(() =&gt; {
+    <span class="cm">// 1. o efeito: roda DEPOIS da renderização</span>
+
+    return () =&gt; {
+        <span class="cm">// 2. a limpeza (opcional): roda antes do próximo efeito e ao desmontar</span>
+    }
+}, [dependencias])   // 3. quando o efeito deve rodar de novo</code></pre>
+<p>A ordem completa de uma mudança de estado, que é a espinha da aula:</p>
+<ol><li>o evento chama <code>setEstado</code>, e o React agenda uma renderização;</li><li>a <strong>função do componente roda</strong> inteira e devolve o JSX;</li><li>o React atualiza o DOM e o navegador <strong>pinta a tela</strong>;</li><li>só então o React executa os <strong>efeitos</strong> cujas dependências mudaram (rodando antes a <strong>limpeza</strong> do efeito anterior);</li><li>se o efeito chamar <code>setEstado</code>, volta ao passo 1.</li></ol>
+<p>Por isso o efeito é o lugar certo para a chamada ao backend: o usuário já vê a tela (com "Carregando..."), e a resposta, quando chegar, vira estado e renderiza de novo.</p>
+<h3 id="s4-3-o-array-de-dependências"><span class="hn">4.3</span>O Array de Dependências</h3>
+<p>O segundo parâmetro diz <strong>quando</strong> o efeito roda de novo:</p>
+<p>| Dependências | Quando o efeito roda |</p>
+<p>|--------------|----------------------|</p>
+<p>| <code>[]</code> | <strong>uma vez</strong>, depois da primeira renderização (montagem) |</p>
+<p>| <code>[user.id]</code> | na montagem <strong>e</strong> sempre que <code>user.id</code> mudar |</p>
+<p>| omitido | depois de <strong>toda</strong> renderização (raramente é o que se quer) |</p>
+<p>O React compara cada dependência com a anterior usando <code>Object.is</code>, a mesma comparação do <code>useState</code>. E aqui o <strong>heap</strong> volta a cobrar: primitivos são comparados por valor, <strong>objetos, arrays e funções por endereço</strong>. Como o componente roda inteiro a cada renderização, um objeto criado no corpo dele é um <strong>endereço novo</strong> toda vez:</p>
+<pre class="code"><code>export function UserTasksErrado({ user }: UserTasksProps) {
+    const [tasks, setTasks] = useState&lt;Task[]&gt;([])
+    const params = { page: 1, limit: 20 }        // objeto NOVO a cada renderização
+
+    useEffect(() =&gt; {
+        async function load() {
+            const result = await tasksListApi(user.id, params)
+            setTasks(result.data)                // muda o estado → renderiza → params novo
+        }                                        // → o efeito roda de novo → setTasks → ...
+        load()
+    }, [params])                                 // LOOP INFINITO de requisições</code></pre>
+<p>A saída é depender de <strong>primitivos</strong> (<code>[user.id, page, limit]</code>), nunca de objetos criados dentro do componente.</p>
+<h3 id="s4-4-o-efeito-também-vê-a-foto"><span class="hn">4.4</span>O Efeito Também Vê a "Foto"</h3>
+<p>Assim como o handler de clique, o efeito é uma função criada <strong>dentro</strong> da renderização e enxerga os valores <strong>daquela</strong> renderização (estado e parâmetros daquela "foto"). O React guarda a função e só a executa quando as dependências mudam. Por isso a lista de dependências precisa citar <strong>tudo</strong> o que o efeito lê do componente: se <code>user.id</code> é usado dentro, <code>user.id</code> entra no array. Esquecer uma dependência significa rodar o efeito com uma foto velha.</p>
+<h3 id="s4-5-limpeza-e-cancelamento"><span class="hn">4.5</span>Limpeza e Cancelamento</h3>
+<p>A função devolvida pelo efeito é a <strong>limpeza</strong>. Ela roda em dois momentos: antes de o efeito rodar <strong>de novo</strong> (dependência mudou) e quando o componente <strong>sai da tela</strong>. É onde se desfaz o que o efeito fez:</p>
+<pre class="code"><code>useEffect(() =&gt; {
+    function handleKey(event: KeyboardEvent) {
+        if (event.key === "Escape") onClose()
+    }
+
+    window.addEventListener("keydown", handleKey)       // efeito: assina
+
+    return () =&gt; window.removeEventListener("keydown", handleKey)   // limpeza: cancela a assinatura
+}, [onClose])</code></pre>
+<p>Na chamada ao backend a limpeza resolve um problema real, a <strong>condição de corrida</strong> (*race condition*): o usuário clica no usuário A e, antes da resposta, clica no B. Se a resposta de A chegar <strong>depois</strong> da de B, a tela mostraria as tasks de A sob o nome de B. A limpeza cancela a requisição velha com um <code>AbortController</code>, o mecanismo nativo de cancelamento que o Axios entende (<code>signal</code>):</p>
+<pre class="code"><code>useEffect(() =&gt; {
+    const controller = new AbortController()
+
+    <span class="cm">// ... GET com { signal: controller.signal } ...</span>
+
+    return () =&gt; controller.abort()    // mudou a dependência: cancela a requisição anterior
+}, [user.id])</code></pre>
+<p>A seção seguinte abre esse mecanismo por dentro, porque ele aparece em todo efeito que chama o backend.</p>
+<h3 id="s4-6-abortcontroller-cancelando-uma-requisição"><span class="hn">4.6</span>AbortController: Cancelando uma Requisição</h3>
+<p>Antes de ver o código completo do efeito com API, vale entender o que é o <code>AbortController</code>, porque ele aparece em todo efeito que chama o backend e é fácil usá-lo sem saber o que faz.</p>
+<p><strong>O que é.</strong> O <code>AbortController</code> é uma API <strong>nativa</strong> do navegador (e do Node): não é do React nem do Axios. Ele serve para <strong>avisar uma operação assíncrona de que ela deve parar</strong>. Funciona com um par de objetos:</p>
+<ul><li>o **<code>controller</code>**, que é o "botão de cancelar", com o método <code>abort()</code>;</li><li>o **<code>controller.signal</code>**, que é o "fio" ligado a esse botão: quem recebe o <code>signal</code> fica sabendo quando o <code>abort()</code> é chamado.</li></ul>
+<p>O <code>signal</code> é entregue à requisição. O Axios e o <code>fetch</code> aceitam o mesmo parâmetro:</p>
+<pre class="code"><code>const controller = new AbortController()
+
+<span class="cm">// Axios</span>
+clientApi.get("/users/7/tasks", { signal: controller.signal })
+
+<span class="cm">// fetch (nativo do navegador)</span>
+fetch("/users/7/tasks", { signal: controller.signal })
+
+<span class="cm">// ... em algum momento:</span>
+controller.abort()     // a requisição pendente é cancelada</code></pre>
+<p>**O que acontece no <code>abort()</code>.<strong> A promise da requisição é </strong>rejeitada** na hora. Isso significa que o código que estava esperando no <code>await</code> cai no <code>catch</code>. O erro é de um tipo especial: <code>CanceledError</code> no Axios (que se reconhece com <code>isCancel(err)</code>) e <code>AbortError</code> no <code>fetch</code> (<code>err.name === "AbortError"</code>). Cancelar não é um defeito, e por isso o <code>catch</code> precisa <strong>separar</strong> o cancelamento do erro de verdade, senão a tela mostraria "Erro ao carregar" para uma requisição que nós mesmos cancelamos:</p>
+<pre class="code"><code>try {
+    const response = await clientApi.get&lt;T&gt;(target, { signal: controller.signal })
+    setData(response.data)
+} catch (err) {
+    if (isCancel(err)) return      // cancelamos de propósito: não é erro, não mexe em estado
+    setError(getErrorMessage(err, "Erro ao carregar os dados"))
+}</code></pre>
+<p><strong>Por que ele resolve a condição de corrida.</strong> Veja a linha do tempo de um clique em A seguido de um clique em B, com e sem cancelamento:</p>
+<pre class="code"><code>SEM AbortController                      COM AbortController (limpeza do efeito)
+
+t0  clica em A  → GET /users/1/tasks     t0  clica em A  → GET /users/1/tasks
+t1  clica em B  → GET /users/2/tasks     t1  clica em B  → limpeza: abort() em A
+t2  resposta de B chega → tela mostra B                     → GET /users/2/tasks
+t3  resposta de A chega → tela mostra A  t2  A rejeita com CanceledError (ignorada)
+    (ERRADO: A sobrescreveu B)           t3  resposta de B chega → tela mostra B  ✔</code></pre>
+<p>**O que o <code>abort()</code> NÃO faz.<strong> Cancelar é uma decisão do </strong>navegador<strong>: ele deixa de esperar a resposta e fecha a conexão. O servidor pode já ter recebido o pedido e até </strong>processado<strong> tudo. Por isso o cancelamento é seguro para </strong>leitura<strong> (GET): no máximo o servidor trabalhou à toa. Para escrita (POST, PUT, DELETE) ele </strong>não desfaz** nada: a task pode ter sido criada no banco mesmo com a requisição cancelada, então não se usa o abort para "desistir" de gravar.</p>
+<p>Três regras de uso:</p>
+<ul><li><strong>Um controller por requisição</strong>, criado <strong>dentro do efeito</strong>. Depois do <code>abort()</code> o <code>signal</code> fica cancelado para sempre (<code>signal.aborted</code> continua <code>true</code>): reaproveitar o mesmo controller faria a requisição seguinte nascer cancelada. Como o efeito roda de novo a cada mudança de dependência, ele cria um controller novo a cada execução;</li><li><strong>abort numa requisição que já terminou não faz nada</strong>: é inofensivo, mas é por isso que o nosso hook confere se ela ainda está pendente (seção 5.2) antes de avisar que cancelou;</li><li>o abort mora na <strong>limpeza</strong> do efeito (<code>return () =&gt; controller.abort()</code>), porque é a limpeza que roda exatamente quando a dependência muda ou o componente sai da tela, que são os dois momentos em que a resposta antiga deixa de interessar.</li></ul>
+<h3 id="s4-7-efeito-com-api-assíncrona"><span class="hn">4.7</span>Efeito com API Assíncrona</h3>
+<p>Existe uma pegadinha: a função passada ao <code>useEffect</code> **não pode ser <code>async</code>**. Uma função <code>async</code> devolve uma <code>Promise</code>, e o React espera que o retorno seja a <strong>função de limpeza</strong> (ou nada). A solução é declarar uma função <code>async</code> <strong>dentro</strong> do efeito e chamá-la:</p>
+<pre class="code"><code>useEffect(async () =&gt; {          // ERRADO: o efeito devolveria uma Promise
+    ...
+}, [])
+
+useEffect(() =&gt; {                // CERTO: função async declarada dentro e chamada
+    async function load() {
+        ...
+    }
+
+    load()
+}, [])</code></pre>
+<p>Agora o exemplo completo, no projeto. Antes, o <code>UsersApp</code> buscava as tasks num handler de clique e mantinha <code>tasks</code> e <code>error</code> como estados do pai. Vamos <strong>mover a responsabilidade</strong> para o componente que mostra as tasks: <code>UserTasks</code> recebe o <code>user</code> por parâmetro e, quando o <code>user.id</code> muda, o <strong>efeito</strong> busca no backend:</p>
+<pre class="code"><code>import { useEffect, useState } from "react"
+import { isCancel } from "axios"
+import clientApi from "../api/_clientApi"
+import { getErrorMessage } from "../utils/getErrorMessage"
+import type { PaginatedResponse, Task, User } from "../types/api"
+
+type UserTasksProps = {
+    user: User
+}
+
+export function UserTasks({ user }: UserTasksProps) {
+    const [tasks, setTasks] = useState&lt;Task[]&gt;([])
+    const [error, setError] = useState("")
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() =&gt; {
+        const controller = new AbortController()
+
+        async function load() {
+            setIsLoading(true)
+            setError("")
+
+            try {
+                const response = await clientApi.get&lt;PaginatedResponse&lt;Task&gt;&gt;(
+                    `/users/${user.id}/tasks?page=1&amp;limit=20`,
+                    { signal: controller.signal }
+                )
+                setTasks(response.data.data)
+            } catch (err) {
+                if (isCancel(err)) return          // cancelada pela limpeza: ignora em silêncio
+                setError(getErrorMessage(err, "Erro ao carregar as tasks"))
+            }
+
+            setIsLoading(false)
+        }
+
+        load()
+
+        return () =&gt; controller.abort()
+    }, [user.id])
+
+    if (isLoading) return &lt;p className="text-muted"&gt;Carregando as tasks de {user.name}...&lt;/p&gt;
+    if (error !== "") return &lt;div className="alert alert-danger"&gt;{error}&lt;/div&gt;
+
+    return (
+        &lt;&gt;
+            &lt;h2 className="h5"&gt;Tasks de {user.name}&lt;/h2&gt;
+
+            {tasks.length === 0 &amp;&amp; &lt;p className="text-muted"&gt;Nenhuma task.&lt;/p&gt;}
+
+            &lt;ul className="list-group"&gt;
+                {tasks.map(task =&gt; (
+                    &lt;li key={task.id} className="list-group-item"&gt;{task.name}&lt;/li&gt;
+                ))}
+            &lt;/ul&gt;
+        &lt;/&gt;
+    )
+}</code></pre>
+<p>Lendo o código com o que aprendemos:</p>
+<ul><li><strong>Três estados</strong> descrevem a "máquina" da requisição: <code>isLoading</code> (esperando), <code>error</code> (falhou) e <code>tasks</code> (deu certo). O JSX só escolhe o que desenhar a partir deles;</li><li><code>isLoading</code> **começa <code>true</code>**: na primeira renderização a tela já mostra "Carregando...", e o efeito dispara a chamada logo depois;</li><li><code>[user.id]</code> é uma dependência <strong>primitiva</strong> (um número): trocou o usuário, o efeito roda de novo, com a limpeza do anterior cancelando a requisição velha;</li><li><code>setTasks</code> e <code>setIsLoading(false)</code> são chamados depois do <code>await</code>, e o React agrupa as duas mudanças numa <strong>única</strong> renderização;</li><li>o <code>isCancel(err)</code> separa "a requisição foi cancelada de propósito" de "deu erro de verdade".</li></ul>
+<h3 id="s4-8-quando-não-usar-um-efeito"><span class="hn">4.8</span>Quando NÃO Usar um Efeito</h3>
+<p>O efeito é uma ferramenta para <strong>sincronizar com algo de fora</strong> (rede, DOM, eventos do navegador, timers). Não use para:</p>
+<ul><li><strong>Valores derivados</strong>: <code>pending = tasks.filter(...).length</code> é só uma conta dentro do componente, e se virar <code>useEffect</code> + <code>setPending</code> você cria uma renderização extra e uma segunda verdade;</li><li><strong>Reagir a um clique ou a um envio</strong>: quem fez foi o usuário, então o lugar é o <strong>handler</strong> (<code>handleCreate</code>, <code>handleSubmit</code>). Foi assim que o CRUD de tasks da Aula 08 funcionou, e continua certo.</li></ul>
+<p>A pergunta que decide: *"isto acontece por causa de uma <strong>ação do usuário</strong> (handler) ou por causa de <strong>o que está na tela agora</strong> (efeito)?"*. No <code>UserTasks</code>, a busca depende de <strong>qual usuário está na tela</strong>, e é por isso que ela virou efeito.</p>
+<h3 id="s4-9-o-efeito-roda-duas-vezes-em-desenvolvimento"><span class="hn">4.9</span>O Efeito Roda Duas Vezes em Desenvolvimento</h3>
+<p>Se o entry do projeto montar o React dentro de <code>&lt;StrictMode&gt;</code>, em desenvolvimento o React executa cada efeito, a limpeza e o efeito de novo, <strong>de propósito</strong>, só para revelar efeitos sem limpeza correta. Em produção isso não acontece. É mais um motivo para sempre devolver a limpeza quando o efeito cria algo (requisição, assinatura, timer).</p>
+<h2 id="s5-custom-hooks"><span class="hn">5</span>Custom Hooks</h2>
+<h3 id="s5-1-o-problema-da-repetição"><span class="hn">5.1</span>O Problema da Repetição</h3>
+<p>O <code>UserTasks</code> da seção anterior tem uma estrutura que se repete em <strong>toda</strong> tela que consulta o backend: <code>data</code>, <code>error</code>, <code>isLoading</code>, um <code>useEffect</code>, um <code>AbortController</code>, um <code>try/catch</code>. Copiar isso para cada componente é receita para divergência (um componente trata o erro, outro esquece).</p>
+<p>Um <strong>custom hook</strong> é a saída: uma função comum, cujo nome começa com <code>use</code>, que <strong>chama outros hooks</strong> (<code>useState</code>, <code>useEffect</code>, <code>useRef</code>) e devolve valores. A lógica e os estados saem do componente e ficam num lugar só, reaproveitável.</p>
+<p>Regras dos hooks (valem para os do React e para os seus):</p>
+<ul><li>o nome começa com **<code>use</code>** (é como o React e o editor reconhecem um hook);</li><li>só são chamados <strong>no topo</strong> do componente ou de outro hook (nunca dentro de <code>if</code>, laço ou função interna): o React identifica cada estado pela <strong>ordem</strong> das chamadas, e essa ordem precisa ser igual em toda renderização;</li><li>só em <strong>componentes</strong> e em <strong>outros hooks</strong>.</li></ul>
+<h3 id="s5-2-o-useaxios"><span class="hn">5.2</span>O <code>useAxios</code></h3>
+<p>Vamos criar <code>resources/js/hooks/useAxios.ts</code>. Ele recebe uma <code>url</code> (e, opcionalmente, um <code>onEvent</code> para contar o que está fazendo) e devolve <strong>três estados</strong> (<code>data</code>, <code>error</code>, <code>isLoading</code>) mais uma função <code>refetch</code>:</p>
+<pre class="code"><code>import { useEffect, useRef, useState } from "react"
+import { isCancel } from "axios"
+import clientApi from "../api/_clientApi"
+import { getErrorMessage } from "../utils/getErrorMessage"
+
+<span class="cm">// O que o hook conta para quem quiser acompanhar: começou, foi cancelado, chegou, falhou</span>
+export type AxiosEvent = "start" | "abort" | "done" | "error"
+
+type UseAxiosResult&lt;T&gt; = {
+    data: T | null
+    error: string
+    isLoading: boolean
+    refetch: () =&gt; void
+}
+
+export function useAxios&lt;T&gt;(
+    url: string | null,
+    onEvent?: (event: AxiosEvent, url: string) =&gt; void
+): UseAxiosResult&lt;T&gt; {
+    const [data, setData] = useState&lt;T | null&gt;(null)
+    const [error, setError] = useState("")
+    const [isLoading, setIsLoading] = useState(url !== null)
+    const [attempt, setAttempt] = useState(0)
+    const onEventRef = useRef(onEvent)
+
+    <span class="cm">// Sem dependências: depois de toda renderização a ref passa a apontar para a função mais recente</span>
+    useEffect(() =&gt; {
+        onEventRef.current = onEvent
+    })
+
+    useEffect(() =&gt; {
+        if (url === null) {
+            setData(null)
+            setIsLoading(false)
+            return
+        }
+
+        const target = url
+        const controller = new AbortController()
+        const request = { isPending: true }
+
+        async function load() {
+            setIsLoading(true)
+            setError("")
+            onEventRef.current?.("start", target)
+
+            try {
+                const response = await clientApi.get&lt;T&gt;(target, { signal: controller.signal })
+                request.isPending = false
+                setData(response.data)
+                onEventRef.current?.("done", target)
+            } catch (err) {
+                if (isCancel(err)) return
+                request.isPending = false
+                setError(getErrorMessage(err, "Erro ao carregar os dados"))
+                onEventRef.current?.("error", target)
+            }
+
+            setIsLoading(false)
+        }
+
+        load()
+
+        <span class="cm">// Limpeza: só cancela se a requisição ainda está no ar (abort numa que já terminou não faz nada)</span>
+        return () =&gt; {
+            if (!request.isPending) return
+
+            controller.abort()
+            onEventRef.current?.("abort", target)
+        }
+    }, [url, attempt])
+
+    <span class="cm">// Só muda um estado: quem faz o trabalho é o efeito (a transição de estados)</span>
+    function refetch() {
+        setAttempt(current =&gt; current + 1)
+    }
+
+    return { data, error, isLoading, refetch }
+}</code></pre>
+<p>Cada peça tem uma razão de ser:</p>
+<ul><li>**<code>&lt;T&gt;</code><strong> é um generic: o hook não sabe o que a API devolve, quem </strong>usa** diz o tipo (<code>useAxios&lt;PaginatedResponse&lt;Task&gt;&gt;</code>), e o <code>data</code> já sai tipado <code>T | null</code>;</li><li>**<code>url: string | null</code>**: com <code>null</code> o hook fica parado, o que permite "só buscar quando já souber o que buscar" (a tela da seção 5.6 usa isso: sem usuário escolhido, o hook das tasks fica parado);</li><li>**<code>[url, attempt]</code><strong> são as dependências, ambas </strong>primitivas**: trocou a <code>url</code>, busca de novo; chamou <code>refetch</code>, o <code>attempt</code> muda e o efeito roda de novo. Repare que o <code>refetch</code> <strong>só altera um estado</strong>, e é o efeito (a transição de estados) que faz o trabalho, exatamente a ideia da seção 4.1;</li><li>a limpeza cancela a requisição anterior com o <code>AbortController</code> da seção 4.6, então o hook já nasce <strong>protegido contra a condição de corrida</strong>;</li><li>o hook devolve um <strong>objeto</strong>, e quem usa desestrutura só o que precisa (a mesma desestruturação da seção 2.3).</li></ul>
+<p>**Por que o <code>onEvent</code> vai numa referência.** O <code>onEvent</code> é uma função, e função é objeto no heap: o componente que chama o hook cria uma função <strong>nova</strong> a cada renderização (endereço novo, como na seção 2.1). Se ela entrasse na lista de dependências (<code>[url, attempt, onEvent]</code>), o React veria uma dependência diferente a cada renderização e rodaria o efeito <strong>sempre</strong>, cancelando e refazendo o GET sem parar, o mesmo loop da seção 4.3. Se ficasse fora da lista, o efeito leria uma função velha, a "foto" da seção 4.4. A saída é a referência da seção 3: o <code>onEventRef</code> é o <strong>mesmo objeto</strong> em toda renderização, o primeiro <code>useEffect</code> (sem dependências, roda depois de toda renderização) o aponta para a função mais recente, e o efeito do GET só lê <code>onEventRef.current</code> na hora de usar. Mudar <code>ref.current</code> não renderiza nem dispara efeito: é exatamente o "dado de bastidor" da seção 3.6.</p>
+<p>**Por que o <code>request.isPending</code>.<strong> A limpeza roda sempre que o efeito vai rodar de novo ou o componente desmonta, inclusive quando a requisição </strong>já terminou** (por exemplo, num <code>refetch</code> depois de a resposta ter chegado). Chamar <code>controller.abort()</code> numa requisição concluída não faz nada, mas o evento <code>"abort"</code> apareceria no registro mesmo assim, contando um cancelamento que não aconteceu. Por isso o objeto <code>request = { isPending: true }</code>, criado junto com o controller, vira <code>false</code> quando a resposta (ou o erro) chega, e a limpeza só aborta, e só avisa <code>"abort"</code>, se ainda for <code>true</code>. Repare que <code>request</code> é um <strong>objeto</strong>: alterar <code>request.isPending</code> não reatribui a <code>const</code>, e o efeito e a limpeza enxergam o mesmo objeto, o que dispensa um <code>let</code>.</p>
+<p>Um cuidado de projeto: o hook depende só de <code>url</code> (uma string) justamente por causa da seção 4.3. Se ele recebesse um objeto de configuração criado no corpo do componente, o efeito rodaria a cada renderização. Parâmetros de consulta entram na própria string: <code>/users/7/tasks?page=2&amp;limit=20</code>.</p>
+<h3 id="s5-3-enxertando-o-hook-no-componente"><span class="hn">5.3</span>Enxertando o Hook no Componente</h3>
+<p>Agora o <code>UserTasks</code> perde todo o código de requisição e <strong>herda</strong> o estado do hook:</p>
+<pre class="code"><code>import { useAxios } from "../hooks/useAxios"
+import type { PaginatedResponse, Task, User } from "../types/api"
+
+type UserTasksProps = {
+    user: User
+}
+
+export function UserTasks({ user }: UserTasksProps) {
+    const { data, error, isLoading, refetch } = useAxios&lt;PaginatedResponse&lt;Task&gt;&gt;(
+        `/users/${user.id}/tasks?page=1&amp;limit=20`
+    )
+
+    function handleRetry() {
+        refetch()
+    }
+
+    if (isLoading) return &lt;p className="text-muted"&gt;Carregando as tasks de {user.name}...&lt;/p&gt;
+
+    if (error !== "") {
+        return (
+            &lt;div className="alert alert-danger d-flex justify-content-between align-items-center"&gt;
+                &lt;span&gt;{error}&lt;/span&gt;
+                &lt;button className="btn btn-sm btn-outline-danger" onClick={handleRetry}&gt;Tentar de novo&lt;/button&gt;
+            &lt;/div&gt;
+        )
+    }
+
+    if (data === null) return null
+
+    const tasks = data.data
+
+    return (
+        &lt;&gt;
+            &lt;h2 className="h5"&gt;Tasks de {user.name}&lt;/h2&gt;
+
+            {tasks.length === 0 &amp;&amp; &lt;p className="text-muted"&gt;Nenhuma task.&lt;/p&gt;}
+
+            &lt;ul className="list-group"&gt;
+                {tasks.map(task =&gt; (
+                    &lt;li key={task.id} className="list-group-item d-flex justify-content-between"&gt;
+                        &lt;span&gt;{task.name}&lt;/span&gt;
+                        &lt;span className={task.is_done ? "badge text-bg-success" : "badge text-bg-secondary"}&gt;
+                            {task.is_done ? "feita" : "pendente"}
+                        &lt;/span&gt;
+                    &lt;/li&gt;
+                ))}
+            &lt;/ul&gt;
+        &lt;/&gt;
+    )
+}</code></pre>
+<p>O ponto principal desta seção: <strong>os estados do hook são estados do componente que o chama</strong>. Quando o <code>useAxios</code> chama <code>setData</code>, <code>setError</code> ou <code>setIsLoading</code>, quem renderiza de novo é o <code>UserTasks</code>, a função inteira, com os valores novos de <code>data</code>, <code>error</code> e <code>isLoading</code>. O componente não escreve uma linha de <code>useState</code> e mesmo assim reage a cada mudança. Dois detalhes:</p>
+<ul><li><strong>cada chamada ao hook tem o seu próprio estado</strong>: dois componentes que usam <code>useAxios</code> não compartilham nada (o hook reaproveita <strong>lógica</strong>, não dados);</li><li>os hooks vêm <strong>antes</strong> dos <code>if</code> com <code>return</code>: a regra da ordem das chamadas vale também aqui, e é por isso que o <code>useAxios</code> é chamado no topo, antes de qualquer retorno antecipado.</li></ul>
+<h3 id="s5-4-usando-no-pai-key-reinicia-o-estado"><span class="hn">5.4</span>Usando no Pai: <code>key</code> Reinicia o Estado</h3>
+<p>No <code>UsersApp</code> o pai agora só guarda <strong>qual usuário está escolhido</strong>. A busca, o carregando e o erro deixaram de ser dele:</p>
+<pre class="code"><code>const [selected, setSelected] = useState&lt;User | null&gt;(null)
+
+function handleSelect(user: User) {
+    setSelected(user)
+}
+
+<span class="cm">// ...no JSX, ao lado direito da tela:</span>
+&lt;section className="col-lg-6"&gt;
+    {selected === null &amp;&amp; &lt;p className="text-muted"&gt;Escolha um usuário para ver as tasks dele.&lt;/p&gt;}
+    {selected !== null &amp;&amp; &lt;UserTasks key={selected.id} user={selected} /&gt;}
+&lt;/section&gt;</code></pre>
+<p>O <code>key={selected.id}</code> aplica a regra da seção 2.4: ao escolher outro usuário a <code>key</code> muda, o React <strong>desmonta</strong> o <code>UserTasks</code> antigo e cria um novo, com os três estados do hook do zero (<code>isLoading</code> verdadeiro, <code>data</code> nulo). Sem a <code>key</code>, o mesmo componente seguiria vivo e mostraria, por um instante, as tasks do usuário anterior até o efeito rodar.</p>
+<h3 id="s5-5-seguindo-uma-renderização-passo-a-passo"><span class="hn">5.5</span>Seguindo uma Renderização, Passo a Passo</h3>
+<p>O usuário clica em "Ana" (id 7) na lista:</p>
+<ol><li>O clique chama <code>handleSelect(ana)</code>, que chama <code>setSelected(ana)</code>;</li><li><code>UsersApp</code> roda inteira: <code>selected</code> agora é <code>ana</code> e o JSX inclui <code>&lt;UserTasks key={7} user={ana} /&gt;</code>;</li><li><code>UserTasks</code> <strong>monta</strong>: roda a função, o <code>useAxios</code> cria seus três estados (<code>data = null</code>, <code>error = ""</code>, <code>isLoading = true</code>) e a tela mostra <strong>"Carregando as tasks de Ana..."</strong>;</li><li>O React atualiza o DOM, o navegador pinta, e só então o <strong>efeito</strong> do hook roda: monta a <code>url</code> <code>/users/7/tasks?page=1&amp;limit=20</code> e dispara o GET pelo <code>clientApi</code>;</li><li>A resposta chega (um objeto novo no heap, <code>PaginatedResponse&lt;Task&gt;</code>); o hook chama <code>setData(...)</code> e <code>setIsLoading(false)</code>, e o React agrupa as duas mudanças numa <strong>única</strong> renderização;</li><li><code>UserTasks</code> roda de novo: <code>isLoading</code> é falso, <code>data</code> não é nulo, e a lista de tasks aparece. **O <code>UsersApp</code> não rodou nesta etapa**, porque o estado que mudou era do filho;</li><li>O usuário clica em "Bruno" antes de uma nova resposta: a <code>key</code> muda, o <code>UserTasks</code> de Ana <strong>desmonta</strong>, a <strong>limpeza</strong> do efeito cancela a requisição pendente com <code>controller.abort()</code>, e o ciclo recomeça para Bruno a partir do passo 3.</li></ol>
+<p>Se a API falhar, o <code>catch</code> chama <code>setError(...)</code>, o componente renderiza com <code>error</code> preenchido, e o botão "Tentar de novo" chama <code>refetch()</code>: o <code>attempt</code> muda, o efeito roda de novo e o ciclo volta para o passo 4.</p>
+<h3 id="s5-6-a-tela-do-nosso-hook"><span class="hn">5.6</span>A Tela do Nosso Hook</h3>
+<p>Para ver o hook trabalhando, e não só ler o código, o projeto ganha uma tela: a View **<code>GET /hooks</code>**. Ela é protegida pelo mesmo middleware das telas de tasks e de usuários (sem sessão, redireciona para <code>/login</code>), porque o hook chama a API usando o cookie de sessão. A View <code>hooks.ejs</code> entrega só o título e o <code>#root</code>, e o entry <code>pages/hooks.tsx</code> monta o componente **<code>HookLab</code>**.</p>
+<p>O <code>HookLab</code> chama o <code>useAxios</code> <strong>duas vezes</strong>, e cada chamada tem os seus próprios estados:</p>
+<pre class="code"><code><span class="cm">// Hook 1: a lista de usuários</span>
+const users = useAxios&lt;PaginatedResponse&lt;User&gt;&gt;("/users?page=1&amp;limit=5")
+
+<span class="cm">// Hook 2: as tasks do usuário escolhido (url null = parado)</span>
+const tasksUrl = buildTasksUrl(selectedId, isBroken)
+const tasks = useAxios&lt;PaginatedResponse&lt;Task&gt;&gt;(tasksUrl, handleEvent)</code></pre>
+<p>A <code>tasksUrl</code> é um valor <strong>derivado</strong> de dois estados do <code>HookLab</code> (<code>selectedId</code> e <code>isBroken</code>): sem usuário escolhido ela é <code>null</code> e o hook das tasks fica parado; com um usuário, ela vira <code>/users/{id}/tasks?page=1&amp;limit=20</code>; com o botão de erro, vira uma rota que não existe. O <code>handleEvent</code>, passado como <code>onEvent</code>, escreve uma linha no registro a cada etapa do hook usando a forma de função: <code>setEvents(current =&gt; [...current, linha])</code>.</p>
+<p>A tela tem <strong>três painéis</strong>:</p>
+<ol><li><strong>Hook da lista de usuários:</strong> o <code>HookStatePanel</code> com os três estados do hook e, abaixo, um botão por usuário;</li><li><strong>Hook das tasks:</strong> mostra a <code>url</code> atual, o <code>HookStatePanel</code> e três botões (<code>refetch()</code>, *Trocar 3x rápido (AbortController)* e *Forçar erro*);</li><li><strong>O que o hook contou:</strong> o <code>EventLog</code>, um registro em fundo escuro com uma linha por evento (<code>começou</code>, <code>chegou</code>, <code>CANCELADO</code>, <code>falhou</code>), mais o botão *Limpar*.</li></ol>
+<p>O <code>HookStatePanel</code> desenha os estados com emblemas coloridos: <code>isLoading</code> fica <strong>amarelo</strong> quando verdadeiro, <code>error</code> fica <strong>vermelho</strong> quando tem mensagem, e <code>data</code> fica <strong>verde</strong> quando já chegou (o texto do <code>data</code> usa o rótulo <code>task(s)</code> nos dois painéis; no painel 1 ele conta usuários). Cada vez que um desses estados muda, o <code>HookLab</code> renderiza de novo, que é a ideia da seção 5.3.</p>
+<p>Roteiro para mostrar em aula:</p>
+<p>| O que fazer | O que aparece | Por quê |</p>
+<p>|-------------|---------------|---------|</p>
+<p>| Abrir <code>/hooks</code> | no painel 1, <code>isLoading</code> amarelo e depois <code>data</code> verde com 5 itens | o hook da lista roda o GET assim que o componente monta (efeito) |</p>
+<p>| Clicar num usuário | o painel 2 mostra a <code>url</code>; o log ganha <code>começou</code> e depois <code>chegou</code>; <code>isLoading</code> amarelo e depois <code>data</code> verde | <code>setSelectedId</code> muda a <code>url</code>, e a mudança de dependência dispara o efeito |</p>
+<p>| <code>refetch()</code> | o log ganha <code>começou</code> e <code>chegou</code> de novo, <strong>na mesma url</strong> | o <code>attempt</code> mudou, a <code>url</code> não: o efeito roda de novo só por causa dele |</p>
+<p>| *Trocar 3x rápido* | o log mostra <code>começou</code>, <code>CANCELADO</code>, <code>começou</code>, <code>CANCELADO</code>, <code>começou</code>, <code>chegou</code> | a <code>url</code> muda a cada 5 ms, e a limpeza do efeito aborta a requisição anterior que ainda estava no ar |</p>
+<p>| *Forçar erro* | <code>error</code> fica vermelho com a mensagem e o log mostra <code>falhou</code> | o servidor responde com erro, o <code>catch</code> chama <code>setError</code>, e <code>isLoading</code> volta a <code>false</code> |</p>
+<p>| *Limpar* | o log esvazia, e <strong>nenhuma</strong> requisição nova aparece | só mudou o estado do log; a <code>url</code> e o <code>attempt</code> são os mesmos, então o efeito não roda |</p>
+<p>Dois pontos para chamar atenção na tela:</p>
+<ul><li><strong>A ordem do cancelamento.</strong> Quando a <code>url</code> muda, primeiro roda a <strong>limpeza</strong> do efeito antigo (<code>CANCELADO</code> da requisição velha) e só depois o efeito novo (<code>começou</code> da nova), exatamente a ordem da seção 4.2. Se a resposta da primeira já tiver chegado antes da troca, ela aparece como <code>chegou</code> e não como <code>CANCELADO</code>: o hook só avisa o cancelamento quando a requisição ainda estava pendente;</li><li><strong>O registro não dispara o efeito.</strong> Toda linha nova no log é um <code>setEvents</code>, que renderiza o <code>HookLab</code> e cria um <code>handleEvent</code> novo (endereço novo). Mesmo assim o efeito do GET <strong>não</strong> roda de novo, porque o <code>onEvent</code> mora numa referência e não entra nas dependências. Se estivesse na lista, cada linha do log provocaria uma nova requisição, que escreveria outra linha, e assim sem parar.</li></ul>
+<h2 id="s6-juntando-tudo"><span class="hn">6</span>Juntando Tudo</h2>
+<h3 id="s6-1-qual-ferramenta-para-qual-problema"><span class="hn">6.1</span>Qual Ferramenta Para Qual Problema</h3>
+<p>| Preciso de... | Ferramenta |</p>
+<p>|---------------|------------|</p>
+<p>| um valor que <strong>aparece na tela</strong> e muda com o tempo | <code>useState</code> |</p>
+<p>| um valor <strong>calculado</strong> a partir de estado ou parâmetros | conta solta no componente (derivado) |</p>
+<p>| <strong>acessar um elemento</strong>, acionar <code>focus()</code> / <code>click()</code>, ou guardar um dado de bastidor sem redesenhar | <code>useRef</code> |</p>
+<p>| algo que acontece <strong>depois</strong> da tela, <strong>por causa</strong> de uma mudança de estado (API, assinatura, timer) | <code>useEffect</code> |</p>
+<p>| <strong>reaproveitar</strong> estados e efeitos entre componentes | custom hook (<code>useAxios</code>) |</p>
+<p>| reagir a <strong>uma ação do usuário</strong> | handler (<code>onClick</code>, <code>onSubmit</code>) |</p>
+<h3 id="s6-2-o-ciclo-completo"><span class="hn">6.2</span>O Ciclo Completo</h3>
+<pre class="code"><code>   evento (clique, digitação)
+        │  handler chama setEstado
+        ▼
+   ┌──────────────────────────┐
+   │ função do componente roda │  ← tudo dentro dela roda de novo
+   │ (estado + parâmetros)     │     (useRef devolve o MESMO objeto do heap)
+   └──────────┬───────────────┘
+              ▼
+        React atualiza o DOM  →  navegador pinta a tela
+              ▼
+   ┌──────────────────────────┐
+   │ efeitos cujas dependências│  ← a "ação" da transição: chamada ao backend
+   │ mudaram (limpeza antes)   │
+   └──────────┬───────────────┘
+              │ a resposta chama setEstado
+              ▼
+        (volta ao topo: nova renderização)</code></pre>
+<h3 id="s6-3-resumo-da-aula"><span class="hn">6.3</span>Resumo da Aula</h3>
+<ul><li>Tudo dentro do componente roda de novo a cada mudança de estado ou de parâmetro; derivados ficam soltos e se atualizam sozinhos;</li><li>parâmetros chegam desestruturados, são <code>const</code> somente leitura e valem para aquela execução; o estado desce por parâmetros e sobe por callbacks;</li><li>a tipagem (<code>type Props</code>, <code>useState&lt;T&gt;</code>, <code>useRef&lt;T&gt;</code>, <code>PaginatedResponse&lt;T&gt;</code>, <code>useAxios&lt;T&gt;</code>) mantém a conversa entre pai e filho coerente e o TypeScript estreita tipos depois de *early returns*;</li><li><code>useRef</code> é um objeto <code>{ current }</code> no heap, o mesmo em toda renderização; mudar não renderiza; serve para elementos, componentes e dados de bastidor que vão ao backend;</li><li><code>useEffect</code> roda <strong>depois</strong> da renderização, quando as dependências mudam; é a ação associada à transição de estados; devolve a limpeza; não aceita função <code>async</code> diretamente;</li><li>o **<code>AbortController</code>** é uma API nativa: <code>controller.signal</code> vai na requisição e <code>controller.abort()</code> na limpeza do efeito faz a requisição rejeitar (<code>isCancel</code> no Axios), evitando que uma resposta atrasada sobrescreva a atual; um controller por requisição, criado dentro do efeito; o servidor pode já ter processado o pedido, então o abort é para leitura;</li><li>um <strong>custom hook</strong> reaproveita estado e efeito, e os estados dele pertencem ao componente que o chama; um callback que o hook só precisa <strong>ler</strong> (como o <code>onEvent</code>) vai numa <code>useRef</code>, para não entrar nas dependências do efeito;</li><li>a tela <code>GET /hooks</code> mostra tudo isso ao vivo: os três estados do hook, o <code>refetch</code>, o cancelamento (<code>CANCELADO</code> no log) e o erro.</li></ul>
+<h2 id="questoes"><span class="hn">TA</span>Questões do TA</h2>
+<article class="questao"><h3><span class="qn">Questão 1</span></h3><p>Considere o componente <code>Pai</code>, que tem <code>const [count, setCount] = useState(0)</code> e devolve um botão e <code>&lt;Filho nome="Ana" /&gt;</code>, sendo que <code>Filho</code> não possui estado. Cada clique no botão chama <code>setCount(count + 1)</code>. Sobre o que acontece a cada clique, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">Apenas <code>Pai</code> roda de novo, porque <code>Filho</code> recebe sempre o mesmo valor em <code>nome</code> e o React nunca executa um componente cujos parâmetros não mudaram.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">Apenas <code>Filho</code> roda de novo, porque ele é o componente que desenha o resultado na tela.</span></li><li class="alt ok"><span class="ltr">C</span><span class="txt"><code>Pai</code> roda inteiro de novo (variáveis, funções internas e JSX são recriados) e, como o JSX dele inclui <code>Filho</code>, <code>Filho</code> também roda, mesmo com <code>nome</code> igual, porque a renderização cai do pai para os filhos.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">D</span><span class="txt">Nenhum dos dois roda de novo, porque o <code>setCount</code> apenas altera o valor guardado, e a tela só é atualizada quando o DOM é recarregado.</span></li><li class="alt"><span class="ltr">E</span><span class="txt"><code>Pai</code> roda de novo, mas as funções declaradas dentro dele mantêm o mesmo endereço do heap entre as execuções, porque o React reaproveita o frame anterior da call stack.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 2</span></h3><p>Sobre o <code>useRef</code>, é correto afirmar que:</p><ol class="alts"><li class="alt ok"><span class="ltr">A</span><span class="txt">Ele devolve um objeto <code>{ current }</code> guardado no heap, o <strong>mesmo</strong> em todas as renderizações; alterar <code>ref.current</code> não provoca nova renderização, o que o torna adequado para acessar elementos do HTML e guardar dados de bastidor, como o id de um timer.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">B</span><span class="txt">Ele devolve uma "foto" nova do valor a cada renderização, e alterar <code>ref.current</code> agenda uma nova renderização, exatamente como o <code>setEstado</code>.</span></li><li class="alt"><span class="ltr">C</span><span class="txt">Ele só pode ser usado com elementos do HTML; para guardar qualquer outro tipo de valor é obrigatório usar <code>useState</code>.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">O valor de <code>ref.current</code> é recalculado a cada renderização, por isso não pode ser usado para lembrar algo entre uma renderização e outra.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">Para que a tela mostre o novo valor de <code>ref.current</code>, basta alterá-lo dentro de um handler, pois o React observa a propriedade <code>current</code> e atualiza o DOM sozinho.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 3</span></h3><p>Um aluno escreveu o efeito abaixo dentro de um componente que recebe <code>user</code> por parâmetro:</p><p>```tsx</p><p>const params = { page: 1, limit: 20 }</p><p>useEffect(() =&gt; {</p><p>async function load() {</p><p>const result = await tasksListApi(user.id, params)</p><p>setTasks(result.data)</p><p>}</p><p>load()</p><p>}, [params])</p><p><code>`</code></p><p>Ao abrir a tela, o navegador dispara requisições sem parar. Sobre o problema e a solução, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">O problema é a função <code>load</code> ser <code>async</code>; basta remover o <code>async</code> e usar <code>.then</code> para o efeito rodar uma única vez.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">O problema é a chamada <code>load()</code> dentro do efeito; ela deveria ficar fora do <code>useEffect</code>, no corpo do componente.</span></li><li class="alt"><span class="ltr">C</span><span class="txt">O problema é o <code>setTasks</code>, que nunca pode ser chamado dentro de um efeito; o resultado deve ser guardado em uma variável comum.</span></li><li class="alt ok"><span class="ltr">D</span><span class="txt"><code>params</code> é um objeto criado no corpo do componente, ou seja, um <strong>endereço novo</strong> a cada renderização; como o React compara dependências por <code>Object.is</code>, o efeito roda a cada renderização, o <code>setTasks</code> renderiza de novo e o ciclo se repete. A solução é depender de valores primitivos, como <code>[user.id]</code> (ou <code>[user.id, page, limit]</code>).</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">E</span><span class="txt">O problema é o array de dependências estar presente; omitir o array faz o efeito rodar uma única vez, na montagem.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 4</span></h3><p>Sobre chamadas assíncronas ao backend dentro de um <code>useEffect</code> e o uso do <code>AbortController</code>, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">A função passada ao <code>useEffect</code> deve ser declarada com <code>async</code>, e o <code>controller.abort()</code> chamado na limpeza desfaz no servidor o que a requisição já tinha feito, como apagar o registro criado por um POST.</span></li><li class="alt ok"><span class="ltr">B</span><span class="txt">A função do efeito não deve ser <code>async</code>, porque uma função assíncrona devolve uma <code>Promise</code> no lugar da limpeza; declara-se uma função <code>async</code> dentro do efeito e chama-se em seguida. O <code>AbortController</code> é criado dentro do efeito, o <code>controller.signal</code> vai na requisição e a limpeza chama <code>controller.abort()</code>: a requisição rejeita (no Axios, o cancelamento é reconhecido com <code>isCancel(err)</code>, que o <code>catch</code> deve ignorar) e uma resposta atrasada não sobrescreve a atual. O servidor, porém, pode já ter processado o pedido, pois o abort só faz o navegador deixar de esperar.</span><span class="gab">gabarito</span></li><li class="alt"><span class="ltr">C</span><span class="txt">Um único <code>AbortController</code> pode ser criado fora do componente e reaproveitado em todas as requisições, porque depois do <code>abort()</code> o <code>signal</code> volta ao estado inicial e aceita novas requisições.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">O <code>AbortController</code> é um recurso do React, disponível apenas dentro de hooks, e o <code>isCancel</code> é um método dele para saber se o <code>signal</code> foi cancelado.</span></li><li class="alt"><span class="ltr">E</span><span class="txt">A limpeza do efeito só roda quando a página é fechada, e por isso não é possível cancelar a requisição anterior quando a dependência do efeito muda.</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+<article class="questao"><h3><span class="qn">Questão 5</span></h3><p>Um custom hook <code>useAxios&lt;T&gt;(url)</code> devolve <code>{ data, error, isLoading, refetch }</code> e é chamado dentro de <code>UserTasks</code>. Sobre o funcionamento desse hook, é correto afirmar que:</p><ol class="alts"><li class="alt"><span class="ltr">A</span><span class="txt">O hook mantém os estados em uma variável global; por isso, todos os componentes que o chamam compartilham o mesmo <code>data</code>, e uma mudança aparece em todos eles ao mesmo tempo.</span></li><li class="alt"><span class="ltr">B</span><span class="txt">Como o hook não é um componente, quando ele chama <code>setData</code> o <code>UserTasks</code> <strong>não</strong> renderiza de novo; é preciso criar um <code>useState</code> extra no componente para refletir o valor na tela.</span></li><li class="alt"><span class="ltr">C</span><span class="txt">O hook pode ser chamado dentro de um <code>if</code>, desde que a condição seja verdadeira na primeira renderização, pois o React guarda o estado pelo nome da variável.</span></li><li class="alt"><span class="ltr">D</span><span class="txt">O nome do hook não importa; o prefixo <code>use</code> é só uma convenção estética e o React identifica os hooks pelo conteúdo da função.</span></li><li class="alt ok"><span class="ltr">E</span><span class="txt">Os estados criados dentro do hook pertencem ao componente que o chamou: quando o hook chama <code>setData</code>, <code>setError</code> ou <code>setIsLoading</code>, o <code>UserTasks</code> roda de novo com os valores novos, e cada componente que chama o hook tem o seu próprio conjunto de estados; o hook deve ser chamado no topo, em toda renderização, na mesma ordem.</span><span class="gab">gabarito</span></li></ol><p class="mix">Misturar alternativas: sim</p></article>
+  </main>
+</div>
+<script src="../../../assets/briefing.js"></script>
+</body>
+</html>

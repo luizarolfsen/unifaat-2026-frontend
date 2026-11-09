@@ -55,7 +55,9 @@ export default defineConfig({
                 "./resources/js/pages/login.tsx",
                 "./resources/js/pages/tasks.tsx",
                 "./resources/js/pages/users.tsx",
-                "./resources/js/pages/counter.tsx"
+                "./resources/js/pages/counter.tsx",
+                "./resources/js/pages/refs.tsx",
+                "./resources/js/pages/hooks.tsx"
             ],
             output: {
                 assetFileNames: 'src/[name].[hash][extname]',

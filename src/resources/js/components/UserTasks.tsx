@@ -1,23 +1,36 @@
-import type { Task, User } from "../types/api"
+import { useAxios } from "../hooks/useAxios"
+import type { PaginatedResponse, Task, User } from "../types/api"
 
 type UserTasksProps = {
-    user: User | null
-    tasks: Task[] | null
-    error: string
+    user: User
 }
 
-export function UserTasks({ user, tasks, error }: UserTasksProps) {
-    if (user === null) {
-        return <p className="text-muted">Escolha um usuário para ver as tasks dele.</p>
+export function UserTasks({ user }: UserTasksProps) {
+    // O componente herda os estados do hook: mudou data/error/isLoading, esta função roda de novo
+    const { data, error, isLoading, refetch } = useAxios<PaginatedResponse<Task>>(
+        `/users/${user.id}/tasks?page=1&limit=20`
+    )
+
+    function handleRetry() {
+        refetch()
+    }
+
+    if (isLoading) {
+        return <p className="text-muted">Carregando as tasks de {user.name}...</p>
     }
 
     if (error !== "") {
-        return <div className="alert alert-danger">{error}</div>
+        return (
+            <div className="alert alert-danger d-flex justify-content-between align-items-center">
+                <span>{error}</span>
+                <button className="btn btn-sm btn-outline-danger" onClick={handleRetry}>Tentar de novo</button>
+            </div>
+        )
     }
 
-    if (tasks === null) {
-        return <p className="text-muted">Carregando as tasks de {user.name}...</p>
-    }
+    if (data === null) return null
+
+    const tasks = data.data
 
     return (
         <>

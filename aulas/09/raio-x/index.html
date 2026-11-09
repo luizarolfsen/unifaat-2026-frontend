@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raio-X do Código — Aula 09</title>
+<link rel="stylesheet" href="../../../assets/raio-x.css">
+<script src="../../../assets/tema.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<style>
+  .toc{ background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 18px 22px; margin: 0 0 40px; }
+  .toc h2{ margin: 0 0 12px; font-size: 1.15rem; }
+  .toc-grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px 28px; }
+  .toc-group h3{ margin: 0 0 6px; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-family: var(--font-mono); }
+  .toc-group ol{ margin: 0; padding-left: 28px; }
+  .toc-group li{ margin: 3px 0; line-height: 1.3; }
+  .toc-group a{ color: var(--ink); text-decoration: none; }
+  .toc-group a:hover{ text-decoration: underline; }
+  .entry.destaque{ background: var(--bg-raised); border: 3px solid var(--accent); border-radius: 12px; padding: 18px 22px 22px 22px; }
+  .entry.destaque h2::before{ content: "★ "; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<nav class="topbar"><a class="back" href="../../../index.html">← Voltar</a></nav>
+
+<header>
+  <span class="kicker">Raio-X do Código · Aula 09 · Timeline</span>
+  <h1>React: Referências e Efeitos</h1>
+  <p class="meta">
+    <span><i class="fa-solid fa-folder"></i> src/ · docker/node24-vite-compiler/</span>
+    <span><i class="fa-solid fa-calendar-days"></i> 09/11/2026</span>
+    <span><i class="fa-solid fa-wrench"></i> 10 etapas</span>
+  </p>
+</header>
+
+<main>
+<section class="toc">
+  <h2>Índice</h2>
+  <div class="toc-grid">
+    <div class="toc-group"><h3>Custom hook</h3><ol>
+      <li value="1"><a href="#etapa-1">useAxios: os estados da requisição num hook</a></li>
+    </ol></div>
+    <div class="toc-group"><h3>Efeitos e API</h3><ol>
+      <li value="2"><a href="#etapa-2">UserTasks herda o estado do hook; o pai só guarda o escolhido</a></li>
+    </ol></div>
+    <div class="toc-group"><h3>Referências</h3><ol>
+      <li value="3"><a href="#etapa-3">Foco no campo da tela de tasks</a></li>
+      <li value="4"><a href="#etapa-4">Dado de bastidor para o backend e foco no modal</a></li>
+    </ol></div>
+    <div class="toc-group"><h3>Laboratório HTML</h3><ol>
+      <li value="5"><a href="#etapa-5">Referências no laboratório: elementos, estado x ref, clique e formulário</a></li>
+      <li value="6"><a href="#etapa-6">Efeito no laboratório: título da aba e relógio com limpeza</a></li>
+      <li value="7"><a href="#etapa-7">A View pública /refs: EJS, entry, rota e Vite</a></li>
+    </ol></div>
+    <div class="toc-group"><h3>Laboratório do hook</h3><ol>
+      <li value="8"><a href="#etapa-8">Os dois painéis: o estado do hook e o registro do que ele conta</a></li>
+      <li value="9"><a href="#etapa-9">HookLab: o nosso useAxios funcionando na tela</a></li>
+      <li value="10"><a href="#etapa-10">A View /hooks: EJS, controller, entry, rota e Vite</a></li>
+    </ol></div>
+  </div>
+</section>
+
+<div class="timeline">
+
+  <!-- ETAPA 1 -->
+  <div class="entry" id="etapa-1">
+    <div class="entry-dot">1</div>
+    <div class="entry-date">Etapa 1 · Custom hook</div>
+    <h2>useAxios: os estados da requisição num hook</h2>
+    <p class="sub">Uma função <code class="inline">use...</code> que guarda <code class="inline">data</code>, <code class="inline">error</code> e <code class="inline">isLoading</code> e faz o GET num efeito. Quem chamar o hook herda os três estados: quando o hook chama <code class="inline">setData</code>, o componente renderiza de novo. A limpeza do efeito usa o <code class="inline">AbortController</code> para cancelar a requisição que ficou velha.</p>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/hooks/useAxios.ts</div>
+      <div class="line add">+ import { useEffect, useRef, useState } from "react"</div>
+      <div class="line add">+ import { isCancel } from "axios"</div>
+      <div class="line add">+ import clientApi from "../api/_clientApi"</div>
+      <div class="line add">+ import { getErrorMessage } from "../utils/getErrorMessage"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // O que o hook conta para quem quiser acompanhar: começou, foi cancelado, chegou, falhou</div>
+      <div class="line add">+ export type AxiosEvent = "start" | "abort" | "done" | "error"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ type UseAxiosResult&lt;T&gt; = {</div>
+      <div class="line add">+     data: T | null</div>
+      <div class="line add">+     error: string</div>
+      <div class="line add">+     isLoading: boolean</div>
+      <div class="line add">+     refetch: () =&gt; void</div>
+      <div class="line add">+ }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ /**</div>
+      <div class="line add">+  * Custom hook: GET com Axios + os três estados da requisição.</div>
+      <div class="line add">+  *</div>
+      <div class="line add">+  * Os estados (data, error, isLoading) nascem AQUI, mas pertencem ao componente</div>
+      <div class="line add">+  * que chama o hook: quando o hook chama setData/setError/setIsLoading, quem</div>
+      <div class="line add">+  * renderiza de novo é o componente.</div>
+      <div class="line add">+  *</div>
+      <div class="line add">+  * - url === null: o hook fica parado (ainda não sei o que buscar).</div>
+      <div class="line add">+  * - dependências do efeito = [url, attempt], ambas primitivas (nunca objeto</div>
+      <div class="line add">+  *   criado no corpo do componente, que seria um endereço novo a cada render).</div>
+      <div class="line add">+  * - a limpeza cancela a requisição anterior (AbortController): sem corrida.</div>
+      <div class="line add">+  * - onEvent (opcional) avisa cada etapa; fica numa REFERÊNCIA para não entrar nas</div>
+      <div class="line add">+  *   dependências do efeito (uma função nova a cada render rodaria o efeito sempre).</div>
+      <div class="line add">+  */</div>
+      <div class="line add">+ export function useAxios&lt;T&gt;(</div>
+      <div class="line add">+     url: string | null,</div>
+      <div class="line add">+     onEvent?: (event: AxiosEvent, url: string) =&gt; void</div>
+      <div class="line add">+ ): UseAxiosResult&lt;T&gt; {</div>
+      <div class="line add">+     const [data, setData] = useState&lt;T | null&gt;(null)</div>
+      <div class="line add">+     const [error, setError] = useState("")</div>
+      <div class="line add">+     const [isLoading, setIsLoading] = useState(url !== null)</div>
+      <div class="line add">+     const [attempt, setAttempt] = useState(0)</div>
+      <div class="line add">+     const onEventRef = useRef(onEvent)</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     // Sem dependências: depois de toda renderização a ref passa a apontar para a função mais recente</div>
+      <div class="line add">+     useEffect(() =&gt; {</div>
+      <div class="line add">+         onEventRef.current = onEvent</div>
+      <div class="line add">+     })</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     useEffect(() =&gt; {</div>
+      <div class="line add">+         if (url === null) {</div>
+      <div class="line add">+             setData(null)</div>
+      <div class="line add">+             setIsLoading(false)</div>
+      <div class="line add">+             return</div>
+      <div class="line add">+         }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+         const target = url</div>
+      <div class="line add">+         const controller = new AbortController()</div>
+      <div class="line add">+         const request = { isPending: true }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+         async function load() {</div>
+      <div class="line add">+             setIsLoading(true)</div>
+      <div class="line add">+             setError("")</div>
+      <div class="line add">+             onEventRef.current?.("start", target)</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             try {</div>
+      <div class="line add">+                 const response = await clientApi.get&lt;T&gt;(target, { signal: controller.signal })</div>
+      <div class="line add">+                 request.isPending = false</div>
+      <div class="line add">+                 setData(response.data)</div>
+      <div class="line add">+                 onEventRef.current?.("done", target)</div>
+      <div class="line add">+             } catch (err) {</div>
+      <div class="line add">+                 if (isCancel(err)) return</div>
+      <div class="line add">+                 request.isPending = false</div>
+      <div class="line add">+                 setError(getErrorMessage(err, "Erro ao carregar os dados"))</div>
+      <div class="line add">+                 onEventRef.current?.("error", target)</div>
+      <div class="line add">+             }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             setIsLoading(false)</div>
+      <div class="line add">+         }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+         load()</div>
+      <div class="line add">+ </div>
+      <div class="line add">+         // Limpeza: só cancela se a requisição ainda está no ar (abort numa que já terminou não faz nada)</div>
+      <div class="line add">+         return () =&gt; {</div>
+      <div class="line add">+             if (!request.isPending) return</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             controller.abort()</div>
+      <div class="line add">+             onEventRef.current?.("abort", target)</div>
+      <div class="line add">+         }</div>
+      <div class="line add">+     }, [url, attempt])</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     // Só muda um estado: quem faz o trabalho é o efeito (a transição de estados)</div>
+      <div class="line add">+     function refetch() {</div>
+      <div class="line add">+         setAttempt(current =&gt; current + 1)</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return { data, error, isLoading, refetch }</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="tree"><b>componente</b> chama useAxios&lt;T&gt;(url, onEvent?)<br>
+   │<br>
+   ├─ useState  data · error · isLoading · attempt      ← estados do COMPONENTE<br>
+   ├─ useRef    onEventRef                              ← função mais recente, sem renderizar<br>
+   ├─ useEffect [url, attempt]  → GET (AbortController)  ← a ação da transição<br>
+   └─ devolve { data, error, isLoading, refetch }<br>
+<br>
+o GET termina → setData(...) → o componente roda de novo com o data novo</div>
+
+    <div class="tree"><b>AbortController</b>: o cancelamento de uma requisição em andamento<br>
+<br>
+efeito roda          →  const controller = new AbortController()<br>
+                        clientApi.get(url, { signal: controller.signal })   ← entrega o signal<br>
+<br>
+a url muda antes da resposta chegar:<br>
+limpeza roda         →  controller.abort()          ← o signal avisa a requisição<br>
+a requisição rejeita →  CanceledError               ← catch: if (isCancel(err)) return<br>
+efeito roda de novo  →  NOVO controller, NOVA requisição</div>
+
+    <div class="why">
+      <div class="why-card">
+        <h4>Genérico</h4>
+        <p><code class="inline">useAxios&lt;T&gt;</code> não sabe o que a API devolve; quem usa informa <code class="inline">useAxios&lt;PaginatedResponse&lt;Task&gt;&gt;</code> e o <code class="inline">data</code> sai tipado <code class="inline">T | null</code>.</p>
+      </div>
+      <div class="why-card">
+        <h4>Dependências primitivas</h4>
+        <p><code class="inline">[url, attempt]</code>: uma string e um número. Um objeto de config criado no corpo do componente seria um endereço novo a cada render e o efeito rodaria sem parar.</p>
+      </div>
+      <div class="why-card">
+        <h4>url === null</h4>
+        <p>O hook fica parado: ainda não sei o que buscar.</p>
+      </div>
+      <div class="why-card">
+        <h4>O que é o AbortController</h4>
+        <p>É uma API <b>nativa do navegador</b> (a mesma do <code class="inline">fetch</code>): não é do React e não é do Axios. O Axios só aceita receber o <code class="inline">signal</code> e respeita o cancelamento.</p>
+      </div>
+      <div class="why-card">
+        <h4>Como usar</h4>
+        <p><code class="inline">new AbortController()</code> <b>dentro do efeito</b>; o <code class="inline">signal</code> vai na requisição (<code class="inline">{ signal: controller.signal }</code>); o <code class="inline">abort()</code> vai na <b>limpeza</b>. Um controller por requisição: depois de abortado ele não serve de novo, por isso cada execução do efeito cria o seu.</p>
+      </div>
+      <div class="why-card">
+        <h4>Por que cancelar</h4>
+        <p>O usuário escolhe A e, antes da resposta, escolhe B. Sem o <code class="inline">abort()</code>, se a resposta de A chegasse depois da de B, a tela mostraria as tasks de A sob o nome de B (condição de corrida). Com o cancelamento, a resposta velha nunca vira estado.</p>
+      </div>
+      <div class="why-card">
+        <h4>isCancel(err)</h4>
+        <p>A requisição cancelada <b>rejeita</b> (CanceledError) e cairia no <code class="inline">catch</code>. O <code class="inline">isCancel(err)</code> separa "cancelei de propósito" de "deu erro de verdade" e sai sem mostrar mensagem de erro.</p>
+      </div>
+      <div class="why-card">
+        <h4>abort não desfaz o servidor</h4>
+        <p>Cancelar só faz o navegador <b>parar de esperar</b> e fechar a conexão. Se o servidor já recebeu o pedido, ele pode terminar de processar: por isso o abort serve para GET (ler), e não para "desfazer" um POST.</p>
+      </div>
+      <div class="why-card">
+        <h4>request.isPending</h4>
+        <p><code class="inline">const request = { isPending: true }</code> é um objeto (não um <code class="inline">let</code>); vira <code class="inline">false</code> quando a resposta chega ou dá erro. A limpeza só chama <code class="inline">abort()</code> se ainda estiver pendente: abortar o que já terminou não faz nada, e assim o log do laboratório só mostra CANCELADO de verdade.</p>
+      </div>
+      <div class="why-card">
+        <h4>onEvent numa ref</h4>
+        <p>O <code class="inline">onEvent</code> é uma função declarada no componente: a cada renderização é um <b>endereço novo</b> no heap. Se ele entrasse em <code class="inline">[url, attempt]</code>, o efeito rodaria a cada render. A <code class="inline">useRef</code> guarda a função mais recente (<code class="inline">onEventRef.current</code>) e o efeito sem dependências só atualiza esse ponteiro depois de cada renderização: o efeito do GET enxerga sempre o callback atual, sem depender dele.</p>
+      </div>
+      <div class="why-card">
+        <h4>refetch</h4>
+        <p>Só muda <code class="inline">attempt</code>; quem refaz o GET é o efeito (a transição de estados).</p>
+      </div>
+      <div class="why-card">
+        <h4>Async no efeito</h4>
+        <p>A função passada ao <code class="inline">useEffect</code> não é <code class="inline">async</code> (devolveria uma Promise); a <code class="inline">load()</code> é declarada dentro e chamada em seguida.</p>
+      </div>
+    </div>
+
+    <div class="ok">
+      <strong><i class="fa-solid fa-circle-check"></i> Testado:</strong>
+      <p><code class="inline">npx tsc --noEmit</code> sem erro. Não executado no navegador nem com servidor (sem Docker, migrate ou seed nesta etapa).</p>
+    </div>
+  </div>
+
+  <!-- ETAPA 2 -->
+  <div class="entry" id="etapa-2">
+    <div class="entry-dot">2</div>
+    <div class="entry-date">Etapa 2 · Efeitos e API</div>
+    <h2>UserTasks herda o estado do hook; o pai só guarda o escolhido</h2>
+    <p class="sub">Antes o <code class="inline">UsersApp</code> buscava as tasks num handler e mantinha <code class="inline">tasks</code> e <code class="inline">error</code> como estados. Agora o <code class="inline">UserTasks</code> chama o <code class="inline">useAxios</code> e o pai só sabe qual usuário foi escolhido.</p>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/UserTasks.tsx</div>
+      <div class="line rem">- import type { Task, User } from "../types/api"</div>
+      <div class="line add">+ import { useAxios } from "../hooks/useAxios"</div>
+      <div class="line add">+ import type { PaginatedResponse, Task, User } from "../types/api"</div>
+      <div class="line ctx"></div>
+      <div class="line ctx">  type UserTasksProps = {</div>
+      <div class="line rem">-     user: User | null</div>
+      <div class="line rem">-     tasks: Task[] | null</div>
+      <div class="line rem">-     error: string</div>
+      <div class="line add">+     user: User</div>
+      <div class="line ctx">  }</div>
+      <div class="line ctx"></div>
+      <div class="line rem">- export function UserTasks({ user, tasks, error }: UserTasksProps) {</div>
+      <div class="line rem">-     if (user === null) {</div>
+      <div class="line rem">-         return &lt;p className="text-muted"&gt;Escolha um usuário para ver as tasks dele.&lt;/p&gt;</div>
+      <div class="line add">+ export function UserTasks({ user }: UserTasksProps) {</div>
+      <div class="line add">+     // O componente herda os estados do hook: mudou data/error/isLoading, esta função roda de novo</div>
+      <div class="line add">+     const { data, error, isLoading, refetch } = useAxios&lt;PaginatedResponse&lt;Task&gt;&gt;(</div>
+      <div class="line add">+         `/users/${user.id}/tasks?page=1&amp;limit=20`</div>
+      <div class="line add">+     )</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleRetry() {</div>
+      <div class="line add">+         refetch()</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     if (isLoading) {</div>
+      <div class="line add">+         return &lt;p className="text-muted"&gt;Carregando as tasks de {user.name}...&lt;/p&gt;</div>
+      <div class="line ctx">      }</div>
+      <div class="line ctx"></div>
+      <div class="line ctx">      if (error !== "") {</div>
+      <div class="line rem">-         return &lt;div className="alert alert-danger"&gt;{error}&lt;/div&gt;</div>
+      <div class="line add">+         return (</div>
+      <div class="line add">+             &lt;div className="alert alert-danger d-flex justify-content-between align-items-center"&gt;</div>
+      <div class="line add">+                 &lt;span&gt;{error}&lt;/span&gt;</div>
+      <div class="line add">+                 &lt;button className="btn btn-sm btn-outline-danger" onClick={handleRetry}&gt;Tentar de novo&lt;/button&gt;</div>
+      <div class="line add">+             &lt;/div&gt;</div>
+      <div class="line add">+         )</div>
+      <div class="line ctx">      }</div>
+      <div class="line ctx"></div>
+      <div class="line rem">-     if (tasks === null) {</div>
+      <div class="line rem">-         return &lt;p className="text-muted"&gt;Carregando as tasks de {user.name}...&lt;/p&gt;</div>
+      <div class="line rem">-     }</div>
+      <div class="line add">+     if (data === null) return null</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     const tasks = data.data</div>
+      <div class="line ctx"></div>
+      <div class="line ctx">      return (</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/UsersApp.tsx</div>
+      <div class="line ctx">  import { useState } from "react"</div>
+      <div class="line rem">- import type { PaginatedResponse, Task, User } from "../types/api"</div>
+      <div class="line add">+ import type { PaginatedResponse, User } from "../types/api"</div>
+      <div class="line ctx">  import { userListApi } from "../api/userListApi"</div>
+      <div class="line rem">- import { tasksListApi } from "../api/tasksListApi"</div>
+      <div class="line rem">- import { getErrorMessage } from "../utils/getErrorMessage"</div>
+      <div class="line ctx">  import { Page } from "./Page"</div>
+      <div class="line ctx">  import { UserTasks } from "./UserTasks"</div>
+      <div class="line ctx">  ...</div>
+      <div class="line ctx">      const [list, setList] = useState&lt;PaginatedResponse&lt;User&gt;&gt;(initialUsers)</div>
+      <div class="line ctx">      const [selected, setSelected] = useState&lt;User | null&gt;(null)</div>
+      <div class="line rem">-     const [tasks, setTasks] = useState&lt;Task[] | null&gt;(null)</div>
+      <div class="line rem">-     const [error, setError] = useState("")</div>
+      <div class="line ctx"></div>
+      <div class="line ctx">      const lastPage = Math.max(1, Math.ceil(list.total / list.limit))</div>
+      <div class="line ctx"></div>
+      <div class="line rem">-     // Clicar num usuário: busca as tasks dele (handler explícito, sem useEffect)</div>
+      <div class="line rem">-     async function handleSelect(user: User) {</div>
+      <div class="line add">+     // Clicar num usuário: só guarda quem foi escolhido. A busca das tasks é do UserTasks (useAxios)</div>
+      <div class="line add">+     function handleSelect(user: User) {</div>
+      <div class="line ctx">          setSelected(user)</div>
+      <div class="line rem">-         setTasks(null)</div>
+      <div class="line rem">-         setError("")</div>
+      <div class="line rem">- </div>
+      <div class="line rem">-         try {</div>
+      <div class="line rem">-             const result = await tasksListApi(user.id, { page: 1, limit: 20 })</div>
+      <div class="line rem">-             setTasks(result.data)</div>
+      <div class="line rem">-         } catch (error) {</div>
+      <div class="line rem">-             setError(getErrorMessage(error, "Erro ao carregar as tasks"))</div>
+      <div class="line rem">-         }</div>
+      <div class="line ctx">      }</div>
+      <div class="line ctx"></div>
+      <div class="line ctx">  ...</div>
+      <div class="line ctx"></div>
+      <div class="line ctx">                      &lt;section className="col-lg-6"&gt;</div>
+      <div class="line rem">-                         &lt;UserTasks user={selected} tasks={tasks} error={error} /&gt;</div>
+      <div class="line add">+                         {selected === null &amp;&amp; &lt;p className="text-muted"&gt;Escolha um usuário para ver as tasks dele.&lt;/p&gt;}</div>
+      <div class="line add">+ </div>
+      <div class="line add">+                         {/* key = identidade: outro usuário desmonta o UserTasks e cria um novo, com estado do zero */}</div>
+      <div class="line add">+                         {selected !== null &amp;&amp; &lt;UserTasks key={selected.id} user={selected} /&gt;}</div>
+      <div class="line ctx">                      &lt;/section&gt;</div>
+      <div class="line ctx">                  &lt;/div&gt;</div>
+    </div>
+
+    <div class="why">
+      <div class="why-card">
+        <h4>user: User</h4>
+        <p>O <code class="inline">UserTasks</code> agora recebe <code class="inline">User</code> (não mais <code class="inline">User | null</code>): o pai só o desenha quando há usuário, e o tipo fica mais simples.</p>
+      </div>
+      <div class="why-card">
+        <h4>Estados herdados</h4>
+        <p>O componente não tem <code class="inline">useState</code> próprio; <code class="inline">data</code>, <code class="inline">error</code> e <code class="inline">isLoading</code> vêm do hook, e cada mudança neles faz o <code class="inline">UserTasks</code> rodar de novo.</p>
+      </div>
+      <div class="why-card">
+        <h4>key</h4>
+        <p><code class="inline">key={selected.id}</code>: outro usuário desmonta o <code class="inline">UserTasks</code> antigo (a limpeza cancela o GET pendente) e monta um novo com os estados do zero.</p>
+      </div>
+      <div class="why-card">
+        <h4>O pai não renderiza</h4>
+        <p>Quando a resposta chega, o estado que muda é do filho: o UsersApp não roda de novo.</p>
+      </div>
+      <div class="why-card">
+        <h4>handleSelect</h4>
+        <p>Deixou de ser <code class="inline">async</code> e de ter <code class="inline">try/catch</code>: só <code class="inline">setSelected(user)</code>.</p>
+      </div>
+      <div class="why-card">
+        <h4>Tentar de novo</h4>
+        <p><code class="inline">handleRetry</code> chama <code class="inline">refetch()</code>, que muda <code class="inline">attempt</code> e dispara o efeito outra vez.</p>
+      </div>
+    </div>
+
+    <div class="ok">
+      <strong><i class="fa-solid fa-circle-check"></i> Testado:</strong>
+      <p><code class="inline">npx tsc --noEmit</code> sem erro. Não executado no navegador nem com servidor (sem Docker, migrate ou seed nesta etapa).</p>
+    </div>
+  </div>
+
+  <!-- ETAPA 3 -->
+  <div class="entry" id="etapa-3">
+    <div class="entry-dot">3</div>
+    <div class="entry-date">Etapa 3 · Referências</div>
+    <h2>Foco no campo da tela de tasks</h2>
+    <p class="sub"><code class="inline">useRef&lt;HTMLInputElement&gt;(null)</code> liga o <code class="inline">&lt;input&gt;</code> do HTML a uma referência. O campo nasce com foco (efeito na montagem) e volta a ter foco depois de criar a task.</p>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/TaskApp.tsx</div>
+      <div class="line rem">- import { useState } from "react"</div>
+      <div class="line add">+ import { useEffect, useRef, useState } from "react"</div>
+      <div class="line ctx">  import type { Task, User } from "../types/api"</div>
+      <div class="line ctx">  import { taskCreateApi } from "../api/taskCreateApi"</div>
+      <div class="line ctx">  ...</div>
+      <div class="line ctx">      const [message, setMessage] = useState("")</div>
+      <div class="line ctx"></div>
+      <div class="line add">+     // Referência para o &lt;input&gt; do HTML: o React coloca o elemento em .current depois de montar</div>
+      <div class="line add">+     const nameInputRef = useRef&lt;HTMLInputElement&gt;(null)</div>
+      <div class="line add">+ </div>
+      <div class="line ctx">      const pending = tasks.filter(task =&gt; !task.is_done).length</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     // Efeito: depois da primeira renderização, o campo já nasce com o foco</div>
+      <div class="line add">+     useEffect(() =&gt; {</div>
+      <div class="line add">+         nameInputRef.current?.focus()</div>
+      <div class="line add">+     }, [])</div>
+      <div class="line ctx"></div>
+      <div class="line ctx">      // C: create</div>
+      <div class="line ctx">      async function create() {</div>
+      <div class="line rem">-         if (name.trim() === "") return</div>
+      <div class="line add">+         if (name.trim() === "") {</div>
+      <div class="line add">+             nameInputRef.current?.focus()</div>
+      <div class="line add">+             return</div>
+      <div class="line add">+         }</div>
+      <div class="line ctx"></div>
+      <div class="line ctx">          const created = await taskCreateApi(idUser, { name })</div>
+      <div class="line ctx">          setTasks(current =&gt; [...current, created])</div>
+      <div class="line ctx">          setName("")</div>
+      <div class="line add">+         nameInputRef.current?.focus()</div>
+      <div class="line ctx">      }</div>
+      <div class="line ctx"></div>
+      <div class="line ctx">  ...</div>
+      <div class="line ctx">                      &lt;div className="input-group mb-3"&gt;</div>
+      <div class="line ctx">                          &lt;input</div>
+      <div class="line add">+                             ref={nameInputRef}</div>
+      <div class="line ctx">                              className="form-control"</div>
+      <div class="line ctx">                              value={name}</div>
+    </div>
+
+    <div class="why">
+      <div class="why-card">
+        <h4>Ref no DOM</h4>
+        <p>O React coloca o elemento em <code class="inline">nameInputRef.current</code> depois de montar; antes disso (e depois de desmontar) o valor é <code class="inline">null</code>, por isso o <code class="inline">?.</code>.</p>
+      </div>
+      <div class="why-card">
+        <h4>Evento nativo</h4>
+        <p><code class="inline">focus()</code> é o método do próprio elemento HTML; a ref só entrega o elemento.</p>
+      </div>
+      <div class="why-card">
+        <h4>Efeito com []</h4>
+        <p>Roda uma vez, depois da primeira renderização, quando o input já existe na tela.</p>
+      </div>
+      <div class="why-card">
+        <h4>Não renderiza</h4>
+        <p>Mudar ou usar a ref não altera estado nenhum: o <code class="inline">focus()</code> não faz o componente rodar de novo.</p>
+      </div>
+    </div>
+
+    <div class="ok">
+      <strong><i class="fa-solid fa-circle-check"></i> Testado:</strong>
+      <p><code class="inline">npx tsc --noEmit</code> sem erro. Não executado no navegador nem com servidor (sem Docker, migrate ou seed nesta etapa).</p>
+    </div>
+  </div>
+
+  <!-- ETAPA 4 -->
+  <div class="entry" id="etapa-4">
+    <div class="entry-dot">4</div>
+    <div class="entry-date">Etapa 4 · Referências</div>
+    <h2>Dado de bastidor para o backend e foco no modal</h2>
+    <p class="sub">No modal de busca, <code class="inline">lastSearchRef</code> guarda a última busca enviada para não repetir a chamada, e um efeito dá foco ao campo quando o modal abre.</p>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/AssignTaskModal.tsx</div>
+      <div class="line rem">- import { useState } from "react"</div>
+      <div class="line add">+ import { useEffect, useRef, useState } from "react"</div>
+      <div class="line ctx">  import type { FormEvent } from "react"</div>
+      <div class="line ctx">  import type { Task, User, UserSearchFilters } from "../types/api"</div>
+      <div class="line ctx">  ...</div>
+      <div class="line ctx">      const [isCreating, setIsCreating] = useState(false)</div>
+      <div class="line ctx"></div>
+      <div class="line add">+     // Referências: o campo do HTML (foco) e um dado de bastidor (a última busca enviada ao backend)</div>
+      <div class="line add">+     const taskNameRef = useRef&lt;HTMLInputElement&gt;(null)</div>
+      <div class="line add">+     const lastSearchRef = useRef("")</div>
+      <div class="line add">+ </div>
+      <div class="line ctx">      const canCreate = taskName.trim() !== "" &amp;&amp; selected !== null &amp;&amp; !isCreating</div>
+      <div class="line ctx"></div>
+      <div class="line add">+     // Efeito: quando o modal abre (isOpen muda para true) o campo do nome da tarefa recebe o foco</div>
+      <div class="line add">+     useEffect(() =&gt; {</div>
+      <div class="line add">+         if (!isOpen) return</div>
+      <div class="line add">+ </div>
+      <div class="line add">+         taskNameRef.current?.focus()</div>
+      <div class="line add">+     }, [isOpen])</div>
+      <div class="line add">+ </div>
+      <div class="line ctx">      function reset() {</div>
+      <div class="line add">+         lastSearchRef.current = ""</div>
+      <div class="line ctx">          setTaskName("")</div>
+      <div class="line ctx">          setField("name")</div>
+      <div class="line ctx">  ...</div>
+      <div class="line ctx">          }</div>
+      <div class="line ctx"></div>
+      <div class="line add">+         // Mesma busca da última vez: não chama o backend de novo (a ref não renderiza nada)</div>
+      <div class="line add">+         const searchKey = `${field}:${text.trim()}`</div>
+      <div class="line add">+         if (searchKey === lastSearchRef.current) return</div>
+      <div class="line add">+         lastSearchRef.current = searchKey</div>
+      <div class="line add">+ </div>
+      <div class="line ctx">          const filters: UserSearchFilters = {}</div>
+      <div class="line ctx">          filters[field] = text.trim()</div>
+      <div class="line ctx">  ...</div>
+      <div class="line ctx">              setTotal(result.total)</div>
+      <div class="line ctx">          } catch (error) {</div>
+      <div class="line add">+             lastSearchRef.current = ""   // falhou: permite tentar a mesma busca de novo</div>
+      <div class="line ctx">              setError(getErrorMessage(error, "Erro ao buscar usuários"))</div>
+      <div class="line ctx">          }</div>
+      <div class="line ctx">  ...</div>
+      <div class="line ctx">                                  &lt;label className="form-label"&gt;Nome da tarefa&lt;/label&gt;</div>
+      <div class="line ctx">                                  &lt;input</div>
+      <div class="line add">+                                     ref={taskNameRef}</div>
+      <div class="line ctx">                                      className="form-control"</div>
+      <div class="line ctx">                                      value={taskName}</div>
+    </div>
+
+    <div class="why">
+      <div class="why-card">
+        <h4>lastSearchRef</h4>
+        <p>A tela não mostra esse dado, só o código precisa lembrar dele; guardar em estado renderizaria à toa.</p>
+      </div>
+      <div class="why-card">
+        <h4>Chave campo:texto</h4>
+        <p>A mesma busca com outro campo (<code class="inline">name:ana</code> x <code class="inline">email:ana</code>) é uma busca diferente.</p>
+      </div>
+      <div class="why-card">
+        <h4>Falhou, libera</h4>
+        <p>No <code class="inline">catch</code> a ref volta a <code class="inline">""</code>, senão o aluno não conseguiria repetir a busca que deu erro.</p>
+      </div>
+      <div class="why-card">
+        <h4>reset()</h4>
+        <p>Limpa a ref junto com os estados quando o modal fecha.</p>
+      </div>
+      <div class="why-card">
+        <h4>Efeito [isOpen]</h4>
+        <p>O modal sempre está montado (devolve <code class="inline">null</code> quando fechado). Quando <code class="inline">isOpen</code> vira <code class="inline">true</code>, o input passa a existir e o efeito, que roda depois da renderização, consegue focá-lo.</p>
+      </div>
+    </div>
+
+    <div class="ok">
+      <strong><i class="fa-solid fa-circle-check"></i> Testado:</strong>
+      <p><code class="inline">npx tsc --noEmit</code> sem erro. Não executado no navegador nem com servidor (sem Docker, migrate ou seed nesta etapa).</p>
+    </div>
+  </div>
+
+  <!-- ETAPA 5 -->
+  <div class="entry" id="etapa-5">
+    <div class="entry-dot">5</div>
+    <div class="entry-date">Etapa 5 · Laboratório HTML</div>
+    <h2>Referências no laboratório: elementos, estado x ref, clique e formulário</h2>
+    <p class="sub">Quatro componentes pequenos, cada um mostrando um uso do <code class="inline">useRef</code>. Eles vão ser montados numa página pública na etapa 7.</p>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/FocusDemo.tsx</div>
+      <div class="line add">+ import { useRef } from "react"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // Referência para elementos do HTML: acionar eventos nativos (focus, scrollIntoView)</div>
+      <div class="line add">+ export function FocusDemo() {</div>
+      <div class="line add">+     const inputRef = useRef&lt;HTMLInputElement&gt;(null)</div>
+      <div class="line add">+     const endRef = useRef&lt;HTMLDivElement&gt;(null)</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleFocus() {</div>
+      <div class="line add">+         inputRef.current?.focus()</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleSelect() {</div>
+      <div class="line add">+         inputRef.current?.select()</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleScroll() {</div>
+      <div class="line add">+         endRef.current?.scrollIntoView({ behavior: "smooth" })</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return (</div>
+      <div class="line add">+         &lt;section className="card card-body mb-4"&gt;</div>
+      <div class="line add">+             &lt;h2 className="h5"&gt;1. Elementos do HTML: focus, select, scrollIntoView&lt;/h2&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;input ref={inputRef} className="form-control mb-2" defaultValue="Texto do campo" /&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;div className="d-flex gap-2 mb-2"&gt;</div>
+      <div class="line add">+                 &lt;button className="btn btn-primary" onClick={handleFocus}&gt;focus()&lt;/button&gt;</div>
+      <div class="line add">+                 &lt;button className="btn btn-secondary" onClick={handleSelect}&gt;select()&lt;/button&gt;</div>
+      <div class="line add">+                 &lt;button className="btn btn-outline-primary" onClick={handleScroll}&gt;scrollIntoView()&lt;/button&gt;</div>
+      <div class="line add">+             &lt;/div&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;div style={{ height: 120, overflowY: "auto" }} className="border rounded p-2"&gt;</div>
+      <div class="line add">+                 &lt;p style={{ height: 160 }} className="text-muted"&gt;Role a caixa ou use o botão...&lt;/p&gt;</div>
+      <div class="line add">+                 &lt;div ref={endRef} className="fw-bold"&gt;Fim da caixa (o botão rolou até aqui)&lt;/div&gt;</div>
+      <div class="line add">+             &lt;/div&gt;</div>
+      <div class="line add">+         &lt;/section&gt;</div>
+      <div class="line add">+     )</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/RefVsState.tsx</div>
+      <div class="line add">+ import { useRef, useState } from "react"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // Estado x referência: os dois sobrevivem às renderizações, mas só o estado renderiza</div>
+      <div class="line add">+ export function RefVsState() {</div>
+      <div class="line add">+     const [count, setCount] = useState(0)</div>
+      <div class="line add">+     const [shownRef, setShownRef] = useState(0)</div>
+      <div class="line add">+     const clicksRef = useRef(0)</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleState() {</div>
+      <div class="line add">+         setCount(current =&gt; current + 1)</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleRef() {</div>
+      <div class="line add">+         clicksRef.current += 1</div>
+      <div class="line add">+         console.log("clicksRef.current =", clicksRef.current)   // muda, mas a tela não</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     // Só para mostrar: copia o valor da ref para um estado, o que provoca a renderização</div>
+      <div class="line add">+     function handleShow() {</div>
+      <div class="line add">+         setShownRef(clicksRef.current)</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return (</div>
+      <div class="line add">+         &lt;section className="card card-body mb-4"&gt;</div>
+      <div class="line add">+             &lt;h2 className="h5"&gt;2. useState x useRef&lt;/h2&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;p className="mb-2"&gt;</div>
+      <div class="line add">+                 Estado: &lt;strong&gt;{count}&lt;/strong&gt; · Ref (valor na última renderização): &lt;strong&gt;{shownRef}&lt;/strong&gt;</div>
+      <div class="line add">+             &lt;/p&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;div className="d-flex gap-2"&gt;</div>
+      <div class="line add">+                 &lt;button className="btn btn-primary" onClick={handleState}&gt;+1 no estado (renderiza)&lt;/button&gt;</div>
+      <div class="line add">+                 &lt;button className="btn btn-warning" onClick={handleRef}&gt;+1 na ref (não renderiza)&lt;/button&gt;</div>
+      <div class="line add">+                 &lt;button className="btn btn-outline-secondary" onClick={handleShow}&gt;Mostrar a ref&lt;/button&gt;</div>
+      <div class="line add">+             &lt;/div&gt;</div>
+      <div class="line add">+         &lt;/section&gt;</div>
+      <div class="line add">+     )</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/FilePicker.tsx</div>
+      <div class="line add">+ import { useRef, useState } from "react"</div>
+      <div class="line add">+ import type { ChangeEvent } from "react"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // O &lt;input type="file"&gt; fica escondido; o botão bonito aciona o clique nativo dele pela ref</div>
+      <div class="line add">+ export function FilePicker() {</div>
+      <div class="line add">+     const fileInputRef = useRef&lt;HTMLInputElement&gt;(null)</div>
+      <div class="line add">+     const [fileName, setFileName] = useState("")</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handlePick() {</div>
+      <div class="line add">+         fileInputRef.current?.click()</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleChange(event: ChangeEvent&lt;HTMLInputElement&gt;) {</div>
+      <div class="line add">+         const file = event.target.files?.[0]</div>
+      <div class="line add">+         setFileName(file?.name ?? "")</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return (</div>
+      <div class="line add">+         &lt;section className="card card-body mb-4"&gt;</div>
+      <div class="line add">+             &lt;h2 className="h5"&gt;3. Acionar o clique de outro elemento&lt;/h2&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleChange} /&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;div className="d-flex align-items-center gap-3"&gt;</div>
+      <div class="line add">+                 &lt;button className="btn btn-primary" onClick={handlePick}&gt;Escolher imagem&lt;/button&gt;</div>
+      <div class="line add">+                 &lt;span className="text-muted"&gt;{fileName === "" ? "Nenhum arquivo" : fileName}&lt;/span&gt;</div>
+      <div class="line add">+             &lt;/div&gt;</div>
+      <div class="line add">+         &lt;/section&gt;</div>
+      <div class="line add">+     )</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/UncontrolledForm.tsx</div>
+      <div class="line add">+ import { useRef, useState } from "react"</div>
+      <div class="line add">+ import type { FormEvent } from "react"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ type Payload = {</div>
+      <div class="line add">+     name: string</div>
+      <div class="line add">+     email: string</div>
+      <div class="line add">+ }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // Campos não controlados: ninguém renderiza durante a digitação; o valor é lido só no envio</div>
+      <div class="line add">+ export function UncontrolledForm() {</div>
+      <div class="line add">+     const nameRef = useRef&lt;HTMLInputElement&gt;(null)</div>
+      <div class="line add">+     const emailRef = useRef&lt;HTMLInputElement&gt;(null)</div>
+      <div class="line add">+     const [payload, setPayload] = useState&lt;Payload | null&gt;(null)</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleSubmit(event: FormEvent) {</div>
+      <div class="line add">+         event.preventDefault()</div>
+      <div class="line add">+ </div>
+      <div class="line add">+         const name = nameRef.current?.value.trim() ?? ""</div>
+      <div class="line add">+         const email = emailRef.current?.value.trim() ?? ""</div>
+      <div class="line add">+ </div>
+      <div class="line add">+         if (name === "") {</div>
+      <div class="line add">+             nameRef.current?.focus()</div>
+      <div class="line add">+             return</div>
+      <div class="line add">+         }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+         // Este objeto é o que iria no corpo do POST para o backend</div>
+      <div class="line add">+         setPayload({ name, email })</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return (</div>
+      <div class="line add">+         &lt;section className="card card-body mb-4"&gt;</div>
+      <div class="line add">+             &lt;h2 className="h5"&gt;4. Dados na ref que vão ao backend (campo não controlado)&lt;/h2&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;form className="d-flex flex-column gap-2" onSubmit={handleSubmit}&gt;</div>
+      <div class="line add">+                 &lt;input ref={nameRef} className="form-control" placeholder="Nome" defaultValue="" /&gt;</div>
+      <div class="line add">+                 &lt;input ref={emailRef} className="form-control" placeholder="E-mail" defaultValue="" /&gt;</div>
+      <div class="line add">+                 &lt;button className="btn btn-primary align-self-start"&gt;Montar o corpo do POST&lt;/button&gt;</div>
+      <div class="line add">+             &lt;/form&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             {payload !== null &amp;&amp; &lt;pre className="mt-3 mb-0 bg-light p-2 rounded"&gt;{JSON.stringify(payload, null, 2)}&lt;/pre&gt;}</div>
+      <div class="line add">+         &lt;/section&gt;</div>
+      <div class="line add">+     )</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="why">
+      <div class="why-card">
+        <h4>FocusDemo</h4>
+        <p><code class="inline">focus()</code>, <code class="inline">select()</code> e <code class="inline">scrollIntoView()</code> por referência a elementos do HTML.</p>
+      </div>
+      <div class="why-card">
+        <h4>RefVsState</h4>
+        <p>O mesmo "+1" no estado (renderiza) e na ref (muda, mas a tela não). "Mostrar a ref" copia o valor para um estado, só para provar que ele estava lá.</p>
+      </div>
+      <div class="why-card">
+        <h4>FilePicker</h4>
+        <p><code class="inline">&lt;input type="file" hidden&gt;</code> acionado por <code class="inline">ref.current?.click()</code> a partir de um botão: acionar o evento nativo de outro elemento.</p>
+      </div>
+      <div class="why-card">
+        <h4>UncontrolledForm</h4>
+        <p>Campos sem <code class="inline">value</code>/<code class="inline">onChange</code>; <code class="inline">nameRef.current?.value</code> é lido só no envio e vira o corpo do POST. Nenhuma renderização a cada tecla.</p>
+      </div>
+    </div>
+
+    <div class="ok">
+      <strong><i class="fa-solid fa-circle-check"></i> Testado:</strong>
+      <p><code class="inline">npx tsc --noEmit</code> sem erro. Não executado no navegador nem com servidor (sem Docker, migrate ou seed nesta etapa).</p>
+    </div>
+  </div>
+
+  <!-- ETAPA 6 -->
+  <div class="entry" id="etapa-6">
+    <div class="entry-dot">6</div>
+    <div class="entry-date">Etapa 6 · Laboratório HTML</div>
+    <h2>Efeito no laboratório: título da aba e relógio com limpeza</h2>
+    <p class="sub">Um efeito <code class="inline">[count]</code> sincroniza o <code class="inline">document.title</code> com o estado; o <code class="inline">Clock</code> mostra a limpeza do efeito ao desmontar.</p>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/Clock.tsx</div>
+      <div class="line add">+ import { useEffect, useState } from "react"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // Efeito com limpeza: o timer nasce ao montar e é cancelado ao desmontar</div>
+      <div class="line add">+ export function Clock() {</div>
+      <div class="line add">+     const [now, setNow] = useState(() =&gt; new Date())</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     useEffect(() =&gt; {</div>
+      <div class="line add">+         const timerId = window.setInterval(() =&gt; setNow(new Date()), 1000)</div>
+      <div class="line add">+ </div>
+      <div class="line add">+         return () =&gt; window.clearInterval(timerId)</div>
+      <div class="line add">+     }, [])</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return &lt;strong&gt;{now.toLocaleTimeString("pt-BR")}&lt;/strong&gt;</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/EffectDemo.tsx</div>
+      <div class="line add">+ import { useEffect, useState } from "react"</div>
+      <div class="line add">+ import { Clock } from "./Clock"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // Efeito: depois que o estado muda e a tela é desenhada, sincroniza algo de fora (o título da aba)</div>
+      <div class="line add">+ export function EffectDemo() {</div>
+      <div class="line add">+     const [count, setCount] = useState(0)</div>
+      <div class="line add">+     const [isClockVisible, setIsClockVisible] = useState(true)</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     useEffect(() =&gt; {</div>
+      <div class="line add">+         document.title = `Cliques: ${count}`</div>
+      <div class="line add">+     }, [count])</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleCount() {</div>
+      <div class="line add">+         setCount(current =&gt; current + 1)</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleToggleClock() {</div>
+      <div class="line add">+         setIsClockVisible(current =&gt; !current)</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return (</div>
+      <div class="line add">+         &lt;section className="card card-body mb-4"&gt;</div>
+      <div class="line add">+             &lt;h2 className="h5"&gt;5. useEffect: a ação da transição de estados&lt;/h2&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;div className="d-flex align-items-center gap-3 mb-2"&gt;</div>
+      <div class="line add">+                 &lt;button className="btn btn-primary" onClick={handleCount}&gt;+1 (olhe o título da aba)&lt;/button&gt;</div>
+      <div class="line add">+                 &lt;span&gt;Estado: &lt;strong&gt;{count}&lt;/strong&gt;&lt;/span&gt;</div>
+      <div class="line add">+             &lt;/div&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;div className="d-flex align-items-center gap-3"&gt;</div>
+      <div class="line add">+                 &lt;button className="btn btn-outline-secondary" onClick={handleToggleClock}&gt;</div>
+      <div class="line add">+                     {isClockVisible ? "Desmontar o relógio" : "Montar o relógio"}</div>
+      <div class="line add">+                 &lt;/button&gt;</div>
+      <div class="line add">+                 {isClockVisible &amp;&amp; &lt;Clock /&gt;}</div>
+      <div class="line add">+             &lt;/div&gt;</div>
+      <div class="line add">+         &lt;/section&gt;</div>
+      <div class="line add">+     )</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/RefsLab.tsx</div>
+      <div class="line add">+ import { FocusDemo } from "./FocusDemo"</div>
+      <div class="line add">+ import { RefVsState } from "./RefVsState"</div>
+      <div class="line add">+ import { FilePicker } from "./FilePicker"</div>
+      <div class="line add">+ import { UncontrolledForm } from "./UncontrolledForm"</div>
+      <div class="line add">+ import { EffectDemo } from "./EffectDemo"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ export function RefsLab() {</div>
+      <div class="line add">+     return (</div>
+      <div class="line add">+         &lt;&gt;</div>
+      <div class="line add">+             &lt;FocusDemo /&gt;</div>
+      <div class="line add">+             &lt;RefVsState /&gt;</div>
+      <div class="line add">+             &lt;FilePicker /&gt;</div>
+      <div class="line add">+             &lt;UncontrolledForm /&gt;</div>
+      <div class="line add">+             &lt;EffectDemo /&gt;</div>
+      <div class="line add">+         &lt;/&gt;</div>
+      <div class="line add">+     )</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="why">
+      <div class="why-card">
+        <h4>document.title</h4>
+        <p>O título da aba é algo de fora da tela do React: o efeito roda depois da renderização e sincroniza.</p>
+      </div>
+      <div class="why-card">
+        <h4>Clock</h4>
+        <p>O <code class="inline">setInterval</code> nasce na montagem; a função devolvida pelo efeito chama <code class="inline">clearInterval</code> quando o componente sai da tela.</p>
+      </div>
+      <div class="why-card">
+        <h4>Desmontar o relógio</h4>
+        <p>O botão alterna <code class="inline">isClockVisible</code>: sem ele na árvore, o estado e o timer deixam de existir (a limpeza rodou).</p>
+      </div>
+      <div class="why-card">
+        <h4>RefsLab</h4>
+        <p>Só compõe as cinco demonstrações numa página.</p>
+      </div>
+    </div>
+
+    <div class="ok">
+      <strong><i class="fa-solid fa-circle-check"></i> Testado:</strong>
+      <p><code class="inline">npx tsc --noEmit</code> sem erro. Não executado no navegador nem com servidor (sem Docker, migrate ou seed nesta etapa).</p>
+    </div>
+  </div>
+
+  <!-- ETAPA 7 -->
+  <div class="entry" id="etapa-7">
+    <div class="entry-dot">7</div>
+    <div class="entry-date">Etapa 7 · Laboratório HTML</div>
+    <h2>A View pública /refs: EJS, entry, rota e Vite</h2>
+    <p class="sub">Como o <code class="inline">/contador</code>: o EJS entrega o HTML e o <code class="inline">#root</code>, o entry monta o <code class="inline">RefsLab</code>, a rota é pública e a entrada entra nos dois <code class="inline">vite.config.js</code>.</p>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/pages/refs.tsx</div>
+      <div class="line add">+ import { createRoot } from "react-dom/client"</div>
+      <div class="line add">+ import { RefsLab } from "../components/RefsLab"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // A View (resources/views/refs.ejs) entrega o #root; o laboratório é um componente.</div>
+      <div class="line add">+ createRoot(document.getElementById("root")!).render(&lt;RefsLab /&gt;)</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/views/refs.ejs</div>
+      <div class="line add">+ &lt;!DOCTYPE html&gt;</div>
+      <div class="line add">+ &lt;html lang="pt-BR"&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ &lt;head&gt;</div>
+      <div class="line add">+   &lt;meta charset="UTF-8" /&gt;</div>
+      <div class="line add">+   &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;</div>
+      <div class="line add">+   &lt;title&gt;Referências e Efeitos em React&lt;/title&gt;</div>
+      <div class="line add">+   &lt;link rel="icon" type="image/png" href="/img/favicon.ico"&gt;</div>
+      <div class="line add">+   &lt;%- vite(["css/app.css", "js/app.ts", "js/pages/refs.tsx"]) %&gt;</div>
+      <div class="line add">+ &lt;/head&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ &lt;body class="container py-5"&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+   &lt;h1 class="text-primary mb-4"&gt;Referências e Efeitos&lt;/h1&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+   &lt;%# O React se pendura aqui: o laboratório é um componente (components/RefsLab.tsx) %&gt;</div>
+      <div class="line add">+   &lt;div id="root"&gt;&lt;/div&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ &lt;/body&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ &lt;/html&gt;</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/app/Http/Controllers/Views/RefsViewController.js</div>
+      <div class="line add">+ /**</div>
+      <div class="line add">+  * Laboratório de referências (useRef) e efeitos (useEffect) como View pública:</div>
+      <div class="line add">+  * sem login, sem middleware. O HTML vem de resources/views/refs.ejs.</div>
+      <div class="line add">+  *</div>
+      <div class="line add">+  * Rota: GET /refs</div>
+      <div class="line add">+  */</div>
+      <div class="line add">+ export default function RefsViewController(request, response) {</div>
+      <div class="line add">+     return response.status(200).render("refs");</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/routes/router.js</div>
+      <div class="line ctx">  import CounterViewController from '../app/Http/Controllers/Views/CounterViewController.js';</div>
+      <div class="line add">+ import RefsViewController from '../app/Http/Controllers/Views/RefsViewController.js';</div>
+      <div class="line ctx">  import LogoutController from '../app/Http/Controllers/Views/LogoutController.js';</div>
+      <div class="line ctx">  ...</div>
+      <div class="line ctx"></div>
+      <div class="line add">+ /** Laboratório de referências e efeitos em React: View pública (demonstração de useRef e useEffect) */</div>
+      <div class="line add">+ router.get('/refs', RefsViewController);</div>
+      <div class="line add">+ </div>
+      <div class="line ctx">  /** Login: se já tem sessão válida, o middleware redireciona antes do HTML existir */</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/vite.config.js (rollupOptions.input)</div>
+      <div class="line ctx">                  "./resources/js/pages/users.tsx",</div>
+      <div class="line rem">-                 "./resources/js/pages/counter.tsx"</div>
+      <div class="line add">+                 "./resources/js/pages/counter.tsx",</div>
+      <div class="line add">+                 "./resources/js/pages/refs.tsx"</div>
+      <div class="line ctx">              ],</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">docker/node24-vite-compiler/vite.config.js (rollupOptions.input)</div>
+      <div class="line ctx">                  "./resources/js/pages/users.tsx",</div>
+      <div class="line rem">-                 "./resources/js/pages/counter.tsx"</div>
+      <div class="line add">+                 "./resources/js/pages/counter.tsx",</div>
+      <div class="line add">+                 "./resources/js/pages/refs.tsx"</div>
+      <div class="line ctx">              ],</div>
+    </div>
+
+    <div class="why">
+      <div class="why-card">
+        <h4>Rota pública</h4>
+        <p><code class="inline">router.get('/refs', RefsViewController)</code> sem middleware, como o contador: exceção de propósito, só para a demonstração.</p>
+      </div>
+      <div class="why-card">
+        <h4>Dois vite.config.js</h4>
+        <p>O do <code class="inline">src/</code> e o do container que compila no Docker. Esquecer o do Docker deixa a View sem o script lá.</p>
+      </div>
+      <div class="why-card">
+        <h4>HTML + React</h4>
+        <p>O <code class="inline">refs.ejs</code> é o HTML da página (título, container Bootstrap); o React ocupa só o <code class="inline">#root</code>.</p>
+      </div>
+    </div>
+
+    <div class="ok">
+      <strong><i class="fa-solid fa-circle-check"></i> Testado:</strong>
+      <p><code class="inline">npx tsc --noEmit</code> sem erro. A View e o build do Vite não foram executados.</p>
+    </div>
+  </div>
+
+  <!-- ETAPA 8 -->
+  <div class="entry" id="etapa-8">
+    <div class="entry-dot">8</div>
+    <div class="entry-date">Etapa 8 · Laboratório do hook</div>
+    <h2>Os dois painéis: o estado do hook e o registro do que ele conta</h2>
+    <p class="sub">Dois componentes só de exibição: o <code class="inline">HookStatePanel</code> mostra <code class="inline">isLoading</code>, <code class="inline">error</code> e <code class="inline">data</code> com cores; o <code class="inline">EventLog</code> lista os eventos que o hook avisa.</p>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/HookStatePanel.tsx</div>
+      <div class="line add">+ type HookStatePanelProps = {</div>
+      <div class="line add">+     isLoading: boolean</div>
+      <div class="line add">+     error: string</div>
+      <div class="line add">+     hasData: boolean</div>
+      <div class="line add">+     count: number</div>
+      <div class="line add">+ }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // Mostra os três estados que o hook entrega. Quando um deles muda, o componente que chamou o hook renderiza de novo</div>
+      <div class="line add">+ export function HookStatePanel({ isLoading, error, hasData, count }: HookStatePanelProps) {</div>
+      <div class="line add">+     const loadingClass = isLoading ? "badge text-bg-warning" : "badge text-bg-secondary"</div>
+      <div class="line add">+     const errorClass = error !== "" ? "badge text-bg-danger" : "badge text-bg-secondary"</div>
+      <div class="line add">+     const dataClass = hasData ? "badge text-bg-success" : "badge text-bg-secondary"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return (</div>
+      <div class="line add">+         &lt;div className="d-flex flex-wrap gap-3 align-items-center"&gt;</div>
+      <div class="line add">+             &lt;span&gt;isLoading: &lt;span className={loadingClass}&gt;{String(isLoading)}&lt;/span&gt;&lt;/span&gt;</div>
+      <div class="line add">+             &lt;span&gt;error: &lt;span className={errorClass}&gt;{error === "" ? "\"\"" : error}&lt;/span&gt;&lt;/span&gt;</div>
+      <div class="line add">+             &lt;span&gt;data: &lt;span className={dataClass}&gt;{hasData ? `${count} task(s)` : "null"}&lt;/span&gt;&lt;/span&gt;</div>
+      <div class="line add">+         &lt;/div&gt;</div>
+      <div class="line add">+     )</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/EventLog.tsx</div>
+      <div class="line add">+ type EventLogProps = {</div>
+      <div class="line add">+     events: string[]</div>
+      <div class="line add">+ }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // Registro de tudo o que o hook contou (começou, cancelou, chegou...)</div>
+      <div class="line add">+ export function EventLog({ events }: EventLogProps) {</div>
+      <div class="line add">+     if (events.length === 0) {</div>
+      <div class="line add">+         return &lt;p className="text-muted mb-0"&gt;Nenhum evento ainda. Escolha um usuário.&lt;/p&gt;</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return (</div>
+      <div class="line add">+         &lt;pre className="bg-dark text-light rounded p-3 mb-0" style={{ maxHeight: 260, overflowY: "auto" }}&gt;</div>
+      <div class="line add">+             {events.join("\n")}</div>
+      <div class="line add">+         &lt;/pre&gt;</div>
+      <div class="line add">+     )</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="why">
+      <div class="why-card">
+        <h4>Só parâmetros</h4>
+        <p>Os dois não têm estado: recebem tudo por <code class="inline">props</code> tipadas e desenham. É o fluxo de dados da Aula 08, agora para mostrar o que o hook faz.</p>
+      </div>
+      <div class="why-card">
+        <h4>Cor por estado</h4>
+        <p>As classes <code class="inline">badge</code> do Bootstrap mudam com <code class="inline">isLoading</code>, <code class="inline">error</code> e <code class="inline">data</code>: quando o hook troca um estado, o painel acende outra cor.</p>
+      </div>
+      <div class="why-card">
+        <h4>EventLog</h4>
+        <p>Recebe <code class="inline">events: string[]</code> e devolve um <code class="inline">&lt;pre&gt;</code> com <code class="inline">join("\n")</code>; lista vazia mostra um aviso, por early return (sem <code class="inline">else</code>).</p>
+      </div>
+    </div>
+
+    <div class="ok">
+      <strong><i class="fa-solid fa-circle-check"></i> Testado:</strong>
+      <p><code class="inline">npx tsc --noEmit</code> sem erro. Não executado no navegador nem com servidor (sem Docker, migrate ou seed nesta etapa).</p>
+    </div>
+  </div>
+
+  <!-- ETAPA 9 -->
+  <div class="entry" id="etapa-9">
+    <div class="entry-dot">9</div>
+    <div class="entry-date">Etapa 9 · Laboratório do hook</div>
+    <h2>HookLab: o nosso useAxios funcionando na tela</h2>
+    <p class="sub">O <code class="inline">HookLab</code> chama o <code class="inline">useAxios</code> duas vezes (a lista de usuários e as tasks do escolhido) e registra no log tudo o que o hook avisa pelo <code class="inline">onEvent</code>.</p>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/components/HookLab.tsx</div>
+      <div class="line add">+ import { useState } from "react"</div>
+      <div class="line add">+ import type { AxiosEvent } from "../hooks/useAxios"</div>
+      <div class="line add">+ import { useAxios } from "../hooks/useAxios"</div>
+      <div class="line add">+ import type { PaginatedResponse, Task, User } from "../types/api"</div>
+      <div class="line add">+ import { HookStatePanel } from "./HookStatePanel"</div>
+      <div class="line add">+ import { EventLog } from "./EventLog"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ function wait(ms: number) {</div>
+      <div class="line add">+     return new Promise&lt;void&gt;(resolve =&gt; setTimeout(resolve, ms))</div>
+      <div class="line add">+ }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // Valor derivado sem let: a url das tasks depende de quem foi escolhido e do botão de erro</div>
+      <div class="line add">+ function buildTasksUrl(selectedId: number | null, isBroken: boolean): string | null {</div>
+      <div class="line add">+     if (isBroken) return "/rota-que-nao-existe"</div>
+      <div class="line add">+     if (selectedId === null) return null</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return `/users/${selectedId}/tasks?page=1&amp;limit=20`</div>
+      <div class="line add">+ }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ const LABELS: Record&lt;AxiosEvent, string&gt; = {</div>
+      <div class="line add">+     start: "GET  começou  ",</div>
+      <div class="line add">+     abort: "GET  CANCELADO",</div>
+      <div class="line add">+     done: "GET  chegou   ",</div>
+      <div class="line add">+     error: "GET  falhou   ",</div>
+      <div class="line add">+ }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // A tela do nosso hook: o useAxios que escrevemos, funcionando e contando o que faz</div>
+      <div class="line add">+ export function HookLab() {</div>
+      <div class="line add">+     const [selectedId, setSelectedId] = useState&lt;number | null&gt;(null)</div>
+      <div class="line add">+     const [isBroken, setIsBroken] = useState(false)</div>
+      <div class="line add">+     const [events, setEvents] = useState&lt;string[]&gt;([])</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     // Hook 1: a lista de usuários. Hook 2: as tasks do usuário escolhido (url null = parado)</div>
+      <div class="line add">+     const users = useAxios&lt;PaginatedResponse&lt;User&gt;&gt;("/users?page=1&amp;limit=5")</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     const tasksUrl = buildTasksUrl(selectedId, isBroken)</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleEvent(event: AxiosEvent, url: string) {</div>
+      <div class="line add">+         const time = new Date().toLocaleTimeString("pt-BR")</div>
+      <div class="line add">+         setEvents(current =&gt; [...current, `${time}  ${LABELS[event]}  ${url}`])</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     const tasks = useAxios&lt;PaginatedResponse&lt;Task&gt;&gt;(tasksUrl, handleEvent)</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleChoose(id: number) {</div>
+      <div class="line add">+         setIsBroken(false)</div>
+      <div class="line add">+         setSelectedId(id)</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleRefetch() {</div>
+      <div class="line add">+         tasks.refetch()</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleBreak() {</div>
+      <div class="line add">+         setIsBroken(true)</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     // Troca de usuário 3 vezes seguidas: as duas primeiras requisições ainda estão no ar e são canceladas</div>
+      <div class="line add">+     async function handleRush() {</div>
+      <div class="line add">+         const list = users.data?.data ?? []</div>
+      <div class="line add">+         setIsBroken(false)</div>
+      <div class="line add">+ </div>
+      <div class="line add">+         for (const user of list.slice(0, 3)) {</div>
+      <div class="line add">+             setSelectedId(user.id)</div>
+      <div class="line add">+             await wait(5)</div>
+      <div class="line add">+         }</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     function handleClear() {</div>
+      <div class="line add">+         setEvents([])</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return (</div>
+      <div class="line add">+         &lt;div className="d-flex flex-column gap-4"&gt;</div>
+      <div class="line add">+             &lt;section className="card card-body"&gt;</div>
+      <div class="line add">+                 &lt;h2 className="h5"&gt;1. Hook da lista de usuários&lt;/h2&gt;</div>
+      <div class="line add">+                 &lt;HookStatePanel</div>
+      <div class="line add">+                     isLoading={users.isLoading}</div>
+      <div class="line add">+                     error={users.error}</div>
+      <div class="line add">+                     hasData={users.data !== null}</div>
+      <div class="line add">+                     count={users.data?.data.length ?? 0}</div>
+      <div class="line add">+                 /&gt;</div>
+      <div class="line add">+                 &lt;div className="d-flex flex-wrap gap-2 mt-3"&gt;</div>
+      <div class="line add">+                     {users.data?.data.map(user =&gt; (</div>
+      <div class="line add">+                         &lt;button key={user.id} className="btn btn-outline-primary btn-sm" onClick={() =&gt; handleChoose(user.id)}&gt;</div>
+      <div class="line add">+                             {user.name}</div>
+      <div class="line add">+                         &lt;/button&gt;</div>
+      <div class="line add">+                     ))}</div>
+      <div class="line add">+                 &lt;/div&gt;</div>
+      <div class="line add">+             &lt;/section&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;section className="card card-body"&gt;</div>
+      <div class="line add">+                 &lt;h2 className="h5"&gt;2. Hook das tasks (url: {tasksUrl ?? "null, parado"})&lt;/h2&gt;</div>
+      <div class="line add">+                 &lt;HookStatePanel</div>
+      <div class="line add">+                     isLoading={tasks.isLoading}</div>
+      <div class="line add">+                     error={tasks.error}</div>
+      <div class="line add">+                     hasData={tasks.data !== null}</div>
+      <div class="line add">+                     count={tasks.data?.data.length ?? 0}</div>
+      <div class="line add">+                 /&gt;</div>
+      <div class="line add">+                 &lt;div className="d-flex flex-wrap gap-2 mt-3"&gt;</div>
+      <div class="line add">+                     &lt;button className="btn btn-secondary btn-sm" onClick={handleRefetch}&gt;refetch()&lt;/button&gt;</div>
+      <div class="line add">+                     &lt;button className="btn btn-warning btn-sm" onClick={handleRush}&gt;Trocar 3x rápido (AbortController)&lt;/button&gt;</div>
+      <div class="line add">+                     &lt;button className="btn btn-danger btn-sm" onClick={handleBreak}&gt;Forçar erro&lt;/button&gt;</div>
+      <div class="line add">+                 &lt;/div&gt;</div>
+      <div class="line add">+             &lt;/section&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+             &lt;section className="card card-body"&gt;</div>
+      <div class="line add">+                 &lt;div className="d-flex justify-content-between align-items-center mb-2"&gt;</div>
+      <div class="line add">+                     &lt;h2 className="h5 mb-0"&gt;3. O que o hook contou&lt;/h2&gt;</div>
+      <div class="line add">+                     &lt;button className="btn btn-outline-secondary btn-sm" onClick={handleClear}&gt;Limpar&lt;/button&gt;</div>
+      <div class="line add">+                 &lt;/div&gt;</div>
+      <div class="line add">+                 &lt;EventLog events={events} /&gt;</div>
+      <div class="line add">+             &lt;/section&gt;</div>
+      <div class="line add">+         &lt;/div&gt;</div>
+      <div class="line add">+     )</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="tree"><b>HookLab</b> (estado: selectedId · isBroken · events)<br>
+   │<br>
+   ├─ useAxios&lt;PaginatedResponse&lt;User&gt;&gt;("/users?page=1&amp;limit=5")      ← hook 1: estados próprios<br>
+   │<br>
+   └─ useAxios&lt;PaginatedResponse&lt;Task&gt;&gt;(tasksUrl, handleEvent)          ← hook 2: estados próprios<br>
+          tasksUrl = null (parado) | /users/ID/tasks | /rota-que-nao-existe<br>
+<br>
+<b>Trocar 3x rápido</b>:  setSelectedId(1) → espera 5 ms → setSelectedId(2) → 5 ms → setSelectedId(3)<br>
+   url 1: efeito dispara o GET        (log: começou)<br>
+   url 2: LIMPEZA aborta o GET de 1   (log: CANCELADO) → GET de 2 (começou)<br>
+   url 3: LIMPEZA aborta o GET de 2   (log: CANCELADO) → GET de 3 (começou) → chegou</div>
+
+    <div class="why">
+      <div class="why-card">
+        <h4>Dois hooks, dois conjuntos de estado</h4>
+        <p>Cada chamada de <code class="inline">useAxios</code> tem os seus próprios <code class="inline">data</code>, <code class="inline">error</code> e <code class="inline">isLoading</code>. O hook reaproveita <b>lógica</b>, não dados.</p>
+      </div>
+      <div class="why-card">
+        <h4>url null = parado</h4>
+        <p><code class="inline">buildTasksUrl</code> devolve <code class="inline">null</code> enquanto ninguém foi escolhido: o hook não faz GET e o painel mostra "null, parado". Valor derivado numa função, sem <code class="inline">let</code>.</p>
+      </div>
+      <div class="why-card">
+        <h4>O botão Trocar 3x rápido</h4>
+        <p>Muda o usuário três vezes com 5 ms entre elas: as duas primeiras requisições ainda estão no ar quando a <code class="inline">url</code> muda. A limpeza do efeito chama <code class="inline">abort()</code> e o log mostra <b>CANCELADO</b>; só a última resposta vira <code class="inline">data</code>. É o AbortController visível.</p>
+      </div>
+      <div class="why-card">
+        <h4>Forçar erro</h4>
+        <p>Aponta o hook para uma rota que não existe: o GET falha, o hook chama <code class="inline">setError</code> e o painel pinta o <code class="inline">error</code> de vermelho.</p>
+      </div>
+      <div class="why-card">
+        <h4>refetch()</h4>
+        <p>Muda o <code class="inline">attempt</code> do hook: o efeito roda de novo e o log mostra um novo "começou" (sem CANCELADO, porque a anterior já tinha terminado).</p>
+      </div>
+      <div class="why-card">
+        <h4>handleEvent</h4>
+        <p>É recriado a cada renderização, e não faz mal: o hook o guarda numa <code class="inline">useRef</code>. Ele escreve no log com <code class="inline">setEvents(current =&gt; [...current, linha])</code> (forma de função, array novo).</p>
+      </div>
+    </div>
+
+    <div class="ok">
+      <strong><i class="fa-solid fa-circle-check"></i> Testado:</strong>
+      <p><code class="inline">npx tsc --noEmit</code> sem erro. Não executado no navegador nem com servidor (sem Docker, migrate ou seed nesta etapa).</p>
+    </div>
+  </div>
+
+  <!-- ETAPA 10 -->
+  <div class="entry" id="etapa-10">
+    <div class="entry-dot">10</div>
+    <div class="entry-date">Etapa 10 · Laboratório do hook</div>
+    <h2>A View /hooks: EJS, controller, entry, rota e Vite</h2>
+    <p class="sub">Diferente de <code class="inline">/refs</code>, esta página <b>exige login</b>: o hook chama a API com o cookie de sessão. O controller lê o usuário do token e o EJS entrega o <code class="inline">#root</code>.</p>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/js/pages/hooks.tsx</div>
+      <div class="line add">+ import { createRoot } from "react-dom/client"</div>
+      <div class="line add">+ import { HookLab } from "../components/HookLab"</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ // A View (resources/views/hooks.ejs) entrega o #root; o laboratório do hook é um componente.</div>
+      <div class="line add">+ createRoot(document.getElementById("root")!).render(&lt;HookLab /&gt;)</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/resources/views/hooks.ejs</div>
+      <div class="line add">+ &lt;!DOCTYPE html&gt;</div>
+      <div class="line add">+ &lt;html lang="pt-BR"&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ &lt;head&gt;</div>
+      <div class="line add">+   &lt;meta charset="UTF-8" /&gt;</div>
+      <div class="line add">+   &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;</div>
+      <div class="line add">+   &lt;title&gt;Custom Hook - useAxios&lt;/title&gt;</div>
+      <div class="line add">+   &lt;link rel="icon" type="image/png" href="/img/favicon.ico"&gt;</div>
+      <div class="line add">+   &lt;%- vite(["css/app.css", "js/app.ts", "js/pages/hooks.tsx"]) %&gt;</div>
+      <div class="line add">+ &lt;/head&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ &lt;body class="container py-5"&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+   &lt;h1 class="text-primary mb-1"&gt;Custom hook: useAxios&lt;/h1&gt;</div>
+      <div class="line add">+   &lt;p class="text-muted mb-4"&gt;Logado como &lt;%= user.name %&gt; · &lt;a href="/usuarios"&gt;voltar&lt;/a&gt;&lt;/p&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+   &lt;%# O React se pendura aqui: o laboratório do hook é um componente (components/HookLab.tsx) %&gt;</div>
+      <div class="line add">+   &lt;div id="root"&gt;&lt;/div&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ &lt;/body&gt;</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ &lt;/html&gt;</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/app/Http/Controllers/Views/HooksViewController.js</div>
+      <div class="line add">+ import UserModel from "../../../Models/UserModel.js";</div>
+      <div class="line add">+ </div>
+      <div class="line add">+ /**</div>
+      <div class="line add">+  * Laboratório do custom hook useAxios como View protegida: o HTML vem de</div>
+      <div class="line add">+  * resources/views/hooks.ejs e o React monta a tela dentro do #root.</div>
+      <div class="line add">+  * As chamadas do hook usam o cookie de sessão, por isso a rota exige login.</div>
+      <div class="line add">+  *</div>
+      <div class="line add">+  * Rota: GET /hooks (protegida por RedirectIfGuestMiddleware)</div>
+      <div class="line add">+  */</div>
+      <div class="line add">+ export default async function HooksViewController(request, response) {</div>
+      <div class="line add">+     const user = await UserModel.findByPk(request.user.id);</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     if (!user) {</div>
+      <div class="line add">+         return response.redirect("/login");</div>
+      <div class="line add">+     }</div>
+      <div class="line add">+ </div>
+      <div class="line add">+     return response.status(200).render("hooks", { user });</div>
+      <div class="line add">+ }</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/routes/router.js</div>
+      <div class="line ctx">  import RefsViewController from '../app/Http/Controllers/Views/RefsViewController.js';</div>
+      <div class="line add">+ import HooksViewController from '../app/Http/Controllers/Views/HooksViewController.js';</div>
+      <div class="line ctx">  import LogoutController from '../app/Http/Controllers/Views/LogoutController.js';</div>
+      <div class="line ctx">  ...</div>
+      <div class="line ctx"></div>
+      <div class="line add">+ /** Laboratório do custom hook useAxios (React dentro da View): precisa de sessão, porque o hook chama a API com o cookie */</div>
+      <div class="line add">+ router.get('/hooks', RedirectIfGuestMiddleware, HooksViewController);</div>
+      <div class="line add">+ </div>
+      <div class="line ctx">  /** Login: se já tem sessão válida, o middleware redireciona antes do HTML existir */</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">src/vite.config.js (rollupOptions.input)</div>
+      <div class="line ctx">                  "./resources/js/pages/counter.tsx",</div>
+      <div class="line rem">-                 "./resources/js/pages/refs.tsx"</div>
+      <div class="line add">+                 "./resources/js/pages/refs.tsx",</div>
+      <div class="line add">+                 "./resources/js/pages/hooks.tsx"</div>
+      <div class="line ctx">              ],</div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-head">docker/node24-vite-compiler/vite.config.js (rollupOptions.input)</div>
+      <div class="line ctx">                  "./resources/js/pages/counter.tsx",</div>
+      <div class="line rem">-                 "./resources/js/pages/refs.tsx"</div>
+      <div class="line add">+                 "./resources/js/pages/refs.tsx",</div>
+      <div class="line add">+                 "./resources/js/pages/hooks.tsx"</div>
+      <div class="line ctx">              ],</div>
+    </div>
+
+    <div class="why">
+      <div class="why-card">
+        <h4>Rota protegida</h4>
+        <p><code class="inline">RedirectIfGuestMiddleware</code> manda para <code class="inline">/login</code> antes de o HTML existir; sem sessão não há cookie e o hook não teria como chamar a API.</p>
+      </div>
+      <div class="why-card">
+        <h4>Controller</h4>
+        <p>Mesmo padrão do <code class="inline">UsersViewController</code>: <code class="inline">findByPk(request.user.id)</code> (o usuário vem do token já verificado) e <code class="inline">render("hooks", { user })</code>.</p>
+      </div>
+      <div class="why-card">
+        <h4>EJS</h4>
+        <p>Mostra o nome de quem está logado (<code class="inline">&lt;%= user.name %&gt;</code>, escapado) e o <code class="inline">#root</code> onde o React se pendura.</p>
+      </div>
+      <div class="why-card">
+        <h4>Dois vite.config.js</h4>
+        <p>A entrada <code class="inline">hooks.tsx</code> entra no do <code class="inline">src/</code> e no do container que compila no Docker.</p>
+      </div>
+    </div>
+
+    <div class="ok">
+      <strong><i class="fa-solid fa-circle-check"></i> Testado:</strong>
+      <p><code class="inline">npx tsc --noEmit</code> sem erro. A View, o build do Vite e as chamadas à API não foram executados.</p>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  Aula 09 — React: Referências e Efeitos · Frontend 2026.2 · Raio-X do Código (timeline viva — novas etapas entram aqui embaixo)
+</footer>
+
+<script src="../../../assets/raio-x.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { FormEvent } from "react"
 import type { Task, User, UserSearchFilters } from "../types/api"
 import { userSearchApi } from "../api/userSearchApi"
@@ -34,9 +34,21 @@ export function AssignTaskModal({ isOpen, onClose, onCreated }: AssignTaskModalP
     const [isSearching, setIsSearching] = useState(false)
     const [isCreating, setIsCreating] = useState(false)
 
+    // Referências: o campo do HTML (foco) e um dado de bastidor (a última busca enviada ao backend)
+    const taskNameRef = useRef<HTMLInputElement>(null)
+    const lastSearchRef = useRef("")
+
     const canCreate = taskName.trim() !== "" && selected !== null && !isCreating
 
+    // Efeito: quando o modal abre (isOpen muda para true) o campo do nome da tarefa recebe o foco
+    useEffect(() => {
+        if (!isOpen) return
+
+        taskNameRef.current?.focus()
+    }, [isOpen])
+
     function reset() {
+        lastSearchRef.current = ""
         setTaskName("")
         setField("name")
         setText("")
@@ -60,6 +72,11 @@ export function AssignTaskModal({ isOpen, onClose, onCreated }: AssignTaskModalP
             return
         }
 
+        // Mesma busca da última vez: não chama o backend de novo (a ref não renderiza nada)
+        const searchKey = `${field}:${text.trim()}`
+        if (searchKey === lastSearchRef.current) return
+        lastSearchRef.current = searchKey
+
         const filters: UserSearchFilters = {}
         filters[field] = text.trim()
 
@@ -71,6 +88,7 @@ export function AssignTaskModal({ isOpen, onClose, onCreated }: AssignTaskModalP
             setUsers(result.data)
             setTotal(result.total)
         } catch (error) {
+            lastSearchRef.current = ""   // falhou: permite tentar a mesma busca de novo
             setError(getErrorMessage(error, "Erro ao buscar usuários"))
         }
 
@@ -117,6 +135,7 @@ export function AssignTaskModal({ isOpen, onClose, onCreated }: AssignTaskModalP
                             <div>
                                 <label className="form-label">Nome da tarefa</label>
                                 <input
+                                    ref={taskNameRef}
                                     className="form-control"
                                     value={taskName}
                                     onChange={event => setTaskName(event.target.value)}
