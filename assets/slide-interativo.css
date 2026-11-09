@@ -508,7 +508,7 @@ pre.cod .hl{ color: var(--accent); font-weight: 700; }
 .w-barra button{ display: none; }
 
 /* widgets que animam sozinhos: nada parece "clique" aqui (sem bolinha ▶) */
-[data-passos] .acao::after, [data-abas] .acao::after{ display: none; }
+[data-passos] .acao::after, [data-abas] .acao::after, [data-render] .acao::after, [data-foto] .acao::after{ display: none; }
 
 /* ── AbortController (slide 13) e a tela /hooks (slide 14) ── */
 .fluxo .cx.erro{ border-color: var(--warn); }

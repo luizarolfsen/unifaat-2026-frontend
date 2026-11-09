@@ -324,6 +324,26 @@
     });
 
     desenhar();
+
+    // Anima sozinho: alterna "o estado mudou (clique no <li>)" e "o parâmetro mudou (o pai passa outro nome)".
+    // Os mesmos handlers do clique rodam; se o aluno clicar na mão, o autoplay só espera (ocupado).
+    var botoesNome = $all(raiz, '[data-nome]');
+    var passoAuto = 0;
+    var auto = autoplay(raiz, {
+      espera: function(){ return 6200; },
+      avancar: function(){
+        if(ocupado) return;
+        var atual = passoAuto;
+        passoAuto = passoAuto + 1;
+        if(atual % 2 === 0){ li.click(); return; }
+        var outro = botoesNome.filter(function(b){ return b.getAttribute('aria-pressed') !== 'true'; })[0];
+        if(outro) outro.click();
+      },
+      reiniciar: function(){ passoAuto = 0; }
+    });
+    raiz.tocando = function(){ return auto.tocando(); };
+    raiz.definirTocando = function(valor){ auto.definir(valor); };
+    raiz.alternar = function(){ auto.alternar(); };
   }
 
   /* ── a "foto" do estado ─────────────────────────────── */
@@ -428,6 +448,27 @@
 
     textoChamada();
     desenhar();
+
+    // Anima sozinho: alterna priority + 1 (a foto) e a forma de função, clicando na task
+    var botoesModo = $all(raiz, '[data-modo]');
+    var botaoZerar = raiz.querySelector('.foto-reset');
+    var passoAuto = 0;
+    var auto = autoplay(raiz, {
+      espera: function(){ return 7500; },
+      avancar: function(){
+        if(ocupado) return;
+        var atual = passoAuto;
+        passoAuto = passoAuto + 1;
+        if(atual % 4 === 0) botaoZerar.click();
+        var botao = botoesModo[atual % 2];
+        if(botao) botao.click();
+        setTimeout(function(){ li.click(); }, 500);
+      },
+      reiniciar: function(){ passoAuto = 0; }
+    });
+    raiz.tocando = function(){ return auto.tocando(); };
+    raiz.definirTocando = function(valor){ auto.definir(valor); };
+    raiz.alternar = function(){ auto.alternar(); };
   }
 
   /* ── inicialização e teclado ────────────────────────── */
@@ -462,7 +503,7 @@
 
     var tecla = e.key.toLowerCase();
     if(tecla === 'p'){
-      var animado = aberto('[data-passos]') || aberto('[data-abas]');
+      var animado = aberto('[data-passos]') || aberto('[data-abas]') || aberto('[data-render]') || aberto('[data-foto]');
       if(animado) animado.alternar();
       return;
     }
@@ -479,7 +520,7 @@
       w.definirTocando(false);          // PDF: nada se mexe sozinho
       if(w.dataset.print) w.irPara(parseInt(w.dataset.print, 10));
     });
-    $all(document, '.deck [data-abas]').forEach(function(w){
+    $all(document, '.deck [data-abas], .deck [data-render], .deck [data-foto]').forEach(function(w){
       guardado.push([w, null, w.tocando()]);
       w.definirTocando(false);
     });

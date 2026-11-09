@@ -40,7 +40,7 @@ Se o padrão mudar, mude **aqui** e nos dois arquivos de `assets/`, nunca dentro
 - **Passos e abas animam sozinhos, em loop** (passo a cada ~2,8 s; o último fica mais tempo; abas a cada ~4 s), **sem nenhum botão na tela** (os ‹ › da barra ficam escondidos; a legenda e o contador continuam). Só anda enquanto o slide está aberto; ao reabrir recomeça do passo 1.
 - Teclado: **`P`** para/retoma; **↑ ↓ / N B** vão passo a passo e **param** a animação; clicar numa aba (o próprio rótulo) também para.
 - No PDF nada se mexe: cada widget mostra o `data-print`. `prefers-reduced-motion` começa parado.
-- Semáforo, re-render e foto continuam acionados por clique (não têm autoplay).
+- **Re-render e foto também animam sozinhos** (a cada ~6 s / ~7,5 s o autoplay faz o clique que o aluno faria: estado muda, parâmetro muda; modo direta x função). O clique na mão continua valendo, e `P` para/retoma. Só o semáforo segue acionado por clique.
 
 ## Widgets (markup mínimo)
 | Widget | Marcação | Notas |
