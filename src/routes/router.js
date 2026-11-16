@@ -29,6 +29,7 @@ import TasksViewController from '../app/Http/Controllers/Views/TasksViewControll
 import CounterViewController from '../app/Http/Controllers/Views/CounterViewController.js';
 import RefsViewController from '../app/Http/Controllers/Views/RefsViewController.js';
 import HooksViewController from '../app/Http/Controllers/Views/HooksViewController.js';
+import ChatViewController from '../app/Http/Controllers/Views/ChatViewController.js';
 import LogoutController from '../app/Http/Controllers/Views/LogoutController.js';
 import UsersViewController from '../app/Http/Controllers/Views/UsersViewController.js';
 
@@ -100,6 +101,9 @@ router.get('/refs', RefsViewController);
 
 /** Laboratório do custom hook useAxios (React dentro da View): precisa de sessão, porque o hook chama a API com o cookie */
 router.get('/hooks', RedirectIfGuestMiddleware, HooksViewController);
+
+/** Chat em tempo real (React + WebSocket): View pública, sem login; o nome é digitado na própria tela. O túnel abre em /socket.io/ (nginx → container websocket) */
+router.get('/chat', ChatViewController);
 
 /** Login: se já tem sessão válida, o middleware redireciona antes do HTML existir */
 router.get('/login', RedirectIfAuthenticatedMiddleware, LoginViewController);

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat em tempo real</title>
+  <link rel="icon" type="image/png" href="/img/favicon.ico">
+  <%- vite(["css/app.css", "js/app.ts", "js/pages/chat.tsx"]) %>
+</head>
+
+<body class="container py-5">
+
+  <h1 class="text-primary mb-1">Chat em tempo real</h1>
+  <p class="text-muted mb-4">Sem login: escolha um nome e entre na sala.</p>
+
+  <%# O React se pendura aqui %>
+  <div id="root"></div>
+
+</body>
+
+</html>

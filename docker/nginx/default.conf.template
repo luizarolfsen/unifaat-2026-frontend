@@ -1,3 +1,10 @@
+# Servidores WebSocket (réplicas): o nginx distribui as CONEXÕES entre eles. O Docker devolve o IP de cada
+# réplica de nodewebsocket_host; o nginx resolve o nome na subida (réplica nova: nginx -s reload).
+upstream websocket_servers {
+    # ip_hash;  # sticky: só é preciso se o client usar polling; em sala de aula todos saem pelo mesmo IP
+    server nodewebsocket_host:3001;
+}
+
 server {
     
     listen ${NGINX_PORT}; # Porta em que o NGINX vai escutar, vem do .env
@@ -10,6 +17,18 @@ server {
     location / {
         autoindex on; # Mostra índice de arquivos se não encontrar o index
         try_files $uri.html $uri $uri/ @node; # Procura o arquivo estático => procura o diretório estático => senao vai para o bloco @node
+    }
+
+    # WebSocket (Socket.IO): repassa o Upgrade, a conexão fica aberta e o nginx escolhe a réplica na abertura do túnel
+    location /socket.io/ {
+        proxy_pass http://websocket_servers; # Container(s) do websocket, pela rede interna
+        proxy_http_version 1.1; # O Upgrade só existe no HTTP/1.1
+        proxy_set_header Upgrade $http_upgrade; # Pede a troca de protocolo para websocket
+        proxy_set_header Connection "upgrade"; # Mantém a conexão aberta para a troca
+        proxy_set_header Host $host; # Passa pra frente o host/nome do domínio
+        proxy_set_header X-Real-IP $remote_addr; # IP de origem: o chat mostra quem está online
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; # Encadeia os IPs no cabeçalho
+        proxy_read_timeout 1h; # Túnel parado não é derrubado em 60 s
     }
 
     location @node {

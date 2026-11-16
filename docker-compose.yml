@@ -84,6 +84,30 @@ services:
         aliases:
           - nodeworker_host
 
+  #NODE WEBSOCKET
+  nodewebsocket-container:
+    build:
+      context: .
+      dockerfile: docker/node-websocket/Dockerfile
+    # Argumentos do entrypoint: o exchange que este servidor assina e a porta (só dentro da rede)
+    command: ["--exchange", "notifications", "--port", "3001"]
+    env_file:
+      - .env
+      - .env.docker
+    volumes:
+      - ./src:/app
+      - nodemodules-volume:/app/node_modules
+    depends_on:
+      - rabbitmq-container
+    environment:
+      RABBITMQ_HOST: rabbitmq_host
+      RABBITMQ_PORT: 5672
+    restart: unless-stopped
+    networks:
+      app-network:
+        aliases:
+          - nodewebsocket_host
+
   #NODE VITE HMR
   nodevitehmr-container:
     build:
@@ -130,6 +154,7 @@ services:
       - ./src/logs/nginx:/var/log/nginx
     depends_on:
       - nodeweb-container
+      - nodewebsocket-container
     networks:
       - app-network
 

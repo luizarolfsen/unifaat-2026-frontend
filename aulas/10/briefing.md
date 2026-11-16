@@ -381,12 +381,13 @@ src/
 ├── _websocket.js                 # entrypoint: lê --exchange e --port e monta tudo
 ├── app/
 │   └── Events/
-│       └── ChatMessageEvent.js   # a unidade de execução (uma por arquivo)
+│       └── Chat/                 # uma pasta por domínio
+│           └── ChatMessageEvent.js   # a unidade de execução (um Event por arquivo)
 ├── database/connections/
 │   └── rabbit.js                 # ganha: assertExchange, notify, subscribe
 └── utils/
     ├── event.js                  # createEvent (o equivalente do createJob)
-    └── loadEvents.js             # lê app/Events (o equivalente do loadJobs)
+    └── loadEvents.js             # lê app/Events e as subpastas (o equivalente do loadJobs)
 ```
 
 **1. A infraestrutura (`rabbit.js`).** Ao lado de `publish` e `consume`, entram três funções que recebem o **nome do exchange como parâmetro**, e nenhuma delas sabe qual é o exchange do chat:
@@ -452,15 +453,23 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 export default async function loadEvents(eventsPath) {
-    const files = await fs.readdir(eventsPath)
+    const entries = await fs.readdir(eventsPath, { withFileTypes: true })
     const events = {}
 
-    for (const file of files) {
-        if (!file.endsWith('.js')) {
+    for (const entry of entries) {
+        const fullPath = path.join(eventsPath, entry.name)
+
+        // uma subpasta por domínio (Chat/, ...): lê de forma recursiva
+        if (entry.isDirectory()) {
+            Object.assign(events, await loadEvents(fullPath))
             continue
         }
 
-        const eventModule = await import(pathToFileURL(path.join(eventsPath, file)).href)
+        if (!entry.name.endsWith('.js')) {
+            continue
+        }
+
+        const eventModule = await import(pathToFileURL(fullPath).href)
         const event = eventModule.default
 
         if (!event || typeof event.handle !== 'function') {
@@ -474,28 +483,30 @@ export default async function loadEvents(eventsPath) {
 }
 ```
 
-**3. O Event (`app/Events`).** O arquivo descreve **o que fazer quando o cliente emitir aquele nome**. O `context` traz o `socket` de quem enviou e a função `notify`, **já presa ao exchange escolhido** pelo entrypoint, então o Event não conhece nome de exchange:
+**3. O Event (`app/Events/Chat`).** **Um Event por arquivo**, agrupados por domínio em pastas. O arquivo descreve **o que fazer quando o cliente emitir aquele nome**. O `context` traz o `socket` de quem enviou e a função `notify`, **já presa ao exchange escolhido** pelo entrypoint, então o Event não conhece nome de exchange:
 
 ```js
-// app/Events/ChatMessageEvent.js
-import { createEvent } from '../../utils/event.js'
+// app/Events/Chat/ChatMessageEvent.js
+import { createEvent } from '../../../utils/event.js'
 
 export default createEvent({
     name: 'chat:message',
     handle: async (payload, context) => {
-        const { name, text } = payload
+        const text = String(payload?.text ?? '').trim()
 
         if (!text) {
             return
         }
 
+        const name = String(payload?.name ?? '').trim() || 'anônimo'
+
         // não entrega na tela: publica no exchange e TODOS os servidores recebem a cópia
-        await context.notify('chat:message', { name, text, sentAt: Date.now() })
+        await context.notify('chat:message', { name, text: text.slice(0, 500), sentAt: Date.now() })
     }
 })
 ```
 
-Para criar um Event novo (`chat:typing`, por exemplo) basta **adicionar um arquivo** em `app/Events`; o entrypoint não muda, assim como um Job novo não muda o `_worker.js`.
+Para criar um Event novo (`chat:typing`, por exemplo) basta **adicionar um arquivo** em `app/Events/Chat` (ou numa pasta nova, se for outro domínio); o `loadEvents` acha sozinho e um nome repetido dá erro na subida; o entrypoint não muda, assim como um Job novo não muda o `_worker.js`.
 
 **4. O entrypoint (`_websocket.js`).** Lê os parâmetros, carrega os Events, aceita conexões, registra um `socket.on` por Event e **assina o exchange escolhido** para fazer o *broadcast*:
 
@@ -735,7 +746,7 @@ O navegador continua falando só com o **Nginx** (porta 8080), e ele tem **dois 
 
 ```nginx
 upstream websocket_servers {
-    ip_hash;                          # a mesma origem sempre cai na mesma réplica (sticky)
+    # ip_hash;                       # sticky: só se o client usar polling (em sala de aula todos saem pelo mesmo IP)
     server nodewebsocket_host:3001;   # o Docker devolve o IP de cada réplica
 }
 

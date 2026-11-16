@@ -60,6 +60,41 @@ export default (() => {
         return channel;
     };
 
+    const isConnected = () => connection !== null;
+
+    // Exchange explícito (o nome vem por parâmetro): fanout copia a mensagem para TODAS as filas ligadas
+    const assertExchange = async (exchange, type = 'fanout', options = { durable: false }) => {
+        const ch = await createChannel();
+        await ch.assertExchange(exchange, type, options);
+        return ch;
+    };
+
+    // Producer: publica no exchange; quem entrega é o fanout
+    const notify = async (exchange, event, payload) => {
+        const ch = await assertExchange(exchange);
+        const message = Buffer.from(JSON.stringify({ event, payload }));
+
+        return ch.publish(exchange, '', message);
+    };
+
+    // Consumer: cria uma fila DINÂMICA só deste processo (nome vazio, exclusive) e a liga ao exchange
+    const subscribe = async (exchange, onNotification) => {
+        const ch = await assertExchange(exchange);
+        const { queue } = await ch.assertQueue('', { exclusive: true });
+
+        await ch.bindQueue(queue, exchange, '');
+
+        return ch.consume(queue, (msg) => {
+            if (!msg) {
+                return;
+            }
+
+            const { event, payload } = JSON.parse(msg.content.toString());
+
+            onNotification(event, payload);
+        }, { noAck: true });
+    };
+
     const assertQueue = async (queue, options = { durable: true }) => {
         const ch = await createChannel();
         await ch.assertQueue(queue, options);
@@ -101,8 +136,12 @@ export default (() => {
 
     return {
         connect,
+        isConnected,
         createChannel,
         assertQueue,
+        assertExchange,
+        notify,
+        subscribe,
         publish,
         consume,
         close

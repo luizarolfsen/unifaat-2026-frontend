@@ -201,12 +201,13 @@ socket.<span class="tk-fn">on</span>(<span class="tk-str">"chat:message"</span>,
 ├── _websocket.js                 # entrypoint: lê --exchange e --port e monta tudo
 ├── app/
 │   └── Events/
-│       └── ChatMessageEvent.js   # a unidade de execução (uma por arquivo)
+│       └── Chat/                 # uma pasta por domínio
+│           └── ChatMessageEvent.js   # a unidade de execução (um Event por arquivo)
 ├── database/connections/
 │   └── rabbit.js                 # ganha: assertExchange, notify, subscribe
 └── utils/
     ├── event.js                  # createEvent (o equivalente do createJob)
-    └── loadEvents.js             # lê app/Events (o equivalente do loadJobs)</code></pre></div>
+    └── loadEvents.js             # lê app/Events e as subpastas (o equivalente do loadJobs)</code></pre></div>
 <p>**1. A infraestrutura (<code>rabbit.js</code>).** Ao lado de <code>publish</code> e <code>consume</code>, entram três funções que recebem o <strong>nome do exchange como parâmetro</strong>, e nenhuma delas sabe qual é o exchange do chat:</p>
 <div class="vsc ed"><div class="vsc-bar"><span class="vsc-dots"><i></i><i></i><i></i></span><span class="vsc-tit">database/connections/rabbit.js (acrescentar, dentro do mesmo módulo)</span><span class="vsc-lang">js</span></div><pre class="code"><code><span class="cm">// database/connections/rabbit.js (acrescentar, dentro do mesmo módulo)</span>
 <span class="tk-kw">const</span> assertExchange = <span class="tk-kw">async</span> (exchange, <span class="tk-kw">type</span> = <span class="tk-str">'fanout'</span>, options = { durable: <span class="tk-kw">false</span> }) =&gt; {
@@ -261,15 +262,23 @@ socket.<span class="tk-fn">on</span>(<span class="tk-str">"chat:message"</span>,
 <span class="tk-kw">import</span> { pathToFileURL } <span class="tk-kw">from</span> <span class="tk-str">'node:url'</span>
 
 <span class="tk-kw">export</span> <span class="tk-kw">default</span> <span class="tk-kw">async</span> <span class="tk-kw">function</span> <span class="tk-fn">loadEvents</span>(eventsPath) {
-    <span class="tk-kw">const</span> files = <span class="tk-kw">await</span> fs.<span class="tk-fn">readdir</span>(eventsPath)
+    <span class="tk-kw">const</span> entries = <span class="tk-kw">await</span> fs.<span class="tk-fn">readdir</span>(eventsPath, { withFileTypes: <span class="tk-kw">true</span> })
     <span class="tk-kw">const</span> events = {}
 
-    <span class="tk-kw">for</span> (<span class="tk-kw">const</span> file <span class="tk-kw">of</span> files) {
-        <span class="tk-kw">if</span> (!file.<span class="tk-fn">endsWith</span>(<span class="tk-str">'.js'</span>)) {
+    <span class="tk-kw">for</span> (<span class="tk-kw">const</span> entry <span class="tk-kw">of</span> entries) {
+        <span class="tk-kw">const</span> fullPath = path.<span class="tk-fn">join</span>(eventsPath, entry.name)
+
+        <span class="cm">// uma subpasta por domínio (Chat/, ...): lê de forma recursiva</span>
+        <span class="tk-kw">if</span> (entry.<span class="tk-fn">isDirectory</span>()) {
+            Object.<span class="tk-fn">assign</span>(events, <span class="tk-kw">await</span> <span class="tk-fn">loadEvents</span>(fullPath))
             <span class="tk-kw">continue</span>
         }
 
-        <span class="tk-kw">const</span> eventModule = <span class="tk-kw">await</span> <span class="tk-kw">import</span>(<span class="tk-fn">pathToFileURL</span>(path.<span class="tk-fn">join</span>(eventsPath, file)).href)
+        <span class="tk-kw">if</span> (!entry.name.<span class="tk-fn">endsWith</span>(<span class="tk-str">'.js'</span>)) {
+            <span class="tk-kw">continue</span>
+        }
+
+        <span class="tk-kw">const</span> eventModule = <span class="tk-kw">await</span> <span class="tk-kw">import</span>(<span class="tk-fn">pathToFileURL</span>(fullPath).href)
         <span class="tk-kw">const</span> event = eventModule.<span class="tk-kw">default</span>
 
         <span class="tk-kw">if</span> (!event || <span class="tk-kw">typeof</span> event.handle !== <span class="tk-str">'function'</span>) {
@@ -281,24 +290,26 @@ socket.<span class="tk-fn">on</span>(<span class="tk-str">"chat:message"</span>,
 
     <span class="tk-kw">return</span> events
 }</code></pre></div>
-<p>**3. O Event (<code>app/Events</code>).<strong> O arquivo descreve </strong>o que fazer quando o cliente emitir aquele nome**. O <code>context</code> traz o <code>socket</code> de quem enviou e a função <code>notify</code>, <strong>já presa ao exchange escolhido</strong> pelo entrypoint, então o Event não conhece nome de exchange:</p>
-<div class="vsc ed"><div class="vsc-bar"><span class="vsc-dots"><i></i><i></i><i></i></span><span class="vsc-tit">app/Events/ChatMessageEvent.js</span><span class="vsc-lang">js</span></div><pre class="code"><code><span class="cm">// app/Events/ChatMessageEvent.js</span>
-<span class="tk-kw">import</span> { createEvent } <span class="tk-kw">from</span> <span class="tk-str">'../../utils/event.js'</span>
+<p>**3. O Event (<code>app/Events/Chat</code>).<strong> </strong>Um Event por arquivo<strong>, agrupados por domínio em pastas. O arquivo descreve </strong>o que fazer quando o cliente emitir aquele nome**. O <code>context</code> traz o <code>socket</code> de quem enviou e a função <code>notify</code>, <strong>já presa ao exchange escolhido</strong> pelo entrypoint, então o Event não conhece nome de exchange:</p>
+<div class="vsc ed"><div class="vsc-bar"><span class="vsc-dots"><i></i><i></i><i></i></span><span class="vsc-tit">app/Events/Chat/ChatMessageEvent.js</span><span class="vsc-lang">js</span></div><pre class="code"><code><span class="cm">// app/Events/Chat/ChatMessageEvent.js</span>
+<span class="tk-kw">import</span> { createEvent } <span class="tk-kw">from</span> <span class="tk-str">'../../../utils/event.js'</span>
 
 <span class="tk-kw">export</span> <span class="tk-kw">default</span> <span class="tk-fn">createEvent</span>({
     name: <span class="tk-str">'chat:message'</span>,
     handle: <span class="tk-kw">async</span> (payload, context) =&gt; {
-        <span class="tk-kw">const</span> { name, text } = payload
+        <span class="tk-kw">const</span> text = <span class="tk-fn">String</span>(payload?.text ?? <span class="tk-str">''</span>).<span class="tk-fn">trim</span>()
 
         <span class="tk-kw">if</span> (!text) {
             <span class="tk-kw">return</span>
         }
 
+        <span class="tk-kw">const</span> name = <span class="tk-fn">String</span>(payload?.name ?? <span class="tk-str">''</span>).<span class="tk-fn">trim</span>() || <span class="tk-str">'anônimo'</span>
+
         <span class="cm">// não entrega na tela: publica no exchange e TODOS os servidores recebem a cópia</span>
-        <span class="tk-kw">await</span> context.<span class="tk-fn">notify</span>(<span class="tk-str">'chat:message'</span>, { name, text, sentAt: Date.<span class="tk-fn">now</span>() })
+        <span class="tk-kw">await</span> context.<span class="tk-fn">notify</span>(<span class="tk-str">'chat:message'</span>, { name, text: text.<span class="tk-fn">slice</span>(<span class="tk-num">0</span>, <span class="tk-num">500</span>), sentAt: Date.<span class="tk-fn">now</span>() })
     }
 })</code></pre></div>
-<p>Para criar um Event novo (<code>chat:typing</code>, por exemplo) basta <strong>adicionar um arquivo</strong> em <code>app/Events</code>; o entrypoint não muda, assim como um Job novo não muda o <code>_worker.js</code>.</p>
+<p>Para criar um Event novo (<code>chat:typing</code>, por exemplo) basta <strong>adicionar um arquivo</strong> em <code>app/Events/Chat</code> (ou numa pasta nova, se for outro domínio); o <code>loadEvents</code> acha sozinho e um nome repetido dá erro na subida; o entrypoint não muda, assim como um Job novo não muda o <code>_worker.js</code>.</p>
 <p>**4. O entrypoint (<code>_websocket.js</code>).** Lê os parâmetros, carrega os Events, aceita conexões, registra um <code>socket.on</code> por Event e <strong>assina o exchange escolhido</strong> para fazer o <em>broadcast</em>:</p>
 <div class="vsc ed"><div class="vsc-bar"><span class="vsc-dots"><i></i><i></i><i></i></span><span class="vsc-tit">_websocket.js</span><span class="vsc-lang">js</span></div><pre class="code"><code><span class="cm">// _websocket.js</span>
 <span class="tk-kw">import</span> { Command } <span class="tk-kw">from</span> <span class="tk-str">'commander'</span>
@@ -456,7 +467,7 @@ program.<span class="tk-fn">option</span>(<span class="tk-str">'--results &lt;ex
 <h3 id="s5-5-nginx-repassando-e-distribuindo-as-conexões"><span class="hn">5.5</span>Nginx: Repassando e Distribuindo as Conexões</h3>
 <p>O navegador continua falando só com o <strong>Nginx</strong> (porta 8080), e ele tem <strong>dois papéis</strong> com o websocket. O primeiro é <strong>repassar</strong> o <code>Upgrade</code> ao container, para o handshake funcionar. O segundo é <strong>distribuir</strong> as conexões entre as <strong>réplicas</strong> do websocket:</p>
 <div class="vsc ed"><div class="vsc-bar"><span class="vsc-dots"><i></i><i></i><i></i></span><span class="vsc-lang">nginx</span></div><pre class="code"><code>upstream websocket_servers {
-    ip_hash;                          # a mesma origem sempre cai na mesma réplica (sticky)
+    # ip_hash;                       # sticky: só se o client usar polling (em sala de aula todos saem pelo mesmo IP)
     server nodewebsocket_host:<span class="tk-num">3001</span>;   # o Docker devolve o IP de cada réplica
 }
 
