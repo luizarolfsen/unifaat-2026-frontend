@@ -16,6 +16,8 @@
   --host-bg: #eceee9;
   --host-border: #b9c0b6;
   --net-border: #27313a;
+  --lan-bg: #eef3f8;
+  --lan-border: #8aa0b8;
   --node-bg: #dce8fb;
   --node-border: #2f5fd0;
   --node-ink: #1d3f8f;
@@ -31,6 +33,7 @@
   --line-vol: #d97706;
   --flow: #e11d48;
   --tunnel: #a21caf;
+  --persist: #4338ca;
   --pool: #0e7490;
   --blocked: #dc2626;
   --dim: .16;
@@ -53,6 +56,8 @@
   --host-bg: #121c18;
   --host-border: #34443b;
   --net-border: #a9b8c9;
+  --lan-bg: #131d29;
+  --lan-border: #4d6580;
   --node-bg: #172a4d;
   --node-border: #6d97f0;
   --node-ink: #cfe0ff;
@@ -68,6 +73,7 @@
   --line-vol: #fbbf24;
   --flow: #fb7185;
   --tunnel: #e879f9;
+  --persist: #a5b4fc;
   --pool: #22d3ee;
   --blocked: #f87171;
 }
@@ -115,17 +121,25 @@ h1 .accent{ color: var(--accent); }
 .stage{
   position: relative;
   min-width: 980px;
-  aspect-ratio: 2100 / 1160;
-  background: var(--host-bg);
-  border: 2px solid var(--host-border);
-  border-radius: 16px;
+  aspect-ratio: 2100 / 1300;
+}
+/* o PC (host) e, embaixo, a rede local com os outros dispositivos: ambos fora da app-network */
+.host-box{
+  background: var(--host-bg); border: 2px solid var(--host-border); border-radius: 16px; z-index: 0;
+}
+.lan-box{
+  background: var(--lan-bg); border: 2px dashed var(--lan-border); border-radius: 16px; z-index: 0;
+}
+.lan-title{
+  position: absolute; right: 22px; top: 12px;
+  font-weight: 700; font-size: clamp(.7rem, 1.2vw, 1.05rem); color: var(--muted);
 }
 .stage > *{
   position: absolute;
   left: calc(var(--x) / 2100 * 100%);
-  top: calc(var(--y) / 1160 * 100%);
+  top: calc(var(--y) / 1300 * 100%);
   width: calc(var(--w) / 2100 * 100%);
-  height: calc(var(--h) / 1160 * 100%);
+  height: calc(var(--h) / 1300 * 100%);
 }
 .stage > svg.wires{ left: 0; top: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; overflow: visible; }
 
@@ -186,6 +200,8 @@ h1 .accent{ color: var(--accent); }
 .client{
   background: var(--surface); border: 2px solid var(--ink); border-radius: 12px; font-weight: 700;
 }
+.client .addr{ display: block; font-family: var(--font-mono); font-weight: 500; font-size: clamp(.5rem, .8vw, .8rem); color: var(--muted); }
+.client[data-id="phone"], .client[data-id="peer"]{ border: 2px dashed var(--lan-border); flex-direction: column; }
 .port{
   background: var(--port-bg); color: var(--port-ink); border-radius: 8px;
   font-family: var(--font-mono); font-weight: 700; font-size: clamp(.55rem, .9vw, .9rem);
@@ -232,11 +248,22 @@ h1 .accent{ color: var(--accent); }
 .wire.flow{ stroke-dasharray: 10 7; animation: march .6s linear infinite; }
 /* montagens em destaque: o tracejado anda do container para o volume/pasta que ele usa */
 .wire.vol.hot{ stroke-dasharray: 8 6; animation: march .8s linear infinite; }
+/* consumer (worker e websocket → RabbitMQ): conexão aberta uma vez e mantida; o RabbitMQ empurra as mensagens */
+.wire.persist{ stroke: var(--persist); stroke-width: 3.8; stroke-dasharray: 16 6 3 6; stroke-linecap: round; }
+.wire.persist.hot, .wire.persist.flow{ stroke: var(--persist); stroke-width: 4.6; stroke-dasharray: 16 6 3 6; animation: march .8s linear infinite; }
+.pulse.persist{ fill: var(--persist); r: 7; }
 /* conexões persistentes: pool (Elasticsearch) e túnel (WebSocket) se destacam das demais */
 .wire.pool{ stroke: var(--pool); stroke-width: 4.2; stroke-dasharray: 1.5 7; stroke-linecap: round; }
-.wire.tunnel{ stroke: var(--tunnel); stroke-width: 7; stroke-dasharray: none; stroke-linecap: round; filter: drop-shadow(0 0 4px var(--tunnel)); }
+/* túnel = tubo: parede roxa (.wire.tunnel) + miolo claro (.tube-in) com duas pistas, ida e volta (bolinhas) */
+.wire.tunnel{ stroke: var(--tunnel); stroke-width: 20; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: round; }
+.tube-in{ fill: none; stroke: var(--surface); stroke-width: 13; stroke-linejoin: round; transition: opacity .2s; }
+.stage.focus .tube-in:not(.hot):not(.flow){ opacity: .07; }
+.stage .tube-in.only-scenario:not(.hot):not(.flow){ opacity: 0; }
+.stage.hide-port .tube-in.port, .stage.hide-net .tube-in.net{ opacity: 0 !important; }
+.pulse.tunnel-up{ fill: var(--tunnel); r: 3.6; } .pulse.tunnel-down{ fill: var(--pool); r: 3.6; }
+.stage.hide-port .pulse.tunnel-up.port, .stage.hide-port .pulse.tunnel-down.port, .stage.hide-net .pulse.tunnel-up.net, .stage.hide-net .pulse.tunnel-down.net{ opacity: 0 !important; }
 .wire.pool.hot, .wire.pool.flow{ stroke: var(--pool); stroke-width: 5; stroke-dasharray: 1.5 8; animation: march .7s linear infinite; }
-.wire.tunnel.hot, .wire.tunnel.flow{ stroke: var(--tunnel); stroke-width: 8; stroke-dasharray: 16 7; animation: march .6s linear infinite; }
+.wire.tunnel.hot, .wire.tunnel.flow{ stroke: var(--tunnel); stroke-width: 20; stroke-dasharray: none; animation: none; }
 .pulse.pool{ fill: var(--pool); } .pulse.tunnel{ fill: var(--tunnel); r: 8; }
 @keyframes march{ to{ stroke-dashoffset: -17; } }
 .pulse{ fill: var(--flow); }
@@ -294,7 +321,8 @@ h1 .accent{ color: var(--accent); }
 .lg-bind{ background: var(--bind-bg); }
 .lg-net{ border-top: 2px solid var(--line); height: 0 !important; }
 .lg-pool{ border-top: 4px dotted var(--pool); height: 0 !important; }
-.lg-tunnel{ border-top: 6px solid var(--tunnel); height: 0 !important; border-radius: 6px; box-shadow: 0 0 5px var(--tunnel); }
+.lg-persist{ border-top: 4px dashed var(--persist); height: 0 !important; }
+.lg-tunnel{ height: 12px !important; border: 3px solid var(--tunnel); background: var(--surface); border-radius: 8px; }
 .lg-mount{ border-top: 2px dashed var(--line-vol); height: 0 !important; }
 
 /* botão de tema (tema.js) */

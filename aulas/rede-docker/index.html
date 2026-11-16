@@ -39,12 +39,18 @@
   <div class="scroller">
     <div class="stage" id="stage">
 
+      <div class="host-box" style="--x:0;--y:0;--w:2100;--h:1050"></div>
+      <div class="lan-box" style="--x:0;--y:1090;--w:2100;--h:200"><span class="lan-title">Rede local (Wi-Fi) · outros dispositivos: fora do seu PC e fora da app-network</span></div>
+
       <span class="host-title" style="--x:28;--y:18;--w:300;--h:40">Host (seu PC)</span>
 
       <div class="net" style="--x:200;--y:200;--w:1880;--h:780"><span class="net-title">app-network (bridge)</span></div>
 
       <!-- clientes no host -->
-      <div class="item client" data-id="browser" tabindex="0" style="--x:18;--y:434;--w:124;--h:62">Navegador</div>
+      <div class="item client" data-id="browser" tabindex="0" style="--x:16;--y:300;--w:124;--h:62">Navegador</div>
+      <!-- clientes de outros dispositivos, fora do PC: entram pelas mesmas portas publicadas -->
+      <div class="item client" data-id="phone" tabindex="0" style="--x:60;--y:1180;--w:190;--h:72">Celular<span class="addr">Wi-Fi · 192.168.x.x</span></div>
+      <div class="item client" data-id="peer" tabindex="0" style="--x:330;--y:1180;--w:230;--h:72">PC de colega<span class="addr">mesma rede · 192.168.x.x</span></div>
       <div class="item client" data-id="tools" tabindex="0" style="--x:820;--y:40;--w:300;--h:58">psql · DBeaver · Node local</div>
 
       <!-- containers -->
@@ -92,10 +98,12 @@
     <span><i class="lg-bind"></i>pasta do seu PC montada (bind mount)</span>
     <span><i class="lg-net"></i>conexão pela rede</span>
     <span><i class="lg-pool"></i>pool de conexões (Elasticsearch: conexões abertas e reaproveitadas)</span>
-    <span><i class="lg-tunnel"></i>túnel WebSocket (o cliente abre uma vez; depois vai e volta nos dois sentidos)</span>
+    <span><i class="lg-persist"></i>conexão persistente de consumer (worker e websocket → RabbitMQ): aberta uma vez e mantida; o RabbitMQ empurra as mensagens, ninguém fica perguntando (sem polling)</span>
+    <span><i class="lg-tunnel"></i>túnel WebSocket: um tubo com duas pistas, ida (roxa) e volta (verde-água); o cliente abre uma vez e depois vai e volta nos dois sentidos</span>
     <span><i class="lg-mount"></i>montagem de volume/pasta</span>
     <span>a seta sempre sai de quem usa e aponta para o que é usado (container → volume, container → serviço, navegador → porta)</span>
     <span><i class="lg-bind"></i>badge <code>origem:destino</code> na borda do container, como no compose: pasta do seu PC → badge, badge laranja → volume interno</span>
+    <span>cliente em <b>azul pontilhado</b> (celular, PC de colega) = outro dispositivo da rede local: usa o IP do seu PC e entra pelas mesmas portas publicadas</span>
     <span>linha tracejada grossa = fronteira da <code>app-network</code></span>
   </div>
 
